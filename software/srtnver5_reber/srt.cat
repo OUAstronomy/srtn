@@ -1,0 +1,144 @@
+* sample d1.cat file
+* first word is key word
+* STATION: latitude longitude west in degrees
+* SOU: source ra, dec, name, epoch  - default eopoch is j2000
+* CALMODE 0 for calcheck, 2 for bandpass only, 20 for manual vane cal
+* CALMODE 2 assumes TCAL value i.e. use 290 if bandpass looking at absorber or bushes use 3 for sky but be sure
+* you are not looking at H-line i.e. use way out of Galactic plane
+* CALMODE 2 also assumes TSYS value i.e. put value of TSYS measured manually on cold sky into srt.cat 
+* CALMODE 3 same as CALMODE 2 but doesn't need entry to confirm
+* TCAL       // 290 is the default absorber or bushes
+* FREQCORR the dongle crystal is typically about 30ppm off frequency or about 40 kHz error at 1420 MHz
+* value can be determined using signal generator or standard H-line calibration region
+* BANDWIDTH is actual bandwith plotted it must be < 10 MHz for PCI card and 2.4 MHz for dongle
+* TSYS previously measured system temperature on cold sky
+SIMULATE ANTENNA
+*CALMODE 20  
+CALMODE 2
+SIMULATE RECEIVER
+*RMSCALC
+*SIMULATE FFT
+*SPEED_UP 800 
+START_DATE 2016:349:20:00:00  // date for simulation
+*SPEED_UP 1 
+*SPEED_UP -18     // negative value advances time hours 
+*MAINTENANCE
+DEBUG
+*COMMAND galacticHsurvey.txt
+*STATION 42.3 83.7 Ann_Arbor
+*STATION -26.7 -117 MWA
+*STATION 42.5 71.5 Haysrt3
+STATION 35.207 97.44 Sooner_Station
+SOU 23 21 12  58 44 00 Cass
+SOU 00 00 00  00 00 00 Sun
+SOU 00 00 00  00 00 00 Moon
+*SOU 19 57 45  40 36 00 Cygnus
+SOU 17 45 40 -29 00 28 SgrA
+*SOU 20 44 33.9 39 55 54 NMLcyg
+*SOU 18 34 52 -05 26 37 OH26.5
+*SOU 07 20 53 -25 40 24 VYCma
+SOU 05 35 17 -05 23 28 Orion
+*SOU 19 20 38 14 14 34 Hcloud
+SOU 00 42 44 41 16 09 Andr
+SOU 01 33 50 30 39 37 Trigl
+*SOU 5 44 50 -1 41 0 S8RA 1950
+SOU 15 28 58 -2 15 0 S6 1950
+*SOU 17 48 46 -34 25 0 S9 1950
+*SOU 02 23 17 61 38 54 W3 1950    // strongest OH line 1665.4 MHz -44 km/s 
+GALACTIC 132 -1 S7
+GALACTIC 207 -15 S8
+*GALACTIC 117 -2.1 CASA
+*GALACTIC 30 0 H1CLOUD2
+*GALACTIC 0 0 G0
+GALACTIC 30 0 G30
+GALACTIC 60 0 G60
+GALACTIC 90 0 G90
+GALACTIC 100 0 G100
+GALACTIC 110 0 G110
+GALACTIC 120 0 G120
+GALACTIC 130 0 G130
+GALACTIC 180 0 G180
+GALACTIC 210 0 G210
+GALACTIC 240 0 G240
+GALACTIC 270 0 G270
+GALACTIC 300 0 G300
+GALACTIC 330 0 G330
+GALACTIC 340 0 G340
+GALACTIC 350 0 G350
+*GALACTIC 10 0 G10
+*GALACTIC 20 0 G20
+*GALACTIC 40 0 G40
+*GALACTIC 50 0 G50
+*GALACTIC 70 0 G70
+*GALACTIC 80 0 G80
+*GALACTIC 04 0 G04
+*GALACTIC 08 0 G08
+*GALACTIC 12 0 G12
+*GALACTIC 15 0 G15
+*GALACTIC 19 0 G19
+*GALACTIC 24 0 G24
+*GALACTIC 28 0 G28
+*GALACTIC 32 0 G32
+*GALACTIC 37 0 G37
+*GALACTIC 42 0 G42
+*GALACTIC 47 0 G47
+*GALACTIC 53 0 G53
+*GALACTIC 60 0 G60
+*GALACTIC 69 0 G69
+*GALACTIC 90 0 G90
+*AZEL  50 60 azel
+*AZEL 120 7 calabs
+
+*NOCLEARINT 
+NOPRINTOUT
+*NODISPLAY
+BEAMWIDTH 5
+NBSW 10
+*AZLIMITS 45 315
+*ELLIMITS 5 85
+AZLIMITS 0 355
+*AZLIMITS 270 90   // for pointing North 
+*ELLIMITS 10 89.0
+ELLIMITS 0 89.0
+STOWPOS 90 0
+TSYS 171    
+TCAL 290    // should equal ambient load
+DATADIR ./data/
+*RECORD 1 SPEC
+*RECORD 10 SPEC RCLR
+RECORD 10 SPEC
+*NUMFREQ 16
+NUMFREQ 1024   // good choise for ADC card
+NUMFREQ 256    // good choice for dongle
+*FREQUENCY 1420.406
+BANDWIDTH 2.0
+FREQUENCY 1420.4
+RESTFREQ 1420.401
+FREQCORR -0.05   // TV dongle correction
+NBLOCK 5   // number of blocks per update - can be reduced for Beagle board with slow display for PCI it is hardwired to 20
+*NUMPOLY 15  // use default value of 25 for dongle
+
+* RFI
+* an optional width can be specified but if it is 
+* larger than the resolution no data will remain for this channel
+* if a width is not specified only one of the 4096 raw frequency channesl
+* will be deleted. If NUMFREQ is 1024 there are up to 3 raw channels that
+* can be deleted without loosing all the information for that channel in the
+* final spectrum. 
+
+*RFI 1420.609 0.004
+
+RFI 1420.05 0.015
+RFI 1420.85 0.005
+RFI 1421.15 0.005
+
+*RFISIGMA 20   // level for which channels with RFI will be flagged default is 6
+
+* old obselete keywords below some of which may be used
+* again in future updates
+*COUNTPERSTEP 10
+*NEWMOUNT 11 14.53 2 130 30   // Mike's new mount
+*H180MOUNT
+*ALFASPID
+*NOISECAL 70
+*PLOTSEC 10

@@ -1,0 +1,567 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Project" SRT Operator's Manual
+% Source: MIT Haystack
+% Author: Nickalas Reynolds, John Tobin
+% Location: The University of Oklahoma
+% Date: Feb 2017
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% functions
+
+
+% packages
+\documentclass[a4paper,10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\geometry{margin=0.75in}
+\usepackage{listings}
+\usepackage{color}
+
+ % colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% coding inline
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+} 
+\lstset{style=mystyle}
+
+% Book's title and subtitle
+\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual}
+% Author
+\author{\textsc{John Tobin\footnote{jjtobin@ou.edu}}\\\textsc{Nickalas Reynolds\footnote{nickreynolds@ou.edu}}}
+
+
+\begin{document}
+
+%\frontmatter
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Abstract}
+The University of Oklahoma's Small Radio Telescope (3m) was sponsored by Dr. John Tobin as an outreach and educational tool for the Norman Community. The use of the telescope helps to aid in expanding one's knowledge of radio astronomy, engineering principles, and proper research methods. The kit was implemented off of MIT Haystack's SRT, fabricated through RF Ham Design, constructed by a team of students and professors\footnote{Prof: John Tobin; Grad students: Paul Canton, Hyunseop Choi, Nickalas Reynolds, Rajeeb Sharma, G-PSI; Undergrad Students: Jacob Gill, Lisa Patel, and Brian Stephensen; Staff: Barry Bergeron, Andy Feldt, Debi Schoenberger, John Snellings, Adrienne Wade, and Joel Young}, and the code was provided by MIT Haystack under the MIT Public License. 
+
+Information specifically regarding the MIT Haystack Observatory can be found at \url{http://www.haystack.mit.edu/edu/undergrad/srt/index.html}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Additional Information}
+The website\footnote{\url{https://github.com/nickalaskreynolds/nhnradiotelescope}} for this file contains:
+\begin{itemize}
+  \item A link to the downloadable PDF and \LaTeX code.
+  \item The SRT source code.
+  \item Useful scripts for observing and parsing the data
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Acknowledgements %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgements}
+\begin{itemize}
+\item Hardware design, development of software, and instructions: (\url{www.haystack.mit.edu/edu/undergrad/srt/})
+\item Fabrication of the SRT parts: (\url{https://www.rfhamdesign.com} )
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Auto-generated table of contents, list of figures and list of tables %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Quick %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace*{-1cm}
+\chapter{Condensed Procedures}
+\vspace*{-1cm}
+This list of procedures is extremely condensed and it is expected you are fairly experienced with operating the telescope before using these. If you are unsure of something, ask.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{align}
+ \text{\#}& \text{ Parameters } \nonumber\\
+ &\text{1) Edit CALMODE in srt.cat file } \nonumber\\
+ &\text{2) CALMODE 0 - used for yfactor solving. Point t cold sky, cal, place absorber, get tsys and tcal } \nonumber\\
+ &\text{3) CALMODE 2 - only does bandpass correction, okay if no absorber or tree } \nonumber\\
+ &\text{4) CALMODE 3 - if stow looks at absorber like trees. } \nonumber\\
+ &\text{4) Verify target frequency and radial velocity }\nonumber\\
+ &\text{5) If velocity is >50km/s, use radvel.py to adjust the frequency}\nonumber\\
+ \text{\#}& \text{ Pointing } \nonumber\\
+ &\text{1) Slew to very bright source (sun) } \nonumber\\
+ &\text{2) Use npoints to correct and input offset } \nonumber\\
+ \text{\#}& \text{ Simple Cal (with absorber) } \nonumber\\
+ &\text{1) Slew to cold sky } \nonumber\\
+ &\text{2) hit cal on calmode 20 } \nonumber\\
+ &\text{3) place absorber } \nonumber\\
+ &\text{4) should have flat bandpass } \nonumber\\
+ \text{\#}& \text{ Simple Cal (without absorber) } \nonumber\\
+ &\text{1) Stow} \nonumber\\
+ &\text{2) hit cal on calmode 2 } \nonumber\\
+ &\text{4) should have flat bandpass } \nonumber\\
+ \text{\#}& \text{ Advanced Cal} \nonumber\\
+ &\text{1) Do above } \nonumber\\
+ &\text{2) Move to blank sky patch and record } \nonumber\\
+ &\text{3) Average $\sim$5 power measurements (from terminal) } \nonumber\\
+ &\text{4) This is P\_cold } \nonumber\\
+ &\text{5) Remove absorber and average ~5 power measurements } \nonumber\\
+ &\text{6) This is P\_hot } \nonumber\\
+ &\text{7) T\_cold $\sim$3k ...... T\_hot is average ambient temperature or thermometer measurement of absorber } \nonumber\\
+ &\text{8) Run python script tsys.py to find tsys } \nonumber\\
+ &\text{9) Edit srt.cat file with new tsys and reload program } \nonumber\\
+ \text{\#}& \text{ Source } \nonumber\\
+ &\text{1) Reopen srtn } \nonumber\\
+ &\text{2) Slew to target and record } \nonumber\\
+ &\text{3) Hit the beamsw (for faint signals) } \nonumber\\
+ &\text{4) Wait for at least $\sim$45 iterations (counter in bottom spectrum window) } \nonumber\\
+ &\text{5) re-hit beamsw to turn it off/ hit record to stop recording } \nonumber\\
+ &\text{6) This target is finished } \nonumber
+\end{align}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Overview %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Overview}
+The capabilities of the SRT are as follow:
+\begin{itemize}
+\item Frequency Adjustments from 1420MHz
+\item Spectral Line Gathering
+\item Continuum
+\item Drift Scans
+\item Point Maps
+\end{itemize}
+\begin{align}
+    & \text{Aperture} & 3.0 & \text{\space meters} \nonumber\\
+    & \text{Frequency Range} & 1420-1470 & \text{\space MHz} \nonumber\\
+    & \text{Pointing Accuracy} & 0.2 & \text{\space Degree} \nonumber\\
+    & \text{Beam Width\footnote{Refer to equation: \ref{eq:beamwidth}}} & 4.92 & \text{\space Degrees} \nonumber
+    & 
+\end{align}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hardware %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Building the Hardware}
+The tools needed were: protective gloves, protective goggles, electric hand drill, \(\frac{1}{4}\) in drill bit, hammer, mallet, riveter, rivets, wire cutter, sharpie, electric cut-off tool (metal blade), soldering iron, mini-pliers, wrench, and a bubble level.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Rotor}
+*Working on this section
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{LNA}
+The low-noise amplifier is located in an environmental resistant box mounted on the rear of the horn, minimizing the blockage of the aperture. The LNA consists of two ultra-low-noise amplifier modules, a band-pass filter, and a bias-tee to power the amplifiers. Two holes will be made in the aluminum case. 
+% Picture of lna case
+\begin{itemize}
+\item Drill the two holes with a $\frac{1}{4}$'' drill bit.
+\item Remove the nut/washer from one of the SMA-F to SMA-F bulkhead connectors
+\item Secure the O-ring against the flange and insert the longer side of the connector into the case and secure it with the washer/nut, using a wrench.
+\item Connect the filter to the ``out'' port of the ZX60-1614LN-S amplifier and the SMA-M to SMA-M adapter to the ``in'' port. Insert the 3'' SMA cable to the other end of the filter
+\item Put this total assembly into the box and connect the adapter to the connector
+\item Attach the other end of the SMA cable to the ``in'' port of the second amplifier.
+\item Section two pieces of 12V wire and tin the ends of them and the 12V pins of the amplifiers
+\item Connect the two 12V pins with one wire and attach the other to the 12V pin of the amplifier not connected to the adapter
+\end{itemize}
+% picture of inside lna case
+\begin{itemize}
+\item Attach the 3'' SMA cable to the ``out'' port of the second amplifier and to the ``RF'' port of the bias-tee. 
+\item Connect the other SMA-F to SMA-F connector and insert it through the second hole
+\item Connect the ``RF\&DC'' port of the bias-tee to the connector
+\item Tin the 12V pin of the bias-tee and solder the remaining 12V wire to this pun
+\end{itemize}
+% Picture of complete setup lna case
+\begin{itemize}
+\item Place the rubber gasket lid on the case and screw it in.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Feed}
+This apparatus consists of a helical antenna inside an aluminum cavity or horn. The helix is a copper tape stretched around the polystyrene foam cylinder, with a folded foil plate to match impedance. The feed is constructed from a 2.5in styrofoam cylinder. The height of the cylinder is determined by the desired wavelength and is $\frac{1}{4}$ wavelength.
+% picture of feed schematic
+\begin{itemize}
+\item Cut the cake pan as indicated on the drawing of the feed.
+\item Cut the foam rod to 73.7mm in length and drill a $\frac{1}{4}$ '' hole down the long axis of the rod. 
+\item 1mm from the edge of the rod, draw a mark. Make two more marks vertically above this mark each 30mm above the previous mark
+\item Cut out a strop of the copper tape 4x439mm. Tape one end at the lowest mark and without taping the rest wrap the strip around the foam such that the lower edge of the strip is flush between the previous two marks.
+\item With a ruler, verify the helix has vertical spacing of 30mm. Once you get the strip in a good position, trace the strips upper edge.
+\item make a mark 15mm from the lower end of the strip and bend the foil back. Make another mark 13mm from the first mark and then a final mark 26.25mm past that
+\item Remove the adhesive backing from the bent foil and fold the copper onto itself. Place the bend on the lowest mark on the foam and apply the foil to the foam. Keep the helix aligned with the previously designated points.
+\end{itemize}
+% picture of foam with wrap
+\begin{itemize}
+\item Cut out a strip of foil 26.25x13mm and leave and additional 3-4mm wide strip on one of the long edges. This will be the basis to form the impedance matching section.
+\item Fold this strip so it is 90 degrees to the rest of the foil. Center it on the helix between the two marks that are 26.25 mm apart and solder the strip to the helix.
+\item Solder the bent over power of the end of the foil to the SMA connector.
+\item Place a $\frac{1}{4}$'' O-ring to the SMA connector and insert into the cake pan center hole. \item Section out a 63mm square piece of PC board and drill a $\frac{1}{4}$'' hole in the center and a $\frac{1}{4}$'' indent as indicated.
+\end{itemize}
+% picture of PC board
+\begin{itemize}
+\item Run the bolt through the center of the foam, board, and the cake pan and secure it with hand tightened nut and washer. Make sure the soldered end of the SMA connector is against the bottom of the cake pan and not propped by the PC board.
+\item Test the apparatus with a network analyzer by attaching the network analyzer to the SMA connect and set to measure S11. Should read roughly -20 dB.
+\item A shorted $\frac{1}{4}$ wavelength stub should be added to the feed to act as a DC path for lightning and static protection for the amplifiers
+\begin{itemize}
+\item Cut out 42mm of long piece coaxial cable
+\item Strip the shield and insulation away $\sim$2mm on one end and 4mm on the other.
+\item Bend over the 4mm end and solder it to the shield
+\item Solder the 2mm side to the center connector of the stub in the SMA connector and solder the shield to one of the ground pins of the SMA connector
+\end{itemize}
+\end{itemize}
+%picture of stub
+\begin{itemize}
+\item The LNA mount plate will now be made. Drill the holes as indicated by the diagram %ref to previous digram
+\item Secure the plate to the back of the pan with four machine screws and nuts through the holes in the corners. Tighten with a wrench
+\item Thread a nut onto each of the 1'' machine screws and place a lock washer on top. Place the LNA onto the machine screws and connect the port of the LNA to the SMA connector on the feed with a SMA-M to SMA-M right angle connector
+\item Using the nuts, level the LNA case on the pan.
+\item thread the final nuts onto the machine screws and tighten with a wrench.
+\item Attach the quadrapod legs to the feed
+\end{itemize}
+% picture of final setup
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Antenna}
+\subsection{Pier}
+The dish was ``portably'' mounted on the roof of Nielsen Hall. There is 1000lbs of ballast holding the pier in place as per wind regulations however, it is not permanently mounted to the building.
+The mount has a wide base to support a 3in pier pipe in which the SPID rotor mounts on top of. An adapter is needed to convert the pier out from 3in to 2.875in. The adapter is held in place by 12bolts and re-leveled. Secure the PID rotor to the adapter. The assembly of the mount is fairly straightforward.
+\subsection{Dish}
+The dish is constructed of 6mm galvanized aluminum. The ribs are mounted onto the 2 ``hubs'' (CNC milled centers) with bolts. The hubs are 20cm round and 10mm thick aluminum. Each rib is secured with 2 bolts into the hub. Before you tighten the bolts, make sure the ribs are spaced evenly as they provide the support for the mesh. Fluctuations in the mesh reduce the efficiency of the telescope. 
+
+Feed the aluminum wire through the four co-centric holes cut in the ribs to secure them in place. The wire will need to be cut precisely to size and crimped in place with the female-female inserts included. 
+
+It is suggested at this point to use large sheets of plotter paper to directly map the size of the mesh sheets needed. This will ensure accurate cutting of the mesh. The mesh should be of an appropriate size, completely overlapping both sides of the rib and with $\sim$4in of spare material on the outer rim to allow fastening. Make sure both the cut mesh and the ribs are label to correspond with the appropriate piece. Once all of the mesh needed is cut, it is time to mount them to the dish.
+
+Line the mesh sheets up to the ribs of the telescope. Use the hand drill to score the mesh and drill through the ribs and 2x20mm aluminum strips. You can then use the riveter to secure the mesh onto the ribs. Use about 6 rivets per rib to secure the mesh. Once all of the mesh is secure, remove the excess mesh around the hub using the cut-off tool with the metal attachment. 
+
+Use zip-ties to secure the mesh onto the aluminum wires fed through the ribs. Space them as evenly as possible and make sure they are held secure. The mesh should be as smooth as possible and follow the curvature of the ribs. Also use zip-ties to wrap the excess $\sim$4in of mesh around the 3x20mm aluminum strip on the outer rim and secure it in place. Remove all unnecessary mesh excess with the cut-off tool. 
+
+Use several people to mount the dish onto the rotor using the provided bracket and bolts. The dish needs to be securely fastened to the rotor and centered. Use the mallet to ``ease'' it into its final resting position. The dish itself isn't extremely heavy but acts as a giant sail and can be very difficult to secure in place.
+
+Mount the quadrapod legs into the dish. You will have to play around with the placement of the legs such that the focus of the dish is on the axis of the helix about half way along its length. You can use string to measure the true diameter and the measure the distance from the string to the center of the dish. The focus is given by this formula:
+\begin{align}
+    f=\frac{D^2}{16\times d}
+\end{align}
+Once the focal length is found and the feed is mounted, use coaxial cable to connect the feed to the receiver. Run the wire down one of the legs and secure it with zip-ties. Secure it along the rib on the back of the telescope and bundle it with the other wires. These wires should be bundled carefully and should feed into protective housing such that environmental effects don't interfere and such that the telescope has full range along its slew without disrupting the bundle. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Software %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{SRT Software}
+Do not change the code of the SRT software on the SRT controller computer until you have thoroughly tested the code and passed it by the senior antenna operator. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Commands}
+For extended help on any commands, within the terminal window, you can type man [COMMAND] e.g. man tar and it will display the internal manual for the given command, tar in this case. 
+\begin{lstlisting}[language=Bash]
+cd # changes directory to home directory ~/ or if given input e.g. 
+cd ~/Downloads/ # will move to Downloads directory in home
+ls # will list all of the files in the current director
+mv /path/file1 /path/file2 # will move file1 to file2 
+mkdir srt # makes a new directory called srt, flag -p will copy directory structure
+tar # (un)compression algorithm, x is uncompress, z is gunzip format, v is verbose, f specifies file
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Setup}
+First download the source code for the SRT either by downloading directly from the GitHub\footnote{\url{https://github.com/nickalaskreynolds/nhnradiotelescope}} or by using the command on line 3.
+\begin{lstlisting}[language=Bash]
+~$ mkdir -p ~/srt/scripts/
+~$ cd ~/srt/
+~/srt$ git clone https://github.com/nickalaskreynolds/nhnradiotelescope/srtsource_ver5.tar.gz # can ignore this line if you directly downloaded
+~/srt$ tar -xzvf srtsource_ver5.tar.gz
+~/srt$ cd srt_ver5
+~/srt/srt_ver5$ ls
+\end{lstlisting}
+You should now be in the SRT main code directory and the contents should be on your screen. The code should be able to run immediately or recompiled  as necessary.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compiling}
+If there are issues with the C compiler not able to locate certain libraries, try searching for solutions to that problem or send me an email\footnote{\url{nickreynolds@ou.edu}}. There should be a file called srtnmake within the directory. This is the main compiler file that will gather the other C files and compile them in the correct order. When you make changes to the other files within the directory (other than the srt.cat file) you will have to recompile the program so it can implement the changes. 
+\begin{lstlisting}[language=Bash]
+~/srt/srt_ver5$ ./srtnmake
+\end{lstlisting}
+
+\newpage
+
+You will probably get a lot of warnings, this is fine and normal errors can look like this:
+\begin{lstlisting}[language=Bash]
+main.c: In function `main':
+main.c:62:12: warning: variable `secstart' set but not used [-Wunused-but-set-variable]
+main.c:60:12: warning: variable `ii' set but not used [-Wunused-but-set-variable]
+main.c:59:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+main.c: In function `gauss':
+main.c:555:16: warning: variable `j' set but not used [-Wunused-but-set-variable]
+vspectra_four.c: In function `vspectra':
+vspectra_four.c:33:28: warning: variable `min' set but not used [-Wunused-but-set-variable]
+vspectra_four.c:33:12: warning: variable `avsig' set but not used [-Wunused-but-set-variable]
+vspectra_four.c:31:43: warning: variable `r' set but not used [-Wunused-but-set-variable]
+disp.c: In function `clearpaint':
+disp.c:440:18: warning: variable `update_rect' set but not used [-Wunused-but-set-variable]
+outfile.c: In function `outfile':
+outfile.c:16:16: warning: variable `n' set but not used [-Wunused-but-set-variable]
+sport.c: In function `rot2':
+sport.c:402:25: warning: variable `i' set but not used [-Wunused-but-set-variable]
+sport.c:402:17: warning: variable `status' set but not used [-Wunused-but-set-variable]
+sport.c:408:15: warning: ignoring return value of `system', declared with attribute warn_unused_result [-Wunused-result]
+cal.c: In function `cal':
+cal.c:18:24: warning: variable `ixe' set but not used [-Wunused-but-set-variable]
+srthelp.c: In function `display_help':
+srthelp.c:39:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+srthelp.c: In function `load_help':
+srthelp.c:254:10: warning: ignoring return value of `fgets', declared with attribute warn_unused_result [-Wunused-result]
+srthelp.c:258:14: warning: ignoring return value of `fgets', declared with attribute warn_unused_result [-Wunused-result]
+velspec.c: In function `velspec':
+velspec.c:19:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+velspec.c: In function `vplot':
+velspec.c:162:15: warning: variable `jmax' set but not used [-Wunused-but-set-variable]
+librtlsdr.c: In function `rtlsdr_open':
+librtlsdr.c:1267:13: warning: variable `rt' set but not used [-Wunused-but-set-variable]
+tuner_r820t.c: In function `R828_RfGainMode':
+tuner_r820t.c:2859:11: warning: variable `LnaGain' set but not used [-Wunused-but-set-variable]
+tuner_r820t.c:2858:11: warning: variable `MixerGain' set but not used [-Wunused-but-set-variable]
+\end{lstlisting}
+
+Now, within the same directory should be a file called srtn . This is the file that will run the GUI window for the telescope. To run it, simply type
+\begin{lstlisting}[language=Bash]
+~/srt/srt_ver5$ ./srtn
+\end{lstlisting}
+and a GUI window should pop up that looks like this:
+% image of GUI window
+
+If you do not have both the receiver dongle and the telescope controller plugged into the computer, the program will fail to initialize. In order to get around this, for testing purposes, go into the srt.cat file and edit the lines from 
+\begin{lstlisting}[language=Bash]
+*SIMULATE ANTENNA --> SIMULATE ANTENNA
+*SIMULATE RECEIVER --> SIMULATE RECEIVER
+\end{lstlisting}
+This will allow you to open the program and test certain commands before committing commands to the telescope untested. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Files}
+Help on the various C code files in the source directory.
+\begin{align}
+\text{60-mcc.rules:} & \text{ udev rules that allows PCI, HID devices, and libusb to work with non-root users}  \nonumber\\
+\text{acml.h:} & \text{ allows calling ACML routines via their C or FORTRAN interfaces}  \nonumber\\
+\text{amdfft.c:} & \text{ fast-fourier transform adaptation software}  \nonumber\\
+\text{calc.c:} & \text{ calibration code}  \nonumber\\
+\text{cat.c:} & \text{ parses the srt.cat file}  \nonumber\\
+\text{cmd.txt:} & \text{ the default file for the commands you want srtn to use}  \nonumber\\
+\text{cmdfl.c:} & \text{ the code to interpret and execute cmd.txt}  \nonumber\\
+\text{d1cons.h:} & \text{ declares values used in code}  \nonumber\\
+\text{d1glob.h:} & \text{ globally declared variables for the code}  \nonumber\\
+\text{d1proto.h:} & \text{ also declares variables for code}  \nonumber\\
+\text{d1typ.h:} & \text{ declares a new struct}  \nonumber\\
+\text{disp.c:} & \text{ code for the GUI}  \nonumber\\
+\text{doindent2:} & \text{ code for parsing whitespace}  \nonumber\\
+\text{fftw2.c:} & \text{ fast-fourier transform}  \nonumber\\
+\text{fftw3.c:} & \text{ fast-fourier transform}  \nonumber\\
+\text{four.c:} & \text{ Handling the different coordinates to angles conversion}  \nonumber\\
+\text{geom.c:} & \text{ for parsing the spherical geometries}  \nonumber\\
+\text{hproto.h:} & \text{ help menu functions}  \nonumber\\
+\text{librtlsdr.c:} & \text{ self consistent library for the dongle}  \nonumber\\
+\text{main.c:} & \text{ the main C file for calling and compile the code}  \nonumber\\
+\text{map.c:} & \text{ Deals with the GUI map controls and drawing.}  \nonumber\\
+\text{outfile.c:} & \text{ writes the data to a file}  \nonumber\\
+\text{PCI-DAS4020-12.1.21.tgz:} & \text{ library for PCI boards}  \nonumber\\
+\text{PCI-DAS4020.h:} & \text{ functions for the PCI boards}  \nonumber\\
+\text{plot.c:} & \text{ plotting the spectra in the GUI}  \nonumber\\
+\text{README:} & \text{ basic readme file}  \nonumber\\
+\text{rtk-sdr.rules:} & \text{ udev rules to allow external rtl-sdr devices to work with non-root users} \nonumber\\
+\text{rtl-sdr\_export.h:} & \text{ packing the librtlsdr}  \nonumber\\
+\text{rtlsdr-i2c.h:} & \text{ declaring variables from librtlsdr}  \nonumber\\
+\text{sport.c:} & \text{ controls the antenna movement}  \nonumber\\
+\text{srt.cat:} & \text{ the main config file}  \nonumber\\
+\text{srt.hlp:} & \text{ the help file in the gui}  \nonumber\\
+\text{srthelp.c:} & \text{ displays the Help menu in the GUI and compiles the srt.hlp file}  \nonumber\\
+\text{srtn:} & \text{ the program}  \nonumber\\
+\text{srtnmake:} & \text{ used to compile the program}  \nonumber\\
+\text{time.c:} & \text{ important for keeping track of timing}  \nonumber\\
+\text{tuner\_r820t.c:} & \text{ the driver for the tuner}  \nonumber\\
+\text{tuner\_r820t.h:} & \text{ declare variables for the tuner}  \nonumber\\
+\text{velspec.c:} & \text{ plots the spectrum in the gui}  \nonumber\\
+\text{vspectra.c:} & \text{ inputs the data from the dongle}  \nonumber\\
+\text{vspectra\_fftw.c:} & \text{ handles the data from the dongle}  \nonumber\\
+\text{vspectra\_four.c:} & \text{ handles the data from the dongle}  \nonumber\\
+\text{vspectra\_pci.c:} & \text{ also inputs data compatible with PCI boards}  \nonumber\\
+\text{vspectra\_pci\_fftw.c:} & \text{ handles the data from the dongle, compatible with PCI boards} \nonumber
+\end{align}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Command Files}
+*work in progress
+
+
+" The use of input command files (filename.cmd) will speed the entry of SRT commands as well as reduce command entry mistakes. A list of the command file syntax can be found by moving the mouse pointer to the Rcmdfl button. The first part of the list will appear in the message board above the text entry box. Moving the pointer off the button then back on will show the rest of the syntax list. The command file is ASCII and can accept instruction lines (those that are read and take some action), blank lines (they are ignored) and comment lines (also ignored by the system). Comments: Start with an asterisk and can be any text the user wishes.
+
+*The following are examples of command file entries *2005:148:00:00:00 Cas *
+
+Instruction: The line must start with a time mark (either UT or LST) or a colon. For Example:
+
+2005:148:00:00:00 radec 23:00:00 06:50:00 (yyyy:ddd:hh:mm:ss (UT))
+LST:06:00:00 (LST:hh:mm:ss)
+:120 azel 120 30 (sss azel position)
+
+Rules:
+
+: cmd /execute the command and proceed to the next line
+:120 cmd /execute the command and wait 120 seconds, taking data, before
+        proceeding to the next line in the schedule
+:120 /wait 120 seconds, taking data, before proceeding to the next
+    line. This is a convenient way of increasing the radiometer
+   integration to more than one scan.
+
+Note: There is NO space allowed between the colon and a time “wait” command
+
+LST:06:00:00 /wait until LST 06:00:00, taking data, before proceeding to the
+            next line
+2005:148:00:00:00 /wait until UT= yyyy:ddd:hh:mm:ss, before proceeding to the
+                 next line
+
+Example Set: Instructions can be set in order to perform an observation. The following set of instructions will command the SRT to take 1420.4 MHz hydrogen spectra in 5 degree spacing along a section of the galactic equator. The user must start data recording, unstow the telescope, calibrate the receiver, set the observing frequency center and frequency scan and then repeat the spectral line observations for ten points along the equator. Note: Allow a space between the colon and the command.
+
+: record rotation.rad  /(Start data recording of file rotation.rad)
+: galactic 206 20      /(unstow and move to calibration position)
+: freq 1419            /(Off-hydrogen calibration frequency)
+: calibrate
+: freq 1420.4 4        /(Set center frequency mode 4)
+: galactic 205 0       /(Move to first data point)
+: galactic 210 0       /(Next point)
+: galactic 215 0
+: galactic 220 0
+: galactic 225 0
+: freq 1419            /(Off-hydrogen calibration frequency)
+: galactic 225 20      /(Calibration point)
+: calibrate
+: freq 1420.4 4        /(Set center frequency mode 4)
+: galactic 230 0       /(Move to sixth data point)
+: galactic 235 0       /(Next point)
+: galactic 240 0
+: galactic 245 0
+: galactic 250 0
+: roff                 /(End data recording)
+
+If this input command file were named galactic.cmd, the user could initiate this observation by clicking in the command text box: galactic.cmd The SRT will read each line in turn and report the current line read as green text in the message board area. If, for example, the start time was 1400 Universal Time on March 15, 2002; and no output file name was entered, the default OUTPUT file would automatically be written and labeled 0414814.rad. Where the file label is: yydddhh.rad"
+
+Thus ends the MIT documentation, outside of what’s in the helpfile, of how to write command files.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Indepth Procedure}
+This section is provided by Bennington\footnote{\url{https://github.com/BenningtonCS/Telescope-2014/wiki/}}. 
+Calibrate the telescope.
+
+    First thing you will have to do before any observing will be to calibrate the telescope. For observing Cas A, you're going to need to perform the "advanced" calibration procedure.
+    Make sure that your center frequency is set to something that is OFF THE H1 LINE, 1415.00 MHz works well. Your center frequency must be off the H1 line because Cas A lies pretty much right in the galactic plane, so any H1 emissions would muddy up the Cas A signal.
+    Refer to the calibration page for details on how to carry out the advanced calibration.
+    Once you get your new Tsys and input into the srt.cat file, you're ready to observe!
+
+Observing Cas A
+
+    Once you've closed SRTN and input your new Tsys, fire SRTN back up.
+    Change your center frequency to 1415.00 MHz or whatever other frequency you are trying out.
+    Do a regular calibration procedure, aka just the bandpass calibration that comes boxed in SRTN.
+    Once the telescope is calibrated, slew over to Cas A.
+    Hit record.
+    Hit the ``beamsw'' button on the top bar of buttons in SRTN. This will start the beamswitching procedure, which takes the telescope on and off Cas A by a beamwidth on either side. This technique is used to tease out faint signals.
+    Wait till about 40-45 beamswitches pass. There is a counter in the average spectrum (bottom spectrum) window for you to keep track of.
+    Hit "beamsw" again to turn the beamswitching off.
+    Hit record again to stop recording.
+    Stow the telescope and close SRTN (unless of course you aren't done looking at stuff!).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reduction %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Data Reduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parsing the Data Files}
+*Working on this section
+Code is on the github page
+Parsing and Plotting the Spectra.
+
+    Now that you have your output file, you're going to need to parse out the spectra so you can plot them.
+    To parse out your data file, move your file to the home directory of the radio telescope computer.
+    In the home directory there also lives the parsing programs. The spectrum parser is called spectrum\_parse.py. Check out the parsing program usage page for details on how to run the program.
+    Once you have your spectra parsed out and written to a new file, you can start to plot them all.
+    First, open up the original output file you made. This is sort of tedious but you're going to need to look at the spectra (large blocks of numbers) to see which ones if any pop out at you. Generally if the numbers that make up a certain spectra are larger than the numbers of the other spectra, those are the ones you're looking for. Alternatively, look for the spectra that were taken at the Az/El of the source. You'll be able to tell because the spectra will always come back to a certain central Az/El and then go off to one side azimuthally. Count how many spectra into the file your spectrum of choice is - this number plus 1 is going to be the column number of your spectrum in the parsed file. Hold on to this number -- you will need it when plotting.
+    Now that you've picked out the spectra you want to plot (it is a good idea to plot off-source spectra for comparison), you can actually plot the spectra.
+    Fire up gnuplot and plot away. Refer to the gnuplot usage page for details.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gnuplot}
+*Working on this section
+Understanding, Interpreting, and changing the units of your plots into something useful.
+
+    So the y-axis in your plot will have units of Kelvins. The numbers in the spectrum correspond to the power level measured at a given frequency, and these numbers are given in Kelvins. We want to convert Kelvins to Janskys, a unit widely used in radio astronomy to quantify spectral flux density. Most if not all established Cas A spectra are given in Jansky's v. Frequency, so we shall follow suit. This page has lots of great basic radio astronomy info and has a Kelvin to Jansky conversion formula, reproduced here:
+    Ta is Antenna temperature, or the values we have in Kelvin right now. S(nu) is spectra flux at a certain frequency, which is what we're looking for, so get S(nu) by itself. A dish is area of the dish, which is a 2.4 m diameter dish. You can figure out the area from there. k is Boltzmann's constant, which can be easily found on the Internet or any physics book. Plug your Tant value at whatever frequency you're interested in into the formula and calculate away to get the spectral flux density at that frequency. The value you get at this point will be in J/s/m$**2$/Hz, and 1 Jansky = $1\times10**26$, so you'll need to multiply the value you just got by $1\times10**26$, and then you'll have your spectral flux density in Janskys. Now you can compare to established continuous spectra of Cas A to see if you really saw it!
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Formulas}
+\begin{align}
+    \text{Diameter} & \text{=} 3 \text{\space m} \nonumber\\
+    \text{Frequency} & \text{=} 1.420401 \text{\space GHz} \nonumber\\
+    \text{Speed of Light} & \text{=} 0.299792458 \text{\space giga-m/s} \nonumber\\
+    \lambda & \text{=} \frac{c}{\nu} \nonumber\\
+    \text{Beam Width} & \text{=} \frac{70 \times \lambda}{\text{Diameter}} \text{\space degrees}
+\end{align}\label{eq:beamwidth}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GitHub}
+\subsection{Quick Command Breakdown}
+This is meant for just a quick overview of GitHub commands. Please understand the commands before using them. 
+\begin{lstlisting}
+new repository
+->git init :: initialize local repository inside the repository
+->git status :: list git files in current directory, tracked and untracked
+
+new file
+->git add $1 :: $1 is name of file, adds the file to the staging environment. Think like indexing
+->git commit -m $1 :: $1 is the comment for the commit. Should be related to the commit.
+
+new branches
+->git checkout -b $1 :: $1 is new branch name. Branching allows working on other projects without affecting master
+->git branch :: lists known branches and * tells which branch you are in
+->git checkout branch :: moves you to the branch defined
+
+online
+->git remote add origin $1 :: $1 is website name. Changes the git variable origin to $1
+->git push -u origin branch :: pushes the local branch repo to the origin branch repo
+->git revert $1 :: $1 is the hash code number. Command is used to revert the master branch
+->git pull origin branch :: pulls the changes in the branch to your local. 
+->git log :: shows a log of all new commits
+\end{lstlisting}\label{lst:github}
+\subsection{Proper Usage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parts List %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Complete Parts List}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Feed \& LNA}
+*Working on this section
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mount \& Dish}
+*Working on this section
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+% end of document
