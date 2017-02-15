@@ -6,7 +6,7 @@ The following directories follow this schema:
 
 example         :: Provides example raw and parsed data
 
-operatorsmanual :: The Operator's Manual for the NHN SRT
+operatorsmanual ALPHA :: The Operator's Manual for the NHN SRT 
 
 scripts         :: Provide scripts for observing and parsing data
 
