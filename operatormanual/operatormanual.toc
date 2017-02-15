@@ -4,24 +4,26 @@
 \contentsline {chapter}{\numberline {3}Building the Hardware}{5}{chapter.3}
 \contentsline {section}{\numberline {3.1}Rotor}{5}{section.3.1}
 \contentsline {section}{\numberline {3.2}LNA}{5}{section.3.2}
-\contentsline {section}{\numberline {3.3}Feed}{6}{section.3.3}
-\contentsline {section}{\numberline {3.4}Antenna}{7}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}Pier}{7}{subsection.3.4.1}
+\contentsline {section}{\numberline {3.3}Feed}{5}{section.3.3}
+\contentsline {section}{\numberline {3.4}Antenna}{6}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Pier}{6}{subsection.3.4.1}
 \contentsline {subsection}{\numberline {3.4.2}Dish}{7}{subsection.3.4.2}
-\contentsline {chapter}{\numberline {4}SRT Software}{8}{chapter.4}
-\contentsline {section}{\numberline {4.1}Commands}{8}{section.4.1}
-\contentsline {section}{\numberline {4.2}Setup}{8}{section.4.2}
-\contentsline {section}{\numberline {4.3}Compiling}{8}{section.4.3}
-\contentsline {section}{\numberline {4.4}Files}{10}{section.4.4}
-\contentsline {section}{\numberline {4.5}Command Files}{11}{section.4.5}
-\contentsline {section}{\numberline {4.6}Indepth Procedure}{11}{section.4.6}
-\contentsline {chapter}{\numberline {5}Data Reduction}{12}{chapter.5}
-\contentsline {section}{\numberline {5.1}Parsing the Data Files}{12}{section.5.1}
-\contentsline {section}{\numberline {5.2}Gnuplot}{12}{section.5.2}
-\contentsline {section}{\numberline {5.3}Formulas}{12}{section.5.3}
-\contentsline {section}{\numberline {5.4}GitHub}{13}{section.5.4}
-\contentsline {subsection}{\numberline {5.4.1}Quick Command Breakdown}{13}{subsection.5.4.1}
-\contentsline {subsection}{\numberline {5.4.2}Proper Usage}{13}{subsection.5.4.2}
-\contentsline {chapter}{\numberline {6}Complete Parts List}{14}{chapter.6}
-\contentsline {section}{\numberline {6.1}Feed \& LNA}{14}{section.6.1}
-\contentsline {section}{\numberline {6.2}Mount \& Dish}{14}{section.6.2}
+\contentsline {chapter}{\numberline {4}SRT Server Computer}{8}{chapter.4}
+\contentsline {chapter}{\numberline {5}SRT Software}{9}{chapter.5}
+\contentsline {section}{\numberline {5.1}Commands}{9}{section.5.1}
+\contentsline {section}{\numberline {5.2}Setup}{9}{section.5.2}
+\contentsline {section}{\numberline {5.3}Compiling}{9}{section.5.3}
+\contentsline {section}{\numberline {5.4}Files}{11}{section.5.4}
+\contentsline {section}{\numberline {5.5}Command Files}{12}{section.5.5}
+\contentsline {section}{\numberline {5.6}Example Procedure}{13}{section.5.6}
+\contentsline {chapter}{\numberline {6}Data Reduction}{14}{chapter.6}
+\contentsline {section}{\numberline {6.1}Parsing the Data Files}{14}{section.6.1}
+\contentsline {section}{\numberline {6.2}Gnuplot}{15}{section.6.2}
+\contentsline {section}{\numberline {6.3}Formulas}{15}{section.6.3}
+\contentsline {section}{\numberline {6.4}GitHub}{15}{section.6.4}
+\contentsline {subsection}{\numberline {6.4.1}Quick Command Breakdown}{15}{subsection.6.4.1}
+\contentsline {subsection}{\numberline {6.4.2}Proper Usage}{15}{subsection.6.4.2}
+\contentsline {chapter}{\numberline {7}Complete Parts List}{17}{chapter.7}
+\contentsline {section}{\numberline {7.1}Rotor}{17}{section.7.1}
+\contentsline {section}{\numberline {7.2}Mount \& Dish}{17}{section.7.2}
+\contentsline {section}{\numberline {7.3}Feed \& LNA}{18}{section.7.3}
