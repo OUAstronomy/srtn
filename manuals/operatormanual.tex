@@ -1,0 +1,555 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Project" SRT Operator's Manual
+% Source: MIT Haystack
+% Author: Nickalas Reynolds, John Tobin
+% Location: The University of Oklahoma
+% Date: Feb 2017
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% functions
+
+
+% packages
+\documentclass[a4paper,10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\geometry{margin=0.5in}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{multicol}
+
+ % colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% coding inline
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+} 
+\lstset{style=mystyle}
+\newcommand{\code}[1]{\colorbox{backcolour}{\text{#1}}}
+\newcommand{\git}{\url{https://github.com/OUsrt/srtn.git}}
+\newcommand{\ben}{\url{https://github.com/BenningtonCS/Telescope-2014/wiki}}
+
+% Book's title and subtitle
+\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual}
+% Author
+\author{\textsc{John Tobin\footnote{jjtobin@ou.edu}}\footnote{GitHub: \git , Group Email: \url{nhnradiotelescope@groups.ou.edu}}\\\textsc{Nickalas Reynolds\footnotemark[2]\footnote{nickreynolds@ou.edu}}}
+
+
+\begin{document}
+
+%\frontmatter
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Abstract}
+The University of Oklahoma's Small Radio Telescope (3m) was sponsored by Dr. John Tobin as an outreach and educational tool for the Norman Community. The use of the telescope helps to aid in expanding one's knowledge of radio astronomy, engineering principles, and proper research methods. The kit was implemented off of MIT Haystack's SRT, fabricated through RF Ham Design, constructed by a team of students and professors\footnote{Prof: John Tobin; Grad students: Paul Canton, Hyunseop Choi, Nickalas Reynolds, Rajeeb Sharma, G-PSI; Undergrad Students: Jacob Gill, Lisa Patel, and Brian Stephensen; Staff: Barry Bergeron, Andy Feldt, Debi Schoenberger, John Snellings, Adrienne Wade, and Joel Young}, and the code was provided by MIT Haystack under the MIT Public License. 
+
+Information specifically regarding the MIT Haystack Observatory can be found at \url{http://www.haystack.mit.edu/edu/undergrad/srt/index.html}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Additional Information}
+The website\footnote{\git} for this file contains:
+\begin{itemize}
+  \item A link to the downloadable PDF and \LaTeX\space code.
+  \item The SRT source code.
+  \item Useful scripts for observing and parsing the data
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Acknowledgements %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgements}
+\begin{itemize}
+\item Hardware design, development of software, and instructions: (\url{www.haystack.mit.edu/edu/undergrad/srt/})
+\item Fabrication of the SRT parts: (\url{https://www.rfhamdesign.com} )
+\item Parse code and instructions: (\ben)
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Auto-generated table of contents, list of figures and list of tables %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Quick %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace*{-1cm}
+\chapter{Condensed Procedures}
+\vspace*{-1cm}
+This list of procedures is extremely condensed and it is expected you are fairly experienced with operating the telescope before using these. If you are unsure of something, ask.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{align}
+ \text{\#}& \text{ Parameters } \nonumber\\
+ &\text{1) Edit CALMODE in srt.cat file } \nonumber\\
+ &\text{2) CALMODE 0 - used for yfactor solving. Point t cold sky, cal, place absorber, get tsys and tcal} \nonumber\\
+ &\text{3) CALMODE 2 - only does bandpass correction, okay if no absorber or tree } \nonumber\\
+ &\text{4) CALMODE 3 - if stow looks at absorber like trees. } \nonumber\\
+ &\text{4) Verify target frequency and radial velocity }\nonumber\\
+ &\text{5) If velocity is >50km/s, use radvel.py to adjust the frequency if needed.}\nonumber\\
+ &\text{5) \textbf{Keep frequency in range 1410-1470MHz unless you have cleared it with Tobin}}. \nonumber \\
+ &\text{Higher frequencies have a different instruction set and improper use can fry the receiver.}\nonumber\\ 
+ \text{\#}& \text{ Pointing } \nonumber\\
+ &\text{1) Slew to very bright source (sun) } \nonumber\\
+ &\text{2) Use npoints to correct and input offset } \nonumber\\
+ \text{\#}& \text{ Simple Cal (with absorber) } \nonumber\\
+ &\text{1) Slew to cold sky } \nonumber\\
+ &\text{2) hit cal on calmode 20 } \nonumber\\
+ &\text{3) place absorber } \nonumber\\
+ &\text{4) should have flat bandpass } \nonumber\\
+ \text{\#}& \text{ Simple Cal (without absorber) } \nonumber\\
+ &\text{1) Stow} \nonumber\\
+ &\text{2) hit cal on calmode 2 } \nonumber\\
+ &\text{4) should have flat bandpass } \nonumber\\
+ \text{\#}& \text{ Source } \nonumber\\
+ &\text{1) Reopen srtn (if you modified the frequency)} \nonumber\\
+ &\text{2) Slew to target and record } \nonumber\\
+ &\text{3) Hit the beamsw (Only for certain faint faint signals) } \nonumber\\
+ &\text{4) Wait for at least $\sim$45 iterations (counter in bottom spectrum window) } \nonumber\\
+ &\text{5) re-hit beamsw to turn it off/ hit record to stop recording } \nonumber\\
+ &\text{6) This target is finished } \nonumber \\
+ \text{\#}& \text{ End of Observation } \nonumber\\
+ &\text{1) Always stow at end of the observation} \nonumber\\
+ &\text{2) Exit the SRTN program, do \textbf{NOT} turn off the computer} \nonumber\\ 
+ &\text{3) Turn off the Controller, Receiver, and Tuner} \nonumber\\
+ &\text{4) Move data files to appropriate directories} \nonumber
+\end{align}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Overview %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Overview}
+The capabilities of the SRT are as follow:
+\begin{itemize}
+\item Frequency Adjustments from 1420MHz
+\item Spectral Line Gathering
+\item Continuum
+\item Drift Scans
+\item Point Maps
+\end{itemize}
+\begin{align}
+    & \text{Aperture} & 3.0 & \text{\space meters} \nonumber\\
+    & \text{Frequency Range} & 1420-1470 & \text{\space MHz} \nonumber\\
+    & \text{Pointing Accuracy} & 0.2 & \text{\space Degree} \nonumber\\
+    & \text{Beam Width\footnote{Refer to equation: \ref{eq:beamwidth}}} & 4.92 & \text{\space Degrees} \nonumber\\
+    & \text{wind speed} & 120 & \text{\space km/h} \nonumber
+\end{align}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Server %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{SRT Server Computer}
+
+First know that the server computer, the SRTN software, and all of the following commands are assuming you are on a Linux OS. The SRTN software and the VNC software are available for other OS architectures but are not covered in the scope of this Manual. You will also have to download and install the VNC software\footnote{\url{https://tigervnc.org}}.
+
+Understand that access to the telescope is a privilege that is administered by Dr. Tobin\footnote{\url{jjtobin@ou.edu}} and any abuse of the system will result in that access being revoked. 
+
+The Nielsen Hall SRT is controlled through a network locked, local server. This server does not follow the standard authentication protocol followed by the University nor the department. In order to gain access to the telescope. You will have to populate and send your ssh public keys to Dr. Tobin. Follow these commands to do this:
+
+\begin{lstlisting}[language=Bash]
+# First verify you have ssh keys generated, or generate them
+~$ ls ~/.ssh/
+# There should be a file named id_rsa.pub. If there is not a directory or not this file then use this command
+~$ ssh-keygen
+# specify the path to download, typically in /home/username/.ssh/
+# type in a password to use to unlock the file.
+~$ cp ~/.ssh/id_rsa.pub ~/id_rsa_NAME.pub # copy the file to your home directory with your name
+\end{lstlisting}
+
+Now email this file to Dr. Tobin and wait until he confirms that he has added your public key to the server computer. Once you have access you can now login to the telescope computer. Please understand how the SRTN software works \textbf{before} controlling the telescope. It is also suggested to have  a senior member of the group assist in the first run. To login to the computer use these commands:
+\begin{lstlisting}
+~$ vncviewer -Shared -ViewOnly -via jjtobin@reber.nhn.ou.edu reber:1 # Viewing the telescope
+~$ vncviewer -Shared -via jjtobin@reber.nhn.ou.edu reber:1 # Controlling the telescope
+\end{lstlisting}
+Since you are just starting out, use the command with the \code{-ViewOnly} flag just to see what the server looks like.
+
+\noindent You will be prompted for a VNC server password which is \code{SRT1420MHz}.
+
+To walk you through the commands: VNC is the program used that uses ssh protocol to provide a graphical interface between two computers, \code{vncviewer} is the command to view an existing VNC server on a host computer, \code{-Shared} allows multiple users to access the server at once, \code{-ViewOnly} does not send keyboard or mouse controls to the hosting server, \code{-via} specifies to route to the domain and specific server, \code{jjtobin@reber.ou.edu} is the domain under which the server presides, \code{reber:1} designates the computer and server window.
+There are probably a few VNC servers operating on the server computer at one time and can be listed with \code{vncserver -list}. However, unless you are not the one that created those windows, please do not close them as they might be in use. 
+{
+\vfill
+\centering``With power comes great responsibility''-- Uncle Ben
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Software %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{SRT Software}
+Do not change the code of the SRT software on the SRT controller computer until you have thoroughly tested the code and passed it by the senior antenna operator. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Commands}
+For extended help on any commands, within the terminal window, you can type man [COMMAND] e.g. man tar and it will display the internal manual for the given command, tar in this case. 
+\begin{lstlisting}[language=Bash]
+cd # changes directory to home directory ~/ or if given input e.g. 
+cd ~/Downloads/ # will move to Downloads directory in home
+ls # will list all of the files in the current director
+mv /path/file1 /path/file2 # will move file1 to file2 
+mkdir srt # makes a new directory called srt, flag -p will copy directory structure
+tar # (un)compression algorithm, x is uncompress, z is gunzip format, v is verbose, f specifies file
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GitHub}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quick Command Breakdown}
+This is meant for just a quick overview of GitHub commands. Please understand the commands before using them. 
+\begin{lstlisting}
+new repository
+->git init :: initialize local repository inside the repository
+->git status :: list git files in current directory, tracked and untracked
+->git log :: shows a log of all new commits
+
+new file
+->git add $1 :: $1 is name of file, adds the file to the staging environment. Think like indexing
+->git commit -m $1 :: $1 is the comment for the commit. Should be related to the commit.
+
+new branches
+->git checkout -b $1 :: $1 is new branch name. Branching allows working on other projects without affecting master
+->git branch :: lists known branches and * tells which branch you are in
+->git checkout branch :: moves you to the branch defined
+
+online
+->git remote add(rm) origin $1 :: $1 is website name. add will add $1 to the origin variable while rm will remove the variable
+->git push -u origin branch :: pushes the local branch repo to the origin branch repo
+->git revert $1 :: $1 is the hash code number. Command is used to revert the branch
+->git pull origin branch :: pulls the changes in the branch to your local. Prefer to use fetch and merge
+->git fetch origin :: remotely stages origin to merge locally
+->git merge origin/branch :: remotely merges the branch from origin to your current branch
+->git request-pull v1.0 origin master :: initiate a pull request upstream from your master branch to their master branch
+
+
+\end{lstlisting}\label{lst:github}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Proper Usage}
+To properly use GitHub in collaboration with other colleagues please follow this guide. 
+
+To implement changes to the repository, you will have to make an account and request access online. Once this is finished, you will not have to check the website again. If you do not already have a directory you wish to use to contribute, make a directory now. You can use a pre-existing directory. Once in this directory, run the command \code{git init} to initialize the current directory. 
+
+To pull changes from the website, you first have to set the variable \code{origin} using command \code{git remote add origin \$1} and input the name of the repository\footnote{In this case, the repository is \git}. Then use \code{git fetch origin} to remotely pull the most updated, official code from the GitHub page. You then merge the most up to date version into your local master with \code{git merge origin/master}. 
+
+You can then create local branches to work and merge projects using \code{git checkout -b \$1} to create the branch and \code{git checkout \$1} to move to a branch. The command \code{git branch} will tell you the list of current branches within the initialize directory you are in. Make the changes you wish to make and then issue the index command \code{git add \$1}. This prepares the file for the commit stage. Once you are satisfied with all of the indexed files, commit the changes using \code{git commit -m "\$1"} where \$1 in this case is a short comment on what this change is. 
+
+Once committed push the changes to the online repository with \code{git push -u origin branch}. If an error comes up regarding unable to push, probably one of two things happened: incorrect spelling of command/branch or someone else has since updated the branch. Like I said, you will be unable to push changes to the GitHub master branch so push changes to another branch and initiate a pull request. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Setup}
+First download the source code for the SRT either by downloading directly from the GitHub\footnote{\git} or by using the command on line 3.
+\begin{lstlisting}[language=Bash]
+~$ mkdir -p ~/srt/scripts/
+~$ cd ~/srt/
+~/srt$ git clone https://github.com/OUsrt/srtn.git # can ignore this line if you directly downloaded
+~/srt$ cp -r ./srtn/software/srtnver5_reber ./
+~/srt$ cd srt_ver5
+~/srt/srt_ver5$ ls
+\end{lstlisting}
+You should now be in the SRT main code directory and the contents should be on your screen. The code should be able to run immediately or recompiled  as necessary.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compiling}
+If there are issues with the C compiler not able to locate certain libraries, try searching for solutions to that problem or send me an email\footnote{\url{nickreynolds@ou.edu}}. There should be a file called srtnmake within the directory. This is the main compiler file that will gather the other C files and compile them in the correct order. When you make changes to the other files within the directory (other than the srt.cat file) you will have to recompile the program so it can implement the changes. 
+\begin{lstlisting}[language=Bash]
+~/srt/srt_ver5$ ./srtnmake
+\end{lstlisting}
+
+\newpage
+
+You will probably get a lot of warnings, this is fine and normal errors can look like this:
+\begin{lstlisting}[language=Bash]
+main.c: In function `main':
+main.c:62:12: warning: variable `secstart' set but not used [-Wunused-but-set-variable]
+main.c:60:12: warning: variable `ii' set but not used [-Wunused-but-set-variable]
+main.c:59:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+main.c: In function `gauss':
+main.c:555:16: warning: variable `j' set but not used [-Wunused-but-set-variable]
+vspectra_four.c: In function `vspectra':
+vspectra_four.c:33:28: warning: variable `min' set but not used [-Wunused-but-set-variable]
+vspectra_four.c:33:12: warning: variable `avsig' set but not used [-Wunused-but-set-variable]
+vspectra_four.c:31:43: warning: variable `r' set but not used [-Wunused-but-set-variable]
+disp.c: In function `clearpaint':
+disp.c:440:18: warning: variable `update_rect' set but not used [-Wunused-but-set-variable]
+outfile.c: In function `outfile':
+outfile.c:16:16: warning: variable `n' set but not used [-Wunused-but-set-variable]
+sport.c: In function `rot2':
+sport.c:402:25: warning: variable `i' set but not used [-Wunused-but-set-variable]
+sport.c:402:17: warning: variable `status' set but not used [-Wunused-but-set-variable]
+sport.c:408:15: warning: ignoring return value of `system', declared with attribute warn_unused_result [-Wunused-result]
+cal.c: In function `cal':
+cal.c:18:24: warning: variable `ixe' set but not used [-Wunused-but-set-variable]
+srthelp.c: In function `display_help':
+srthelp.c:39:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+srthelp.c: In function `load_help':
+srthelp.c:254:10: warning: ignoring return value of `fgets', declared with attribute warn_unused_result [-Wunused-result]
+srthelp.c:258:14: warning: ignoring return value of `fgets', declared with attribute warn_unused_result [-Wunused-result]
+velspec.c: In function `velspec':
+velspec.c:19:14: warning: variable `color' set but not used [-Wunused-but-set-variable]
+velspec.c: In function `vplot':
+velspec.c:162:15: warning: variable `jmax' set but not used [-Wunused-but-set-variable]
+librtlsdr.c: In function `rtlsdr_open':
+librtlsdr.c:1267:13: warning: variable `rt' set but not used [-Wunused-but-set-variable]
+tuner_r820t.c: In function `R828_RfGainMode':
+tuner_r820t.c:2859:11: warning: variable `LnaGain' set but not used [-Wunused-but-set-variable]
+tuner_r820t.c:2858:11: warning: variable `MixerGain' set but not used [-Wunused-but-set-variable]
+\end{lstlisting}
+
+Now, within the same directory should be a file called \code{srtn} . This is the file that will run the GUI window for the telescope. To run it, simply type
+\begin{lstlisting}[language=Bash]
+~/srt/srt_ver5$ ./srtn
+\end{lstlisting}
+and a GUI window should pop up that looks like this:
+% image of GUI window
+
+If you do not have both the receiver dongle and the telescope controller plugged into the computer, the program will fail to initialize. In order to get around this, for testing purposes, go into the \code{srt.cat} file and edit the lines from 
+\begin{lstlisting}[language=Bash]
+*SIMULATE ANTENNA --> SIMULATE ANTENNA
+*SIMULATE RECEIVER --> SIMULATE RECEIVER
+\end{lstlisting}
+This will allow you to open the program and test certain commands before committing commands to the telescope untested.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Files}
+Help on the various C code files in the source directory.
+\begin{align}
+\text{60-mcc.rules:} & \text{ udev rules that allows PCI, HID devices, and libusb to work with non-root users}  \nonumber\\
+\text{acml.h:} & \text{ allows calling ACML routines via their C or FORTRAN interfaces}  \nonumber\\
+\text{amdfft.c:} & \text{ fast-fourier transform adaptation software}  \nonumber\\
+\text{calc.c:} & \text{ calibration code}  \nonumber\\
+\text{cat.c:} & \text{ parses the srt.cat file}  \nonumber\\
+\text{cmd.txt:} & \text{ the default file for the commands you want srtn to use}  \nonumber\\
+\text{cmdfl.c:} & \text{ the code to interpret and execute cmd.txt}  \nonumber\\
+\text{d1cons.h:} & \text{ declares values used in code}  \nonumber\\
+\text{d1glob.h:} & \text{ globally declared variables for the code}  \nonumber\\
+\text{d1proto.h:} & \text{ also declares variables for code}  \nonumber\\
+\text{d1typ.h:} & \text{ declares a new struct}  \nonumber\\
+\text{disp.c:} & \text{ code for the GUI}  \nonumber\\
+\text{doindent2:} & \text{ code for parsing whitespace}  \nonumber\\
+\text{fftw2.c:} & \text{ fast-fourier transform}  \nonumber\\
+\text{fftw3.c:} & \text{ fast-fourier transform}  \nonumber\\
+\text{four.c:} & \text{ Handling the different coordinates to angles conversion}  \nonumber\\
+\text{geom.c:} & \text{ for parsing the spherical geometries}  \nonumber\\
+\text{hproto.h:} & \text{ help menu functions}  \nonumber\\
+\text{librtlsdr.c:} & \text{ self consistent library for the dongle}  \nonumber\\
+\text{main.c:} & \text{ the main C file for calling and compile the code}  \nonumber\\
+\text{map.c:} & \text{ Deals with the GUI map controls and drawing.}  \nonumber\\
+\text{outfile.c:} & \text{ writes the data to a file}  \nonumber\\
+\text{PCI-DAS4020-12.1.21.tgz:} & \text{ library for PCI boards}  \nonumber\\
+\text{PCI-DAS4020.h:} & \text{ functions for the PCI boards}  \nonumber\\
+\text{plot.c:} & \text{ plotting the spectra in the GUI}  \nonumber\\
+\text{README:} & \text{ basic readme file}  \nonumber\\
+\text{rtk-sdr.rules:} & \text{ udev rules to allow external rtl-sdr devices to work with non-root users} \nonumber\\
+\text{rtl-sdr\_export.h:} & \text{ packing the librtlsdr}  \nonumber\\
+\text{rtlsdr-i2c.h:} & \text{ declaring variables from librtlsdr}  \nonumber\\
+\text{sport.c:} & \text{ controls the antenna movement}  \nonumber\\
+\text{srt.cat:} & \text{ the main config file}  \nonumber\\
+\text{srt.hlp:} & \text{ the help file in the gui}  \nonumber\\
+\text{srthelp.c:} & \text{ displays the Help menu in the GUI and compiles the srt.hlp file}  \nonumber\\
+\text{srtn:} & \text{ the program}  \nonumber\\
+\text{srtnmake:} & \text{ used to compile the program}  \nonumber\\
+\text{time.c:} & \text{ important for keeping track of timing}  \nonumber\\
+\text{tuner\_r820t.c:} & \text{ the driver for the tuner}  \nonumber\\
+\text{tuner\_r820t.h:} & \text{ declare variables for the tuner}  \nonumber\\
+\text{velspec.c:} & \text{ plots the spectrum in the gui}  \nonumber\\
+\text{vspectra.c:} & \text{ inputs the data from the dongle}  \nonumber\\
+\text{vspectra\_fftw.c:} & \text{ handles the data from the dongle}  \nonumber\\
+\text{vspectra\_four.c:} & \text{ handles the data from the dongle}  \nonumber\\
+\text{vspectra\_pci.c:} & \text{ also inputs data compatible with PCI boards}  \nonumber\\
+\text{vspectra\_pci\_fftw.c:} & \text{ handles the data from the dongle, compatible with PCI boards} \nonumber
+\end{align}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\section{Command Files}
+Adapted from Bennington\footnote{\ben}
+{\obeylines
+\setlength{\parindent}{0pt}{
+\hfill
+It is suggested to use input command files as this will add speed the entry of SRT commands as well as reduce command entry mistakes. By default the srtn software provides the syntax for setting up a cmd file if you mouse over the Rcmdfl button in the srtn software. The command file is ASCII formatted and can: accept instruction lines (active lines), blank lines (ignored), comment lines (begins with *, ignored), and comment sections (begins with /, ignored).
+\hfill
+}}
+Instruction line: Must start with a time mark (either UT or LST) or a colon. 
+\begin{align}
+\text{For Example:} & \nonumber \\
+& \text{2005:148:00:00:00 (yyyy:ddd:hh:mm:ss (UT))}  \nonumber \\
+& \text{23:00:00 06:50:00 ra/dec}  \nonumber \\
+& \text{LST:06:00:00 (LST:hh:mm:ss)} \nonumber \\
+& \text{:120 azel 120 30 (sss azel position)} \nonumber
+\end{align}
+{\obeylines
+\setlength{\parindent}{0pt}{
+\hfill 
+Rules:
+: cmd /execute the command and proceed to the next line
+:120 cmd /execute the command and wait 120 seconds, taking data, before proceeding to the next line in the schedule
+:120 /wait 120 seconds, taking data, before proceeding to the next line. This is a convenient way of increasing the 
+radiometer integration to more than one scan.
+\hfill
+*Note: There is NO space allowed between the colon and a time ``wait'' command
+\hfill
+LST:06:00:00 /wait until LST 06:00:00, taking data, before proceeding to the next line
+2005:148:00:00:00 /wait until UT= yyyy:ddd:hh:mm:ss, before proceeding to the next line
+\hfill
+Example Set: Command the SRT to take 1420.4 MHz hydrogen spectra in 5 degree spacing along a section of the galactic equator. The user must start data recording, unstow the telescope, calibrate the receiver, set the observing frequency center and frequency scan and then repeat the spectral line observations for ten points along the equator. Note: Allow a space between the colon and the command.
+\hfill
+: record rotation.rad  /(Start data recording of file rotation.rad)
+: galactic 206 20      /(unstow and move to calibration position)
+: freq 1419            /(Off-hydrogen calibration frequency)
+: calibrate
+: freq 1420.4 4        /(Set center frequency mode 4)
+: galactic 205 0       /(Move to first data point)
+: galactic 210 0       /(Next point)
+: galactic 215 0
+: galactic 220 0
+: galactic 225 0
+: freq 1419            /(Off-hydrogen calibration frequency)
+: galactic 225 20      /(Calibration point)
+: calibrate
+: freq 1420.4 4        /(Set center frequency mode 4)
+: galactic 230 0       /(Move to sixth data point)
+: galactic 235 0       /(Next point)
+: galactic 240 0
+: galactic 245 0
+: galactic 250 0
+: roff                 /(End data recording)
+\hfill
+}}
+If this input command file were named galactic.cmd, the user could initiate this observation by clicking in the command text box: galactic.cmd The SRT will read each line in turn and report the current line read as green text in the message board area. If, for example, the start time was 1400 Universal Time on March 15, 2002; and no output file name was entered, the default OUTPUT file would automatically be written and labeled 0214814.rad. Where the file label is: ``yydddhh.rad''
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Example Procedure}
+Adapted from Bennington\footnote{\ben}. 
+{\obeylines
+\setlength{\parindent}{0pt}{
+\textbf{Calibrate the telescope:}
+\hfill
+    First thing you will have to do before any observing will be to calibrate the telescope. 
+\hfill
+    Your intended source will determine the calibration procedure and the subsequent method of observing. Some sources have to use ``beamsw'' others cannot use this method. 
+    \hfill
+    For observing the Milk Way HI and for doing the sun radio profile do not use ``beamsw'' as this will corrupt your spectra. To observe the HI you will have to adjust the frequency. To observe the sun the beam width of the SRT will have to be adjusted to offset further than the 5 degrees currently set. This can be done in the srt.cat file 
+    \hfill
+    Beam switching is used for faint sources like Cas A, Cygnus A, the Moon. M33 and Andromeda can use the beam switching method but it is currently untested if this will yield good results. 
+    \hfill
+    Generally you will not have to adjust the frequency unless doing continuum measures (1413MHz is clean of RFI) or source is near another bright radio source
+    \hfill
+    For observing Cas A, you're going to need to perform the ``advanced'' calibration procedure.
+\hfill    
+    Make sure that your center frequency is set to something that is OFF THE H1 LINE, 1415.00 MHz works well. Your center frequency must be off the H1 line because Cas A lies pretty much right in the galactic plane, so any H1 emissions would muddy up the Cas A signal.
+\hfill    
+    Refer to the calibration page for details on how to carry out the advanced calibration.
+\hfill    
+    Take note of your new Tsys and you're ready to observe!
+\hfill
+\textbf{Observing Cas A:}
+\hfill  
+    Once the telescope is calibrated, slew over to Cas A.
+\hfill    
+    Hit record.
+\hfill    
+    Hit the ``beamsw'' button on the top bar of buttons in SRTN. This will start the beamswitching procedure, which takes the telescope on and off Cas A by a beamwidth on either side. This technique is used to tease out faint signals.
+\hfill    
+    Wait till at least 40-45 beamswitches pass. If this is your only source then observe for as long as possible. There is a counter in the average spectrum (bottom spectrum) window for you to keep track of.
+\hfill    
+    Hit ``beamsw'' again to turn the beamswitching off.
+\hfill    
+    Hit record again to stop recording.
+\hfill    
+   \textbf{ Stow} the telescope and close SRTN (unless of course you aren't done looking at stuff!).
+\hfill
+\hfill
+}}
+This method is of course not the template to use for all sources and the methodologies will depend on current conditions, type of source, strength of source, etc.
+
+It is also suggested to leave enough time to take multiple measurements sets for each source.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reduction %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Data Reduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parsing the Data Files}
+Adapted from Bennington\footnote{\ben}.
+
+Parsing and Plotting the Spectra.
+\begin{itemize}
+    \item Copy the data from the server computer to your personal computer to run the reduction sequence. 
+    \item The command \code{scp /file/to/move/ /destination/} will help.
+    \item Make sure you acquire the parsing code\footnote{\git} in order the parse the data.
+    \item The metadata parser is called meta\_parse.py. The meta\_parse script lists columns of data in the order: Date, obsn, az, el, center freq, Tsys, Tant, vlsr, galactic latitude, galactic longitude, source, fstart, fstop, spacing, bw, fbw, nfreq, nsam, npoint, integ, sigma, bsw.
+    \item The spectrum parser is called spectrum\_parse.py. The spectrum\_parse script lists each frequency in the spectrum in the first column, and then the power values associated with each frequency in each subsequent columns
+    \item The rotation curve parser is called rot\_curve\_spec\_parse.py. The rot\_curve\_spec\_parse script usage is the same as the previous two programs. The printing of the data is a little different, however. The first column prints the frequency channels present in the spectrum like the other parser, but then prints the velocities associated with the red/blueshift of the frequencies away from the 1420.406 MHz center frequency in the second column. The next column is the average spectrum for glon 0, then glon 10, then glon 20, and so on until glon 90. It averages all spectra taken at a single point in the galactic plane to produce an average spectrum for that point.
+    \item Another parser is called hi\_spec\_parse.py. It prints the column numbers of the last spectrum taken before the telescope moved to the next point. The velocities associated with frequencies red/blueshifted from the center freq. of 1420.406 MHz are also calculated.
+    \item To run the files, use \code{$\sim$\$ python meta\_parse.py test\_data.rad -o meta\_output.txt}. You might have to specify a different python version. These should work with python2.7, it is untested for python3+.
+    \item Once you have your spectra parsed out and written to a new file, you can start to plot them all.
+    \item First, open up the original output file you made. This is sort of tedious but you're going to need to look at the spectra (large blocks of numbers) to see which ones if any pop out at you. Generally if the numbers that make up a certain spectra are larger than the numbers of the other spectra, those are the ones you're looking for. 
+    \item Alternatively, look for the spectra that were taken at the Az/El of the source. You'll be able to tell because the spectra will always come back to a certain central Az/El and then go off to one side azimuthally. 
+    \item Count how many spectra into the file your spectrum of choice is - this number plus 1 is going to be the column number of your spectrum in the parsed file. Hold on to this number -- you will need it when plotting.
+    \item Now that you've picked out the spectra you want to plot (it is a good idea to plot off-source spectra for comparison), you can actually plot the spectra..
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gnuplot}
+Adapted from Bennington\footnote{\ben}.
+
+Understanding, Interpreting, and changing the units of your plots into something useful.
+\begin{itemize}
+    \item So the y-axis in your plot will have units of Kelvins. The numbers in the spectrum correspond to the power level measured at a given frequency, and these numbers are given in Kelvins. 
+    \item We want to convert Kelvins to Janskys with $\text{kT}_a = \frac{\text{S}_{\nu}\times \text{A}_{\text{dish}}}{2}$, T$_a$ is Antenna temperature.S$_{nu}$ is spectra flux at a certain frequency. A$_{dish}$, k is Boltzmann's constant. The value you get at this point will be in J/s/m$^2$/Hz, and 1 Jansky = $1\times10^{26}$, so you'll need to multiply the value you just got by $1\times10^{26}$, and then you'll have your spectral flux density in Janskys. Now you can compare to established continuous spectra. 
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Formulas}
+\begin{align}
+    \text{Diameter} & \text{=} 3 \text{\space m} \nonumber\\
+    \text{Frequency} & \text{=} 1.420401 \text{\space GHz} \nonumber\\
+    \text{Speed of Light} & \text{=} 0.299792458 \text{\space giga-m/s} \nonumber\\
+    \lambda & \text{=} \frac{c}{\nu} \nonumber\\
+    \text{Beam Width} & \text{=} \frac{70 \times \lambda}{\text{Diameter}} \text{\space degrees}
+\end{align}\label{eq:beamwidth}
+\begin{align}
+ \text{\#}& \text{Solving for tsys} \nonumber\\
+ &\text{1) Follow the Simple Cal procedure} \nonumber\\
+ &\text{2) Move to blank sky patch and record } \nonumber\\
+ &\text{3) Average $\sim$5 power measurements (from terminal). This is P\_cold } \nonumber\\
+ &\text{5) Remove absorber and average ~5 power measurements. This is P\_hot } \nonumber\\
+ &\text{6) T\_cold $\sim$3k ...... T\_hot is average ambient temperature or thermometer measurement of absorber } \nonumber\\
+ &\text{7) Run python script tsys.py to find tsys } \nonumber\\
+ \end{align}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+% end of document
