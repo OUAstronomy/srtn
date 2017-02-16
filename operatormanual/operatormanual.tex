@@ -108,11 +108,13 @@ This list of procedures is extremely condensed and it is expected you are fairly
 \begin{align}
  \text{\#}& \text{ Parameters } \nonumber\\
  &\text{1) Edit CALMODE in srt.cat file } \nonumber\\
- &\text{2) CALMODE 0 - used for yfactor solving. Point t cold sky, cal, place absorber, get tsys and tcal } \nonumber\\
+ &\text{2) CALMODE 0 - used for yfactor solving. Point t cold sky, cal, place absorber, get tsys and tcal} \nonumber\\
  &\text{3) CALMODE 2 - only does bandpass correction, okay if no absorber or tree } \nonumber\\
  &\text{4) CALMODE 3 - if stow looks at absorber like trees. } \nonumber\\
  &\text{4) Verify target frequency and radial velocity }\nonumber\\
- &\text{5) If velocity is >50km/s, use radvel.py to adjust the frequency}\nonumber\\
+ &\text{5) If velocity is >50km/s, use radvel.py to adjust the frequency if needed.}\nonumber\\
+ &\text{5) \textbf{Keep frequency in range 1410-1470MHz unless you have cleared it with Tobin}}. \nonumber \\
+ &\text{Higher frequencies have a different instruction set and improper use can fry the receiver.}\nonumber\\ 
  \text{\#}& \text{ Pointing } \nonumber\\
  &\text{1) Slew to very bright source (sun) } \nonumber\\
  &\text{2) Use npoints to correct and input offset } \nonumber\\
@@ -125,18 +127,10 @@ This list of procedures is extremely condensed and it is expected you are fairly
  &\text{1) Stow} \nonumber\\
  &\text{2) hit cal on calmode 2 } \nonumber\\
  &\text{4) should have flat bandpass } \nonumber\\
- \text{\#}& \text{ Advanced Cal} \nonumber\\
- &\text{1) Do above } \nonumber\\
- &\text{2) Move to blank sky patch and record } \nonumber\\
- &\text{3) Average $\sim$5 power measurements (from terminal). This is P\_cold } \nonumber\\
- &\text{5) Remove absorber and average ~5 power measurements. This is P\_hot } \nonumber\\
- &\text{6) T\_cold $\sim$3k ...... T\_hot is average ambient temperature or thermometer measurement of absorber } \nonumber\\
- &\text{7) Run python script tsys.py to find tsys } \nonumber\\
- &\text{8) Edit srt.cat file with new tsys and reload program } \nonumber\\
  \text{\#}& \text{ Source } \nonumber\\
- &\text{1) Reopen srtn } \nonumber\\
+ &\text{1) Reopen srtn (if you modified the frequency)} \nonumber\\
  &\text{2) Slew to target and record } \nonumber\\
- &\text{3) Hit the beamsw (for faint signals) } \nonumber\\
+ &\text{3) Hit the beamsw (Only for certain faint faint signals) } \nonumber\\
  &\text{4) Wait for at least $\sim$45 iterations (counter in bottom spectrum window) } \nonumber\\
  &\text{5) re-hit beamsw to turn it off/ hit record to stop recording } \nonumber\\
  &\text{6) This target is finished } \nonumber \\
@@ -167,109 +161,6 @@ The capabilities of the SRT are as follow:
     & \text{wind speed} & 120 & \text{\space km/h} \nonumber
 \end{align}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Hardware %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Building the Hardware}
-The tools needed were: protective gloves, protective goggles, electric hand drill, \(\frac{1}{4}\) in drill bit, hammer, mallet, riveter, rivets, wire cutter, sharpie, electric cut-off tool (metal blade), soldering iron, mini-pliers, wrench, and a bubble level.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Rotor}
-*Working on this section
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{LNA}
-The low-noise amplifier is located in an environmental resistant box mounted on the rear of the horn, minimizing the blockage of the aperture. The LNA consists of two ultra-low-noise amplifier modules, a band-pass filter, and a bias-tee to power the amplifiers. Two holes will be made in the aluminum case. 
-% Picture of lna case
-\begin{itemize}
-\item Drill the two holes with a $\frac{1}{4}$'' drill bit.
-\item Remove the nut/washer from one of the SMA-F to SMA-F bulkhead connectors
-\item Secure the O-ring against the flange and insert the longer side of the connector into the case and secure it with the washer/nut, using a wrench.
-\item Connect the filter to the ``out'' port of the ZX60-1614LN-S amplifier and the SMA-M to SMA-M adapter to the ``in'' port. Insert the 3'' SMA cable to the other end of the filter
-\item Put this total assembly into the box and connect the adapter to the connector
-\item Attach the other end of the SMA cable to the ``in'' port of the second amplifier.
-\item Section two pieces of 12V wire and tin the ends of them and the 12V pins of the amplifiers
-\item Connect the two 12V pins with one wire and attach the other to the 12V pin of the amplifier not connected to the adapter
-\end{itemize}
-% picture of inside lna case
-\begin{itemize}
-\item Attach the 3'' SMA cable to the ``out'' port of the second amplifier and to the ``RF'' port of the bias-tee. 
-\item Connect the other SMA-F to SMA-F connector and insert it through the second hole
-\item Connect the ``RF\&DC'' port of the bias-tee to the connector
-\item Tin the 12V pin of the bias-tee and solder the remaining 12V wire to this pun
-\end{itemize}
-% Picture of complete setup lna case
-\begin{itemize}
-\item Place the rubber gasket lid on the case and screw it in.
-\end{itemize}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Feed}
-This apparatus consists of a helical antenna inside an aluminum cavity or horn. The helix is a copper tape stretched around the polystyrene foam cylinder, with a folded foil plate to match impedance. The feed is constructed from a 2.5in Styrofoam cylinder. The height of the cylinder is determined by the desired wavelength and is $\frac{1}{4}$ wavelength.
-% picture of feed schematic
-\begin{itemize}
-\item Cut the cake pan as indicated on the drawing of the feed.
-\item Cut the foam rod to 73.7mm in length and drill a $\frac{1}{4}$ '' hole down the long axis of the rod. 
-\item 1mm from the edge of the rod, draw a mark. Make two more marks vertically above this mark each 30mm above the previous mark
-\item Cut out a strop of the copper tape 4x439mm. Tape one end at the lowest mark and without taping the rest wrap the strip around the foam such that the lower edge of the strip is flush between the previous two marks.
-\item With a ruler, verify the helix has vertical spacing of 30mm. Once you get the strip in a good position, trace the strips upper edge.
-\item make a mark 15mm from the lower end of the strip and bend the foil back. Make another mark 13mm from the first mark and then a final mark 26.25mm past that
-\item Remove the adhesive backing from the bent foil and fold the copper onto itself. Place the bend on the lowest mark on the foam and apply the foil to the foam. Keep the helix aligned with the previously designated points.
-\end{itemize}
-% picture of foam with wrap
-\begin{itemize}
-\item Cut out a strip of foil 26.25x13mm and leave and additional 3-4mm wide strip on one of the long edges. This will be the basis to form the impedance matching section.
-\item Fold this strip so it is 90 degrees to the rest of the foil. Center it on the helix between the two marks that are 26.25 mm apart and solder the strip to the helix.
-\item Solder the bent over power of the end of the foil to the SMA connector.
-\item Place a $\frac{1}{4}$'' O-ring to the SMA connector and insert into the cake pan center hole. \item Section out a 63mm square piece of PC board and drill a $\frac{1}{4}$'' hole in the center and a $\frac{1}{4}$'' indent as indicated.
-\end{itemize}
-% picture of PC board
-\begin{itemize}
-\item Run the bolt through the center of the foam, board, and the cake pan and secure it with hand tightened nut and washer. Make sure the soldered end of the SMA connector is against the bottom of the cake pan and not propped by the PC board.
-\item Test the apparatus with a network analyzer by attaching the network analyzer to the SMA connect and set to measure S11. Should read roughly -20 dB.
-\item A shorted $\frac{1}{4}$ wavelength stub should be added to the feed to act as a DC path for lightning and static protection for the amplifiers
-\begin{itemize}
-\item Cut out 42mm of long piece coaxial cable
-\item Strip the shield and insulation away $\sim$2mm on one end and 4mm on the other.
-\item Bend over the 4mm end and solder it to the shield
-\item Solder the 2mm side to the center connector of the stub in the SMA connector and solder the shield to one of the ground pins of the SMA connector
-\end{itemize}
-\end{itemize}
-%picture of stub
-\begin{itemize}
-\item The LNA mount plate will now be made. Drill the holes as indicated by the diagram %ref to previous digram
-\item Secure the plate to the back of the pan with four machine screws and nuts through the holes in the corners. Tighten with a wrench
-\item Thread a nut onto each of the 1'' machine screws and place a lock washer on top. Place the LNA onto the machine screws and connect the port of the LNA to the SMA connector on the feed with a SMA-M to SMA-M right angle connector
-\item Using the nuts, level the LNA case on the pan.
-\item thread the final nuts onto the machine screws and tighten with a wrench.
-\item Attach the quadrapod legs to the feed
-\end{itemize}
-% picture of final setup
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Antenna}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Pier}
-The dish was ``portably'' mounted on the roof of Nielsen Hall. There is 1000lbs of ballast holding the pier in place as per wind regulations however, it is not permanently mounted to the building.
-The mount has a wide base to support a 3in pier pipe in which the SPID rotor mounts on top of. An adapter is needed to convert the pier out from 3in to 2.875in. The adapter is held in place by 12bolts and re-leveled. Secure the PID rotor to the adapter. The assembly of the mount is fairly straightforward.
-%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Dish}
-The dish is constructed of 6mm galvanized aluminum. The ribs are mounted onto the 2 ``hubs'' (CNC milled centers) with bolts. The hubs are 20cm round and 10mm thick aluminum. Each rib is secured with 2 bolts into the hub. Before you tighten the bolts, make sure the ribs are spaced evenly as they provide the support for the mesh. Fluctuations in the mesh reduce the efficiency of the telescope. 
-
-Feed the aluminum wire through the four co-centric holes cut in the ribs to secure them in place. The wire will need to be cut precisely to size and crimped in place with the female-female inserts included. 
-
-It is suggested at this point to use large sheets of plotter paper to directly map the size of the mesh sheets needed. This will ensure accurate cutting of the mesh. The mesh should be of an appropriate size, completely overlapping both sides of the rib and with $\sim$4in of spare material on the outer rim to allow fastening. Make sure both the cut mesh and the ribs are label to correspond with the appropriate piece. Once all of the mesh needed is cut, it is time to mount them to the dish.
-
-Line the mesh sheets up to the ribs of the telescope. Use the hand drill to score the mesh and drill through the ribs and 2x20mm aluminum strips. You can then use the riveter to secure the mesh onto the ribs. Use about 6 rivets per rib to secure the mesh. Once all of the mesh is secure, remove the excess mesh around the hub using the cut-off tool with the metal attachment. 
-
-Use zip-ties to secure the mesh onto the aluminum wires fed through the ribs. Space them as evenly as possible and make sure they are held secure. The mesh should be as smooth as possible and follow the curvature of the ribs. Also use zip-ties to wrap the excess $\sim$4in of mesh around the 3x20mm aluminum strip on the outer rim and secure it in place. Remove all unnecessary mesh excess with the cut-off tool. 
-
-Use several people to mount the dish onto the rotor using the provided bracket and bolts. The dish needs to be securely fastened to the rotor and centered. Use the mallet to ``ease'' it into its final resting position. The dish itself isn't extremely heavy but acts as a giant sail and can be very difficult to secure in place.
-
-Mount the quadrapod legs into the dish. You will have to play around with the placement of the legs such that the focus of the dish is on the axis of the helix about half way along its length. You can use string to measure the true diameter and the measure the distance from the string to the center of the dish. The focus is given by this formula:
-\begin{align}
-    f=\frac{D^2}{16\times d}
-\end{align}
-Once the focal length is found and the feed is mounted, use coaxial cable to connect the feed to the receiver. Run the wire down one of the legs and secure it with zip-ties. Secure it along the rib on the back of the telescope and bundle it with the other wires. These wires should be bundled carefully and should feed into protective housing such that environmental effects don't interfere and such that the telescope has full range along its slew without disrupting the bundle. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Server %
@@ -326,6 +217,50 @@ mv /path/file1 /path/file2 # will move file1 to file2
 mkdir srt # makes a new directory called srt, flag -p will copy directory structure
 tar # (un)compression algorithm, x is uncompress, z is gunzip format, v is verbose, f specifies file
 \end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GitHub}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quick Command Breakdown}
+This is meant for just a quick overview of GitHub commands. Please understand the commands before using them. 
+\begin{lstlisting}
+new repository
+->git init :: initialize local repository inside the repository
+->git status :: list git files in current directory, tracked and untracked
+->git log :: shows a log of all new commits
+
+new file
+->git add $1 :: $1 is name of file, adds the file to the staging environment. Think like indexing
+->git commit -m $1 :: $1 is the comment for the commit. Should be related to the commit.
+
+new branches
+->git checkout -b $1 :: $1 is new branch name. Branching allows working on other projects without affecting master
+->git branch :: lists known branches and * tells which branch you are in
+->git checkout branch :: moves you to the branch defined
+
+online
+->git remote add(rm) origin $1 :: $1 is website name. add will add $1 to the origin variable while rm will remove the variable
+->git push -u origin branch :: pushes the local branch repo to the origin branch repo
+->git revert $1 :: $1 is the hash code number. Command is used to revert the branch
+->git pull origin branch :: pulls the changes in the branch to your local. Prefer to use fetch and merge
+->git fetch origin :: remotely stages origin to merge locally
+->git merge origin/branch :: remotely merges the branch from origin to your current branch
+->git request-pull v1.0 origin master :: initiate a pull request upstream from your master branch to their master branch
+
+
+\end{lstlisting}\label{lst:github}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Proper Usage}
+To properly use GitHub in collaboration with other colleagues please follow this guide. 
+
+To implement changes to the repository, you will have to make an account and request access online. Once this is finished, you will not have to check the website again. If you do not already have a directory you wish to use to contribute, make a directory now. You can use a pre-existing directory. Once in this directory, run the command \code{git init} to initialize the current directory. 
+
+To pull changes from the website, you first have to set the variable \code{origin} using command \code{git remote add origin \$1} and input the name of the repository\footnote{In this case, the repository is \git}. Then use \code{git fetch origin} to remotely pull the most updated, official code from the GitHub page. You then merge the most up to date version into your local master with \code{git merge origin/master}. 
+
+You can then create local branches to work and merge projects using \code{git checkout -b \$1} to create the branch and \code{git checkout \$1} to move to a branch. The command \code{git branch} will tell you the list of current branches within the initialize directory you are in. Make the changes you wish to make and then issue the index command \code{git add \$1}. This prepares the file for the commit stage. Once you are satisfied with all of the indexed files, commit the changes using \code{git commit -m "\$1"} where \$1 in this case is a short comment on what this change is. 
+
+Once committed push the changes to the online repository with \code{git push -u origin branch}. If an error comes up regarding unable to push, probably one of two things happened: incorrect spelling of command/branch or someone else has since updated the branch. Like I said, you will be unable to push changes to the GitHub master branch so push changes to another branch and initiate a pull request. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Setup}
@@ -399,7 +334,7 @@ If you do not have both the receiver dongle and the telescope controller plugged
 *SIMULATE ANTENNA --> SIMULATE ANTENNA
 *SIMULATE RECEIVER --> SIMULATE RECEIVER
 \end{lstlisting}
-This will allow you to open the program and test certain commands before committing commands to the telescope untested. 
+This will allow you to open the program and test certain commands before committing commands to the telescope untested.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
@@ -520,36 +455,38 @@ Adapted from Bennington\footnote{\ben}.
 \textbf{Calibrate the telescope:}
 \hfill
     First thing you will have to do before any observing will be to calibrate the telescope. 
-\hfill    
+\hfill
+    Your intended source will determine the calibration procedure and the subsequent method of observing. Some sources have to use ``beamsw'' others cannot use this method. 
+    \hfill
+    For observing the Milk Way HI and for doing the sun radio profile do not use ``beamsw'' as this will corrupt your spectra. To observe the HI you will have to adjust the frequency. To observe the sun the beam width of the SRT will have to be adjusted to offset further than the 5 degrees currently set. This can be done in the srt.cat file 
+    \hfill
+    Beam switching is used for faint sources like Cas A, Cygnus A, the Moon. M33 and Andromeda can use the beam switching method but it is currently untested if this will yield good results. 
+    \hfill
+    Generally you will not have to adjust the frequency unless doing continuum measures (1413MHz is clean of RFI) or source is near another bright radio source
+    \hfill
     For observing Cas A, you're going to need to perform the ``advanced'' calibration procedure.
 \hfill    
     Make sure that your center frequency is set to something that is OFF THE H1 LINE, 1415.00 MHz works well. Your center frequency must be off the H1 line because Cas A lies pretty much right in the galactic plane, so any H1 emissions would muddy up the Cas A signal.
 \hfill    
     Refer to the calibration page for details on how to carry out the advanced calibration.
 \hfill    
-    Once you get your new Tsys and input into the srt.cat file, you're ready to observe!
+    Take note of your new Tsys and you're ready to observe!
 \hfill
 \textbf{Observing Cas A:}
-\hfill
-    Once you've closed SRTN and input your new Tsys, fire SRTN back up.
-\hfill    
-    Change your center frequency to 1415.00 MHz or whatever other frequency you are trying out.
-\hfill    
-    Do a regular calibration procedure, aka just the bandpass calibration that comes boxed in SRTN.
-\hfill    
+\hfill  
     Once the telescope is calibrated, slew over to Cas A.
 \hfill    
     Hit record.
 \hfill    
     Hit the ``beamsw'' button on the top bar of buttons in SRTN. This will start the beamswitching procedure, which takes the telescope on and off Cas A by a beamwidth on either side. This technique is used to tease out faint signals.
 \hfill    
-    Wait till about 40-45 beamswitches pass. There is a counter in the average spectrum (bottom spectrum) window for you to keep track of.
+    Wait till at least 40-45 beamswitches pass. If this is your only source then observe for as long as possible. There is a counter in the average spectrum (bottom spectrum) window for you to keep track of.
 \hfill    
     Hit ``beamsw'' again to turn the beamswitching off.
 \hfill    
     Hit record again to stop recording.
 \hfill    
-    Stow the telescope and close SRTN (unless of course you aren't done looking at stuff!).
+   \textbf{ Stow} the telescope and close SRTN (unless of course you aren't done looking at stuff!).
 \hfill
 \hfill
 }}
@@ -600,146 +537,16 @@ Understanding, Interpreting, and changing the units of your plots into something
     \lambda & \text{=} \frac{c}{\nu} \nonumber\\
     \text{Beam Width} & \text{=} \frac{70 \times \lambda}{\text{Diameter}} \text{\space degrees}
 \end{align}\label{eq:beamwidth}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{GitHub}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Quick Command Breakdown}
-This is meant for just a quick overview of GitHub commands. Please understand the commands before using them. 
-\begin{lstlisting}
-new repository
-->git init :: initialize local repository inside the repository
-->git status :: list git files in current directory, tracked and untracked
-->git log :: shows a log of all new commits
-
-new file
-->git add $1 :: $1 is name of file, adds the file to the staging environment. Think like indexing
-->git commit -m $1 :: $1 is the comment for the commit. Should be related to the commit.
-
-new branches
-->git checkout -b $1 :: $1 is new branch name. Branching allows working on other projects without affecting master
-->git branch :: lists known branches and * tells which branch you are in
-->git checkout branch :: moves you to the branch defined
-
-online
-->git remote add(rm) origin $1 :: $1 is website name. add will add $1 to the origin variable while rm will remove the variable
-->git push -u origin branch :: pushes the local branch repo to the origin branch repo
-->git revert $1 :: $1 is the hash code number. Command is used to revert the branch
-->git pull origin branch :: pulls the changes in the branch to your local. Prefer to use fetch and merge
-->git fetch origin :: remotely stages origin to merge locally
-->git merge origin/branch :: remotely merges the branch from origin to your current branch
-->git request-pull v1.0 origin master :: initiate a pull request upstream from your master branch to their master branch
-
-
-\end{lstlisting}\label{lst:github}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Proper Usage}
-To properly use GitHub in collaboration with other colleagues please follow this guide. 
-
-To implement changes to the repository, you will have to make an account and request access online. Once this is finished, you will not have to check the website again. If you do not already have a directory you wish to use to contribute, make a directory now. You can use a pre-existing directory. Once in this directory, run the command \code{git init} to initialize the current directory. 
-
-To pull changes from the website, you first have to set the variable \code{origin} using the command \code{git remote add origin \$1} and input the name of the repository\footnote{In this case, the repository is \git}. Then use \code{git fetch origin} to remotely pull the most updated, official code from the GitHub page. You then merge the most up to date version into your local master with \code{git merge origin/master}. 
-
-You can then create local branches to work and merge projects using \code{git checkout -b \$1} to create the branch and \code{git checkout \$1} to move to a branch. The command \code{git branch} will tell you the list of current branches within the initialize directory you are in. Make the changes you wish to make and then issue the index command \code{git add \$1}. This prepares the file for the commit stage. Once you are satisfied with all of the indexed files, commit the changes using \code{git commit -m "\$1"} where \$1 in this case is a short comment on what this change is. 
-
-Once committed push the changes to the online repository with \code{git push -u origin branch}. If an error comes up regarding unable to push, probably one of two things happened: incorrect spelling of command/branch or someone else has since updated the branch. Like I said, you will be unable to push changes to the GitHub master branch so push changes to another branch and initiate a pull request. 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Parts List %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Complete Parts List}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Rotor}
 \begin{align}
-\text{Power supply unit: PW15015LC} & \nonumber \\
-\text{Specifications:}  & \nonumber \\
- & \text{Voltage adj. range: 13.5 - 16.5 Volt / 10 Amp DC} \nonumber \\
- & \text{Overload protection} \nonumber \\
- & \text{Rimpel noise max 180 mVpp} \nonumber \\
- & \text{AC input range: 88 $\sim$ 132VAC/176 $\sim$ 264VAC selected switch} \nonumber \\
- & \text{Dimension: 19 x 11 x 5 cm (LxBxH)} \nonumber \\
- & \text{Weight: 0.8 kg} \nonumber \\
-\text{Power supply unit: PW32015} & \nonumber \\
-\text{Specifications:} & \nonumber \\
- & \text{Universal AC input / Full range} \nonumber \\
- & \text{Built-in active PFC function. PF>0.95} \nonumber \\
- & \text{Voltage adj. range: 13.5 - 18 Volt / 20 Amp DC} \nonumber \\
- & \text{Protections: Short circuit/Over load/Over voltage/Over temperature} \nonumber \\
- & \text{Forced air cooling by built-in DC Fan} \nonumber \\
- & \text{Built-in fan speed control} \nonumber \\
- & \text{Voltage range: 88 $\sim$ 264VAC 124 $\sim$ 370VDC} \nonumber \\
- & \text{Dimensions: 23 x 11.5 x 5.5 cm (LxBxH)} \nonumber \\
- & \text{Weight: 1.1 Kg} \nonumber \\
- & \text{Core control cable} \nonumber \\
-\text{SPID RAS rotator bracket: FPD-BR02} & \nonumber 
-\end{align}
+ \text{\#}& \text{Solving for tsys} \nonumber\\
+ &\text{1) Follow the Simple Cal procedure} \nonumber\\
+ &\text{2) Move to blank sky patch and record } \nonumber\\
+ &\text{3) Average $\sim$5 power measurements (from terminal). This is P\_cold } \nonumber\\
+ &\text{5) Remove absorber and average ~5 power measurements. This is P\_hot } \nonumber\\
+ &\text{6) T\_cold $\sim$3k ...... T\_hot is average ambient temperature or thermometer measurement of absorber } \nonumber\\
+ &\text{7) Run python script tsys.py to find tsys } \nonumber\\
+ \end{align}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Mount \& Dish}
-\begin{multicols}{2}
-\begin{itemize}
-\item Mount Plate/bracket
-\item 3" x 10' Pier
-\item Ballast: 1000lbs
-\item 6mm galvanized aluminum wire mesh 4x150ft
-\item 2 pcs CNC milled centers (Hub)
-\item 12 Rib's made of 20mm sq aluminium tube
-\item 4 inner rings:2mm x 100ft are used to secure mesh
-\item Outer rim made of 3x20mm aluminum strip
-\item Mesh secured by using of 2x20mm aluminum strip
-\item 3-Leg feed support 15 or 20 square aluminum tube
-\item 3" to 2.875" adapter for rotor
-\end{itemize}
-\end{multicols}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\clearpage
-\section{Feed \& LNA}
-\begin{multicols}{2}
-\begin{itemize}
-\item Ultra Low Noise Amplifier
-\item Coaxial Bias-Tee
-\item Coaxial Cable 086-6SM+
-\item Coaxial Cable 086-4SM+
-\item SMA-F to SMA-F Adapter
-\item SMA-F to Solder Pin Bulkhead Connector
-\item SMA-M to SMA-M Right Angle Adapter
-\item 3M Adhesive Copper Foil Tape
-\item 22 Gauge Copper Wire
-\item Semi-Rigid Coaxial Cable
-\item F-Type Male to BNC Female
-\item SMA-M to SMA-M Coupler
-\item DC Barrel Jack connector
-\item F-type plug connector
-\item Cap Screw 1/4-20x3.25"
-\item Lock Washers 6-32
-\item Machine Screws, 6-32x1/2"
-\item Machine Screws, 6-32X1"
-\item Nuts 6-32
-\item Nuts 1/4-20
-\item Washers 1/4"
-\item Styrofoam Rod 2.5" x 24"
-\item Cake Pan 7"x3"
-\item O-rings 7/32" inner diameter
-\item O-rings 1/4" inner diameter
-\item SMA-M Crimp Connector Straight
-\item LMR-400
-\item Type-F Male Crimp Connector
-\item In-Line Amplifier
-\item BNC Female Jack to Type-F Male Plug
-\item BNC-M to BNC-M Patch Cable
-\item Power Injector
-\item BNC-F to SMA-M Adapter
-\item Bandpass Filter
-\item SMA-F to BNC-F Adapter
-\item BNC-F to SMB Plug Adapter
-\item AC-to-DC Power Supply
-\item Breadboard
-\item DC Jack
-\item F-Type Plug
-\end{itemize}
-\end{multicols}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % END %
