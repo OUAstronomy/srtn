@@ -2,6 +2,8 @@
 
 The Nielsen Hall Small Radio Telescope GitHub Page
 
+To be added to the collaboration, just let me know.
+
 Please read and understand the Operator Manual before attempting to control the SRT. Improper management can permanently damage the SRT.
 
 The following directories follow this schema:
