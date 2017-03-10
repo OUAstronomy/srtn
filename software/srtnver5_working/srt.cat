@@ -12,10 +12,10 @@
 * value can be determined using signal generator or standard H-line calibration region
 * BANDWIDTH is actual bandwith plotted it must be < 10 MHz for PCI card and 2.4 MHz for dongle
 * TSYS previously measured system temperature on cold sky
-SIMULATE ANTENNA
+*SIMULATE ANTENNA
 *CALMODE 20  
-CALMODE 2
-SIMULATE RECEIVER
+CALMODE 20
+*SIMULATE RECEIVER
 *RMSCALC
 *SIMULATE FFT
 *SPEED_UP 800 
@@ -23,7 +23,7 @@ START_DATE 2016:349:20:00:00  // date for simulation
 *SPEED_UP 1 
 *SPEED_UP -18     // negative value advances time hours 
 *MAINTENANCE
-DEBUG
+*DEBUG
 *COMMAND galacticHsurvey.txt
 *STATION 42.3 83.7 Ann_Arbor
 *STATION -26.7 -117 MWA
@@ -32,19 +32,22 @@ STATION 35.207 97.44 Sooner_Station
 SOU 23 21 12  58 44 00 Cass
 SOU 00 00 00  00 00 00 Sun
 SOU 00 00 00  00 00 00 Moon
-*SOU 19 57 45  40 36 00 Cygnus
-SOU 17 45 40 -29 00 28 SgrA
-*SOU 20 44 33.9 39 55 54 NMLcyg
-*SOU 18 34 52 -05 26 37 OH26.5
-*SOU 07 20 53 -25 40 24 VYCma
+SOU 20 20 20.0 38 30 45.30 CygnusX 1950
+SOU 19 57 45  40 36 00 CygnusA // velocity -2.2km/s ~ 1420.411
+SOU 17 45 40 -29 00 28 SgrA // velocity 46km/s ~ 1420.183
+SOU 20 44 33.9 39 55 54 NMLcyg 1950
+SOU 18 34 52 -05 26 37 OH26.5
+SOU 07 20 53 -25 40 24 VYCma 1950 // velocity 20km/s ~ 1420.306
 SOU 05 35 17 -05 23 28 Orion
 *SOU 19 20 38 14 14 34 Hcloud
-SOU 00 42 44 41 16 09 Andr
+SOU 00 42 44 41 16 09.0 Andr 1950 // velocity -525 km/s ~ 1422.891MHz
+SOU 05 34 31.9 22 00 52.2 Crab //high var ~100-300km/s~1419.927-1418.98
 SOU 01 33 50 30 39 37 Trigl
 *SOU 5 44 50 -1 41 0 S8RA 1950
 SOU 15 28 58 -2 15 0 S6 1950
 *SOU 17 48 46 -34 25 0 S9 1950
 *SOU 02 23 17 61 38 54 W3 1950    // strongest OH line 1665.4 MHz -44 km/s 
+GALACTIC 5 63 R7
 GALACTIC 132 -1 S7
 GALACTIC 207 -15 S8
 *GALACTIC 117 -2.1 CASA
@@ -65,12 +68,12 @@ GALACTIC 300 0 G300
 GALACTIC 330 0 G330
 GALACTIC 340 0 G340
 GALACTIC 350 0 G350
-*GALACTIC 10 0 G10
-*GALACTIC 20 0 G20
-*GALACTIC 40 0 G40
-*GALACTIC 50 0 G50
-*GALACTIC 70 0 G70
-*GALACTIC 80 0 G80
+GALACTIC 10 0 G10
+GALACTIC 20 0 G20
+GALACTIC 40 0 G40
+GALACTIC 50 0 G50
+GALACTIC 70 0 G70
+GALACTIC 80 0 G80
 *GALACTIC 04 0 G04
 *GALACTIC 08 0 G08
 *GALACTIC 12 0 G12
@@ -99,11 +102,12 @@ NBSW 10
 AZLIMITS 0 355
 *AZLIMITS 270 90   // for pointing North 
 *ELLIMITS 10 89.0
-ELLIMITS 0 89.0
-STOWPOS 90 0
-TSYS 171    
-TCAL 290    // should equal ambient load
-DATADIR ./data/
+ELLIMITS 0 90.0
+STOWPOS 90 2
+*TSYS 1200
+TSYS 195    
+TCAL 287    // should equal ambient load
+*DATADIR ./data
 *RECORD 1 SPEC
 *RECORD 10 SPEC RCLR
 RECORD 10 SPEC
@@ -113,8 +117,10 @@ NUMFREQ 256    // good choice for dongle
 *FREQUENCY 1420.406
 BANDWIDTH 2.0
 FREQUENCY 1420.4
+*FREQUENCY 1612.231 OH
 RESTFREQ 1420.401
-FREQCORR -0.05   // TV dongle correction
+*RESTFREQ 1612.231 OH
+FREQCORR 0.0   // TV dongle correction
 NBLOCK 5   // number of blocks per update - can be reduced for Beagle board with slow display for PCI it is hardwired to 20
 *NUMPOLY 15  // use default value of 25 for dongle
 
@@ -131,7 +137,7 @@ NBLOCK 5   // number of blocks per update - can be reduced for Beagle board with
 RFI 1420.05 0.015
 RFI 1420.85 0.005
 RFI 1421.15 0.005
-
+RFI 1420.80 0.015
 *RFISIGMA 20   // level for which channels with RFI will be flagged default is 6
 
 * old obselete keywords below some of which may be used

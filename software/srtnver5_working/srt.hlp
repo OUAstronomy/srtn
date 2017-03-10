@@ -8,6 +8,10 @@ Welcome to the SRT Help Window
 
 Please click on the buttons above to get more information about the features of the SRT software.
 
+Use radvel.py to solve for the new radial velocity shifted frquency
+
+Use tsys.py to solve for the T_sys and the gain given the hot and cold power and temperatures.
+
 Plot: Click on spectrum to generate a PostScript Plot  with filename yyyy_ddd_hr_mn.ps
 
 srt.cat keywords (see also sample srt.cat file):

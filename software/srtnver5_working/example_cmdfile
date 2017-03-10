@@ -1,0 +1,10 @@
+/********************
+/Example command file
+/********************
+: record Andr.txt 	/ Record output to file Andr.txt
+: freq 1422.9 20 0	/ change frequency to 1422.9 and bin 20
+: calibrate			/ follow cal procedure in srt.cat
+: Andr				/ move to source Andr
+:600 b				/ Integrate for 600 seconds using beam switching
+:roff				/ Stop recording
+:stow				/ stow telescope

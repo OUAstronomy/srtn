@@ -289,7 +289,7 @@ void azel(double az, double el)
 
                 } else if (d1.debug)
                     printf("%s\n", txt);
-                sleep(2);
+                sleep(1);
             } else
                 n = 1;
             kk++;

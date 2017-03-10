@@ -1,0 +1,12 @@
+yfac 1.470530 tsys 171.000000 pwr 257.301141 pwrprev 174.639674 calmode 20 max_pwr 1420.456 MHz
+yfac 1.492161 tsys 171.000000 pwr 479.838396 pwrprev 323.265697 calmode 20 max_pwr 1420.466 MHz
+
+yfac 1.425132 tsys 171.000000 pwr 471.671571 pwrprev 328.521874 calmode 0 max_pwr 1420.466 MHz
+
+
+yfac 3.153598 Tsys 134.658371
+yfac 3.153598 tsys 584.000000 pwr 1864.910500 pwrprev 597.468958 calmode 0 max_pwr 1420.456 MHz
+
+yfac 3.091341 Tsys 138.667000
+yfac 3.091341 tsys 584.000000 pwr 921.855787 pwrprev 299.337054 calmode 0 max_pwr 1420.400 MHz
+

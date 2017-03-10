@@ -1,0 +1,5 @@
+To appropriately move the files to the data directory, you can run the python code move_data.py.	
+
+It will prompt for starting files and ending directory names. 
+
+Never delete your data, this just serves as an extra backup
