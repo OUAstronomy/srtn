@@ -34,7 +34,7 @@ print("Locations to move to: ",data_dir,name_array)
 
 for i in range(len(name_array)):
 	if name_array[i] in cur_sources:
-		print("No")
+		#print("No")
 		continue
 	else:
 		os.system('mkdir -v ' + data_dir + name_array[i])
