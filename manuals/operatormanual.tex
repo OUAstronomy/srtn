@@ -106,14 +106,15 @@ The website\footnote{\git} for this file contains:
 This list of procedures is extremely condensed and it is expected you are fairly experienced with operating the telescope before using these. If you are unsure of something, ask.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{align}
- \text{\#}& \text{ Parameters } \nonumber\\
+ \text{\#}& \text{ Parameters (Not always needed)} \nonumber\\
  &\text{1) Edit CALMODE in srt.cat file } \nonumber\\
  &\text{2) CALMODE 0 - used for yfactor solving. Point t cold sky, cal, place absorber, get tsys and tcal} \nonumber\\
  &\text{3) CALMODE 2 - only does bandpass correction, okay if no absorber or tree } \nonumber\\
  &\text{4) CALMODE 3 - if stow looks at absorber like trees. } \nonumber\\
  &\text{4) Verify target frequency and radial velocity }\nonumber\\
  &\text{5) If velocity is >50km/s, use radvel.py to adjust the frequency if needed.}\nonumber\\
- &\text{5) \textbf{Keep frequency in range 1410-1470MHz unless you have cleared it with Tobin}}. \nonumber \\
+ &\text{5) \textbf{Keep frequency in range 1300-1550MHz unless you have cleared it with Tobin}}. \nonumber \\
+ &\text{6) Input the Tcal (temperature of the absorber) into the srt.cal file.} \nonumber \\
  &\text{Higher frequencies have a different instruction set and improper use can fry the receiver.}\nonumber\\ 
  \text{\#}& \text{ Pointing } \nonumber\\
  &\text{1) Slew to very bright source (sun) } \nonumber\\
@@ -179,11 +180,11 @@ The Nielsen Hall SRT is controlled through a network locked, local server. This 
 # There should be a file named id_rsa.pub. If there is not a directory or not this file then use this command
 ~$ ssh-keygen
 # specify the path to download, typically in /home/username/.ssh/
-# type in a password to use to unlock the file.
+# type in a password to use to unlock the file or leave blank
 ~$ cp ~/.ssh/id_rsa.pub ~/id_rsa_NAME.pub # copy the file to your home directory with your name
 \end{lstlisting}
 
-Now email this file to Dr. Tobin and wait until he confirms that he has added your public key to the server computer. Once you have access you can now login to the telescope computer. Please understand how the SRTN software works \textbf{before} controlling the telescope. It is also suggested to have  a senior member of the group assist in the first run. To login to the computer use these commands:
+Now email this file to Dr. Tobin or Nick Reynolds and wait until he confirms that he has added your public key to the server computer. Once you have access you can now login to the telescope computer. Please understand how the SRTN software works \textbf{before} controlling the telescope. It is also suggested to have  a senior member of the group assist in the first run. To login to the computer use these commands:
 \begin{lstlisting}
 ~$ vncviewer -Shared -ViewOnly -via jjtobin@reber.nhn.ou.edu reber:1 # Viewing the telescope
 ~$ vncviewer -Shared -via jjtobin@reber.nhn.ou.edu reber:1 # Controlling the telescope
@@ -246,6 +247,7 @@ online
 ->git fetch origin :: remotely stages origin to merge locally
 ->git merge origin/branch :: remotely merges the branch from origin to your current branch
 ->git request-pull v1.0 origin master :: initiate a pull request upstream from your master branch to their master branch
+->git clone $1 :: will clone the specified online directory
 
 
 \end{lstlisting}\label{lst:github}
@@ -270,8 +272,8 @@ First download the source code for the SRT either by downloading directly from t
 ~$ cd ~/srt/
 ~/srt$ git clone https://github.com/OUsrt/srtn.git # can ignore this line if you directly downloaded
 ~/srt$ cp -r ./srtn/software/srtnver5_reber ./
-~/srt$ cd srt_ver5
-~/srt/srt_ver5$ ls
+~/srt$ cd srtnver5_reber
+~/srt/srtnver5_reber$ ls
 \end{lstlisting}
 You should now be in the SRT main code directory and the contents should be on your screen. The code should be able to run immediately or recompiled  as necessary.
 
@@ -279,7 +281,7 @@ You should now be in the SRT main code directory and the contents should be on y
 \section{Compiling}
 If there are issues with the C compiler not able to locate certain libraries, try searching for solutions to that problem or send me an email\footnote{\url{nickreynolds@ou.edu}}. There should be a file called srtnmake within the directory. This is the main compiler file that will gather the other C files and compile them in the correct order. When you make changes to the other files within the directory (other than the srt.cat file) you will have to recompile the program so it can implement the changes. 
 \begin{lstlisting}[language=Bash]
-~/srt/srt_ver5$ ./srtnmake
+~/srt/srtnver5_reber$ ./srtnmake
 \end{lstlisting}
 
 \newpage
@@ -343,7 +345,7 @@ Help on the various C code files in the source directory.
 \begin{align}
 \text{60-mcc.rules:} & \text{ udev rules that allows PCI, HID devices, and libusb to work with non-root users}  \nonumber\\
 \text{acml.h:} & \text{ allows calling ACML routines via their C or FORTRAN interfaces}  \nonumber\\
-\text{amdfft.c:} & \text{ fast-fourier transform adaptation software}  \nonumber\\
+\text{amdfft.c:} & \text{ fast-fourier transform adaptation sofztware}  \nonumber\\
 \text{calc.c:} & \text{ calibration code}  \nonumber\\
 \text{cat.c:} & \text{ parses the srt.cat file}  \nonumber\\
 \text{cmd.txt:} & \text{ the default file for the commands you want srtn to use}  \nonumber\\
@@ -354,6 +356,7 @@ Help on the various C code files in the source directory.
 \text{d1typ.h:} & \text{ declares a new struct}  \nonumber\\
 \text{disp.c:} & \text{ code for the GUI}  \nonumber\\
 \text{doindent2:} & \text{ code for parsing whitespace}  \nonumber\\
+\text{example\_cmdfile:} & \text{ example command file for srtn} \nonumber\\
 \text{fftw2.c:} & \text{ fast-fourier transform}  \nonumber\\
 \text{fftw3.c:} & \text{ fast-fourier transform}  \nonumber\\
 \text{four.c:} & \text{ Handling the different coordinates to angles conversion}  \nonumber\\
@@ -398,7 +401,7 @@ Adapted from Bennington\footnote{\ben}
 It is suggested to use input command files as this will add speed the entry of SRT commands as well as reduce command entry mistakes. By default the srtn software provides the syntax for setting up a cmd file if you mouse over the Rcmdfl button in the srtn software. The command file is ASCII formatted and can: accept instruction lines (active lines), blank lines (ignored), comment lines (begins with *, ignored), and comment sections (begins with /, ignored).
 \hfill
 }}
-Instruction line: Must start with a time mark (either UT or LST) or a colon. 
+Instruction line: Must start with a time mark (either UT or LST) or a colon (current time). 
 \begin{align}
 \text{For Example:} & \nonumber \\
 & \text{2005:148:00:00:00 (yyyy:ddd:hh:mm:ss (UT))}  \nonumber \\
@@ -494,6 +497,8 @@ This method is of course not the template to use for all sources and the methodo
 
 It is also suggested to leave enough time to take multiple measurements sets for each source.
 
+For extremely precise measurements, it is suggested to find the beam profile. This can be done by writing a script to map out many points up to 5 beam widths off of the sun and analyze the FWHM. There is code on the GitHub to do just that. 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reduction %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -502,6 +507,8 @@ It is also suggested to leave enough time to take multiple measurements sets for
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parsing the Data Files}
 Adapted from Bennington\footnote{\ben}.
+
+Section still needs a lot of work.
 
 Parsing and Plotting the Spectra.
 \begin{itemize}
@@ -522,6 +529,8 @@ Parsing and Plotting the Spectra.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gnuplot}
 Adapted from Bennington\footnote{\ben}.
+
+Section still needs a lot of work.
 
 Understanding, Interpreting, and changing the units of your plots into something useful.
 \begin{itemize}
