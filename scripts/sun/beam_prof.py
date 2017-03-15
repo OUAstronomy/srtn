@@ -47,17 +47,16 @@ orig_stdout = sys.stdout
 sys.stdout = f
 print(": Sun")
 print(": record beam_prof_1d_" + str(inti) + "int_" + str(num-1) + "off.txt")
-i=0
 for j in range(num):
-	print(":" + str(inti) + " offset " + str(j) + " " + str(i))
-for j in range(num):
-	if j != 0:
-		print(":" + str(inti) + " offset -" + str(j) + " " + str(j))
-for j in range(num):
-	print(":" + str(inti) + " offset " + str(i) + " " + str(i))
+	print(":" + str(inti) + " offset " + str(j) + " " + str(0))
 for j in range(num):
 	if j != 0:
-		print(":" + str(inti) + " offset " + str(i) + " -" + str(j))	
+		print(":" + str(inti) + " offset -" + str(j) + " " + str(0))
+for j in range(num):
+	print(":" + str(inti) + " offset " + str(0) + " " + str(j))
+for j in range(num):
+	if j != 0:
+		print(":" + str(inti) + " offset " + str(0) + " -" + str(j))	
 print(": roff")
 print(": stow")
 

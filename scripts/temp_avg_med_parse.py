@@ -13,7 +13,8 @@ print("DON\'T RUN ON MAC")
 print("Run with Python version 2.7.5 and 3.1")
 
 # file name
-fname = "orig.txt"
+#fname = "orig.txt"
+fname = raw_input("Input filename: ")
 forig=fname
 os.system("cp -vf " + fname + " backup.txt")
 # fname=raw_input("Filename: ")
@@ -22,6 +23,7 @@ os.system("cp -vf " + fname + " backup.txt")
 sednewfile = "sed_" + fname
 os.system("rm -vf " + sednewfile)
 os.system("sed '1d' " + fname + " > " + sednewfile)
+os.system("sed -i '/stow/d' " + sednewfile)
 awknewfile = "awk_" + fname
 os.system("rm -vf " + awknewfile)
 os.system("awk '{print $1}' " + sednewfile + " > " + awknewfile)
@@ -36,6 +38,8 @@ fname="temp_" + fname
 os.system("rm -vf " + fname)
 os.system("awk '!($1=\"\") !($2=\"\")' " + forig + " > " + fname)
 os.system("sed -i '1d' " + fname)
+os.system("sed -i '/stow/d' " + fname)
+
 
 # open file, read values, and remove null space/newlines
 with open(fname) as f:
