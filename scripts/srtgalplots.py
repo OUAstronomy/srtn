@@ -1,8 +1,6 @@
 # coding: utf-8
 '''
-Creates srt_gal_time_window.txt file which houses
-	the raw time outputs for when certain coordinates 
-	will rise
+Creates plots for timeframes which the galaxy will be above horizon
 Orig Author: Patrick Vallely
 Adapted by: Nickalas Reynolds
 Date: March 2017
