@@ -27,7 +27,7 @@ fname = "gal_rot_cmd_"+str(startpos) + "_" +str(endpos)+"_"+str(int_time)+"int.t
 f = open(fname,'w')
 orig_stdout = sys.stdout
 sys.stdout = f
-print(': record ' + outname + ".txt")
+print(': record ./' + outname + ".txt")
 for i in range(len(degree)):
 	print(': ' + "G" + str(degree[i])+'.0')
 	print(':' + str(int_time))
