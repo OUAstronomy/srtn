@@ -29,7 +29,7 @@ orig_stdout = sys.stdout
 sys.stdout = f
 print(': record ' + outname + ".txt")
 for i in range(len(degree)):
-	print(': ' + "G" + str(degree[i]))
+	print(': ' + "G" + str(degree[i])+'.0')
 	print(':' + str(int_time))
 print(':roff')
 print(':stow')
@@ -78,7 +78,7 @@ print('RFI 1420.85 0.005')
 print('RFI 1421.15 0.005')
 print('')
 for i in range(len(degree)):
-	print("GALACTIC " + str(degree[i]) + " 0.0 G" + str(degree[i]))
+	print("GALACTIC " + str(degree[i])+'.0' + " 0.0 G" + str(degree[i])+'.0')
 print("GALACTIC 360.0 0.0 G360.0")
 sys.stdout = orig_stdout
 f.close

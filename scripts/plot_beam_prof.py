@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import ascii
 import pylab
+import math
 from scipy.optimize import curve_fit
 from scipy import asarray as ar , exp
 from scipy.special import yn
@@ -83,6 +84,9 @@ if answer == 1:
 	popt , pcov = curve_fit(gaus , x1 , y1 , p0 = [1 , mu1 , sigma1])
 	x1p=np.linspace(-20,20,100)
 	plt.plot(x1p , gaus(x1p , *popt) , '--' , color = 'red' , label = 'fit')
+	fwhm = 2. * ((2 * math.log1p(2)) ** 0.5) * (popt[2])
+	print('FWHM for az: ' + str(abs(fwhm)))
+	#print(popt)
 	'''
 	a = 2
 	func1 = lambda var1 , b1 : bessel2(a , b1 , var1)
@@ -98,8 +102,12 @@ if answer == 1:
 	popt2 , pcov2 = curve_fit(gaus , x2 , y2 , p0 = [1 , mu2 , sigma2])
 	plt.plot(x1p , gaus(x1p , *popt2) , '--' , color = 'blue' , label = 'fit')
 	plt.savefig('bp_1d_Gaussian_fits.pdf')
+	fwhm = 2. * ((2 * math.log1p(2)) ** 0.5) * (popt2[2])
+	print('FWHM for el: ' + str(abs(fwhm)))
+	#print(popt2)
 
 	plt.show()
+
 elif answer == 2:
 	print('Not supported')
 	'''
