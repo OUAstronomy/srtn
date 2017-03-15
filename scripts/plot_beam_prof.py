@@ -1,8 +1,8 @@
 #! / usr / bin / env python
 # - * - coding: utf-8 - * -
 """
-name: all_meta_parse
-Author Nickalas Reynolds
+name: plot_beam_prof
+Author Nickalas Reynolds and Patrick Vallely
 data: March 2017
 """
 # import modules
@@ -71,7 +71,8 @@ sigma1 = np.array(y1).std()
 plt.xlabel('Offset (degrees)' , fontsize = 18)
 plt.ylabel('T$_{bol}$ (K)' , fontsize = 18)
 popt , pcov = curve_fit(gaus , x1 , y1 , p0 = [1 , mu1 , sigma1])
-plt.plot(x1 , gaus(x1 , *popt) , '--' , color = 'red' , label = 'fit')
+x1p=np.linspace(-20,20,100)
+plt.plot(x1p , gaus(x1p , *popt) , '--' , color = 'red' , label = 'fit')
 '''
 a = 2
 func1 = lambda var1 , b1 : bessel2(a , b1 , var1)
@@ -85,13 +86,10 @@ mu2 = np.array(y2).mean()
 sigma2 = np.array(y2).std()
 plt.xlabel('Offset (degrees)' , fontsize = 18)
 popt2 , pcov2 = curve_fit(gaus , x2 , y2 , p0 = [1 , mu2 , sigma2])
-plt.plot(x2 , gaus(x2 , *popt2) , '--' , color = 'blue' , label = 'fit')
-
-
+plt.plot(x1p , gaus(x1p , *popt2) , '--' , color = 'blue' , label = 'fit')
+plt.savefig('bp_Gaussian_fits.pdf')
 
 plt.show()
-
-
 
 #############
 # end of code
