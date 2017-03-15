@@ -52,6 +52,7 @@ if int(answer) == 1:
 	with open(outname1, 'w') as modified: modified.write(first_line + data)
 	print("Finished with all.")
 	print("########################")
+	print("Made file " + outname0 + ", " + outname1)	
 
 if int(answer) == 2:
 	instring = raw_input("Please input filename: ")
@@ -73,6 +74,7 @@ if int(answer) == 2:
 	with open(outname1, 'r') as original: data = original.read()
 	with open(outname1, 'w') as modified: modified.write(first_line + "\n" + data)
 	print("########################")
+	print("Made file " + outname0 + ", " + outname1)	
 
 if int(answer) == 3:
 	instring = raw_input("Please input identifying string eg beam_prof_1d: ")
@@ -103,6 +105,6 @@ if int(answer) == 3:
 		print("Finished file: " + files)
 	print("########################")
 	print("Finished with all.")
-	
+	print("Made file " + outname3 + ", " + outname1)	
 #############
 # end of code
