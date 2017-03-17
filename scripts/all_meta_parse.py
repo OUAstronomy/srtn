@@ -105,6 +105,6 @@ if int(answer) == 3:
 		print("Finished file: " + files)
 	print("########################")
 	print("Finished with all.")
-	print("Made file " + outname3 + ", " + outname1)	
+	print("Made file " + outname3)	
 #############
 # end of code
