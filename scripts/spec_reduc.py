@@ -22,7 +22,7 @@ from matplotlib.path import Path
 #data = ascii.read("tobin-g110-reduced.dat")
 
 # define useful variables
-print ("Date needs to be of format: freq vel Tant")
+print ("Data needs to be of format: freq vel Tant")
 while True:
 	try:
 		outfilename = raw_input("Input filename for output (no extension): ")
@@ -34,6 +34,7 @@ while True:
 
 minvel = min(data['vel'])
 maxvel = max(data['vel'])
+data = ascii.read(datafile)
 
 # plot raw data
 plt.ion()
