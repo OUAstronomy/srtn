@@ -19,10 +19,10 @@ from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
 
 # read data
-data = ascii.read("tobin-g110-reduced.dat")
+#data = ascii.read("tobin-g110-reduced.dat")
 
 # define useful variables
-'''
+print ("Date needs to be of format: freq vel Tant")
 while True:
 	try:
 		outfilename = raw_input("Input filename for output (no extension): ")
@@ -31,8 +31,7 @@ while True:
 			break
 	except ValueError:
 		continue
-'''
-outfilename = "nick_test"
+
 minvel = min(data['vel'])
 maxvel = max(data['vel'])
 
