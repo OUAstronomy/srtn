@@ -5,18 +5,20 @@ Date: March 2017
 '''
 
 # import modules
-import astropy
 import numpy as np
+import os
+import glob
+from astropy.table import Table
+from astropy.io import ascii
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import draw as draw
-from astropy.io import ascii
 from matplotlib.ticker import ScalarFormatter
 import matplotlib.ticker as ticker
-import math
 from six.moves import input
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
+
 
 # read data
 #data = ascii.read("tobin-g110-reduced.dat")
@@ -32,9 +34,16 @@ while True:
 	except ValueError:
 		continue
 
+# handle files
+files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
+print("Will remove these files:")
+print(files)
+print("\n")
+input("Press [RET] to continue")
+os.system("rm -vf *" + outfilename + "*")
+data = ascii.read(datafile)
 minvel = min(data['vel'])
 maxvel = max(data['vel'])
-data = ascii.read(datafile)
 
 # plot raw data
 plt.ion()
@@ -352,12 +361,21 @@ plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 intensity=np.sum(spectra_blcorr[intensity_mask])
 chanwidth=data['vel'][0]-data['vel'][1]
 intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
+print("\n")
 print("Intensity: ")
 print((intensity)*chanwidth, '+/-',intensity_rms, 'K km/s')
 
+# write to file
+spec_final = Table([data['vel'],data['Tant'],spectra_blcorr], names=('vel', 'Tant_raw', 'Tant_corr'))
+ascii.write(spec_final, outfilename + "_spectra_corr.txt")
 
 input("Press [RET] to exit")
 plt.show()
+print("\n")
+files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
+print("Made the following files:")
+print(files)
+
 
 #############
 # end of code
