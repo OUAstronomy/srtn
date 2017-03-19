@@ -2,7 +2,8 @@
 # - * - coding: utf-8 - * -
 """
 name: plot_beam_prof
-Author Nickalas Reynolds and Patrick Vallely
+Author Nickalas Reynolds
+edits by Patrick Vallely
 data: March 2017
 """
 # import modules
@@ -15,6 +16,7 @@ import math
 from scipy.optimize import curve_fit
 from scipy import asarray as ar , exp
 from scipy.special import yn
+import scipy.interpolate
 
 # read file
 fname = raw_input("Input master meta filename: ")
@@ -56,6 +58,7 @@ for i in range(len(data)):
 	elif data['eloff'][i] != 0:
 		x2.append(data['eloff'][i])
 		y2.append(data['Tant'][i])
+print("Starting...")
 
 # separate dimension
 if answer == 1:
@@ -109,20 +112,37 @@ if answer == 1:
 	plt.show()
 
 elif answer == 2:
-	print('Not supported')
-	'''
-	# max for plotting
-	max_val = 0
+	print("Brace yourself, this takes awhile...")
+	x=[]
+	y=[]
+	z=[]
 	for i in range(len(data)):
-	 	max_val = max(max_val , data['eloff'][i])
+		x.append(data['Azoff'][i])
+		y.append(data['eloff'][i])
+		z.append(data['Tant'][i])
+	# Set up a regular grid of interpolation points
+	nInterp = 200
+	xi, yi = np.linspace(min(x), max(x), nInterp), np.linspace(min(y), max(y), nInterp)
+	xi, yi = np.meshgrid(xi, yi)
 
-	# plotting
-	plt.figure(1)
-	pylab.pcolor(data['Azoff'],data['eloff'],data['Tant'])
-	pylab.colorbar()
-	plt.savefig('bp_2d_Gaussian_fits.pdf')
+	# Interpolate; there's also method='cubic' for 2-D data such as here
+	#rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+	#zi = rbf(xi, yi)
+	zi = scipy.interpolate.griddata((x, y), z, (xi, yi), method='linear')
+	zj = scipy.interpolate.griddata((x, y), z, (xi, yi), method='nearest')
+	plt.subplot(221)
+	plt.imshow(zi, vmin=min(z), vmax=max(z), origin='lower',
+	           extent=[min(x), max(x), min(y), max(y)])
+	plt.xlabel("Az")
+	plt.ylabel("El")        
 
-	pylab.show()
-	'''
+	plt.subplot(222)
+	plt.imshow(zj, vmin=min(z), vmax=max(z), origin='lower',
+	           extent=[min(x), max(x), min(y), max(y)])
+	plt.xlabel("Az")
+
+	plt.colorbar()
+	plt.show()
+
 #############
 # end of code

@@ -54,7 +54,7 @@ for j in range(num):
 		print(":" + str(inti) + " offset -" + str(j) + " " + str(0))
 for j in range(num):
 	if j != 0:
-	print(":" + str(inti) + " offset " + str(0) + " " + str(j))
+		print(":" + str(inti) + " offset " + str(0) + " " + str(j))
 for j in range(num):
 	if j != 0:
 		print(":" + str(inti) + " offset " + str(0) + " -" + str(j))	
