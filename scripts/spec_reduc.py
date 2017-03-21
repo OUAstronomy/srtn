@@ -1,5 +1,5 @@
 '''
-Creates plots that shows times source is up
+Creates plots to correct baselines
 author: John Tobin and Nick Reynolds
 Date: March 2017
 '''
