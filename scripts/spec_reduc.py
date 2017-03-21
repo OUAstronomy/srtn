@@ -44,6 +44,7 @@ os.system("rm -vf *" + outfilename + "*")
 data = ascii.read(datafile)
 minvel = min(data['vel'])
 maxvel = max(data['vel'])
+data.sort(['vel'])
 
 # plot raw data
 plt.ion()
@@ -274,7 +275,7 @@ minint=min(data['vel'][intensity_mask_guess])
 maxint=max(data['vel'][intensity_mask_guess])
 plt.figure(6)
 plt.xlim(minvel,maxvel)
-plt.ylim(-5,maxt * 1.1)
+plt.ylim(-5,max(spectra_blcorr) * 1.1)
 lin1=plt.plot(data['vel'],spectra_blcorr,color='black',linestyle='steps')
 lin2=plt.plot(data['vel'][intensity_mask_guess],np.zeros(len(data['vel'][intensity_mask_guess])),color='blue',linestyle='dotted')
 lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
@@ -341,8 +342,8 @@ while True:
 minint=min(data['vel'][intensity_mask])
 maxint=max(data['vel'][intensity_mask])
 plt.figure(7)
-plt.xlim(-200,200)
-plt.ylim(-5,70)
+plt.xlim(minvel,maxvel)
+plt.ylim(-5,max(spectra_blcorr) * 1.1)
 lin1=plt.plot(data['vel'],spectra_blcorr,color='black',linestyle='steps')
 lin2=plt.plot(data['vel'][intensity_mask],np.zeros(len(data['vel'][intensity_mask])),color='blue',linestyle='dotted')
 lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
@@ -359,7 +360,7 @@ plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
 # intensity
 intensity=np.sum(spectra_blcorr[intensity_mask])
-chanwidth=data['vel'][0]-data['vel'][1]
+chanwidth=abs(max(data['vel'])-min(data['vel']))/len(data['vel'])
 intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
 print("\n")
 print("Intensity: ")
@@ -375,7 +376,7 @@ print("\n")
 files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
 print("Made the following files:")
 print(files)
-
+plt.close()
 
 #############
 # end of code
