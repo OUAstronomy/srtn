@@ -57,7 +57,7 @@ if int(answer) == 1:
 if int(answer) == 2:
 	instring = raw_input("Please input filename: ")
 	os.system("rm -f *" + instring + "*.bak* *meta*" + instring + "*" )
-	files = [f for f in glob.glob(instring) if os.path.isfile(f)]
+	files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
 	files=str(files[0])
 	print(files)
 	outname0="meta_"+files
