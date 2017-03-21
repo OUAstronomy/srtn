@@ -314,7 +314,7 @@ while True:
 			# recovering intensity of line 
 			temp = []
 			intensity_mask_array = []
-			rfi_mask = []
+            intensity_mask = []
 			while True:
 				selector = SelectFromCollection(t, lin10)
 				print("Draw a box around Gaussian")
