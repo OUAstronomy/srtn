@@ -10,7 +10,8 @@ import time
 
 # sun position
 num=int(raw_input("Input number of points in each direction(10<num<30): "))
-inti=int(raw_input("Input integration time: "))
+inti=int(raw_input("Input integration time (short time <10s): "))
+print("Make sure to rename the command file to a shorter name since the SRTN program has a file limit.")
 num=num+1
 
 ##################
