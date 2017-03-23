@@ -5,6 +5,8 @@ Date: March 2017
 '''
 
 # import modules
+from __future__ import print_function
+assert sys.version_info >= (2,5)
 import numpy as np
 import os
 import glob
@@ -26,13 +28,13 @@ from matplotlib.path import Path
 # define useful variables
 print ("Data needs to be of format: freq vel Tant")
 while True:
-	try:
-		outfilename = raw_input("Input filename for output (no extension): ")
-		datafile = raw_input("Input data file for plot: ")
-		if outfilename != "":
-			break
-	except ValueError:
-		continue
+    try:
+        outfilename = raw_input("Input filename for output (no extension): ")
+        datafile = raw_input("Input data file for plot: ")
+    except ValueError:
+        continue
+    if outfilename != "":
+        break
 
 # handle files
 files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]

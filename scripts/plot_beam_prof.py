@@ -7,6 +7,8 @@ edits by Patrick Vallely
 data: March 2017
 """
 # import modules
+from __future__ import print_function
+assert sys.version_info >= (2,5)
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,10 +21,12 @@ from scipy.special import yn
 import scipy.interpolate
 
 # read file
-fname = raw_input("Input master meta filename: ")
 while True:
 	try:
+		fname = raw_input("Input master meta filename: ")
 		answer = raw_input("1 or 2 dimensions: ")
+		answer = int(answer)
+		data = ascii.read(fname)
 	except ValueError:
 		print("Please input an integer, 1 2.")
 		continue
@@ -31,10 +35,8 @@ while True:
 		continue
 	else:
 		break
-answer = int(answer)
 
 # reading data
-data = ascii.read(fname)
 
 # splitting data
 x1 = []

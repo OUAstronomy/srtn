@@ -7,6 +7,8 @@ data: March 2017
 """
 
 # import modules
+from __future__ import print_function
+assert sys.version_info >= (2,5)
 import meta_parse
 import os
 import glob
