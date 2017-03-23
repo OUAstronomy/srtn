@@ -4,16 +4,25 @@
 #############
 
 # import libraries
+from __future__ import print_function
+assert sys.version_info >= (2,5)
 import os
 import sys
 import time
 
 # starting pos and ending pos
-int_time = raw_input("Integration Time (Same for all sources) in seconds: ")
-beam_width = raw_input("Desired Beam Width (degree): ")
-startpos = raw_input("Starting Degree: ")
-endpos = raw_input("Ending Degree: ")
-direc = raw_input("Positive(+) or negative(-) direction: ")
+while True:
+	try:
+		int_time = raw_input("Integration Time (Same for all sources) in seconds: ")
+		beam_width = raw_input("Desired Beam Width (degree): ")
+		startpos = raw_input("Starting Degree: ")
+		endpos = raw_input("Ending Degree: ")
+		direc = raw_input("Positive(+) or negative(-) direction: ")
+		azel = raw_input("Input azel offsets as az,el (-2,1): ")
+		az_el = azel.split(",")
+		az_el = map(int,az_el)
+	except ValueError:
+		continue
 
 ##################
 # making cmd file
@@ -92,6 +101,7 @@ for i in range(len(final)):
 		print(': record ' + outname + ".txt")
 		print('')
 	print(': ' + "G" + str(final[i]))
+	print(': offset ' + str(az_el[0]) + " " + str(az_el[1]))
 	print(':' + str(int_time))
 	if (((i * int_time)-(j*7200)) >= (7200)):
 		print(':roff')
