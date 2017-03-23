@@ -4,9 +4,9 @@
 #############
 
 # import libraries
-import sys
 from __future__ import print_function
 assert sys.version_info >= (2,5)
+import sys
 
 # declare variables
 startpos=0
