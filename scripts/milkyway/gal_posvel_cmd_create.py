@@ -23,7 +23,9 @@ while True:
 		az_el = map(int,az_el)
 	except ValueError:
 		continue
-
+	if len(az_el) == 2:
+		break
+		
 ##################
 # making cmd file
 ##################

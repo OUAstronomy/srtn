@@ -5,12 +5,23 @@
 
 # import libraries
 import sys
+from __future__ import print_function
+assert sys.version_info >= (2,5)
 
 # declare variables
 startpos=0
 endpos=90
-int_time=int(raw_input("Input desired integration time per position(>20): "))
-
+while True:
+    try:
+        int_time=int(raw_input("Input desired integration time per position(>20): "))
+        azel = raw_input("Input azel offsets as az,el (-2,1): ")
+        az_el = azel.split(",")
+        az_el = map(int,az_el)
+    except ValueError:
+        continue
+    if len(az_el) == 2:
+        break
+    
 # declare array
 degree=[]
 for i in range(90+1):
@@ -27,9 +38,11 @@ fname = "gal_rot_cmd_"+str(startpos) + "_" +str(endpos)+"_"+str(int_time)+"int.t
 f = open(fname,'w')
 orig_stdout = sys.stdout
 sys.stdout = f
+
 print(': record ./' + outname + ".txt")
 for i in range(len(degree)):
 	print(': ' + "G" + str(degree[i])+'.0')
+    print(': offset ' + str(az_el[0]) + " " + str(az_el[1]))
 	print(':' + str(int_time))
 print(':roff')
 print(':stow')
