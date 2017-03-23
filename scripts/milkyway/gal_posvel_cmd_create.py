@@ -25,7 +25,7 @@ while True:
 		continue
 	if len(az_el) == 2:
 		break
-		
+
 ##################
 # making cmd file
 ##################
@@ -100,7 +100,7 @@ else: ## negative direction
 j=0
 for i in range(len(final)):
 	if i == 0:
-		print(': record ' + outname + ".txt")
+		print(': record ./' + outname + ".txt")
 		print('')
 	print(': ' + "G" + str(final[i]))
 	print(': offset ' + str(az_el[0]) + " " + str(az_el[1]))
