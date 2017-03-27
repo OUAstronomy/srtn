@@ -34,6 +34,8 @@ def spectrum_parse(input_file, output_file):
     vlsr = float(data[0][15])
     freq_steps = int(round((fstop - fstart) / spacing))  # get the number of frequency steps
     measure_count = len(data[3])                         # get the number of pwr data points
+    azoff = float(data[0][21])
+    eloff = float(data[0][23])
 
     # Make sure the number of pwr data points is the same as the expected number of freq steps
     if freq_steps != measure_count:
@@ -102,7 +104,7 @@ def spectrum_parse(input_file, output_file):
             nvalues.append(x)
 
 
-        print nvalues
+        #print nvalues
 
     extract_values(data)
 
