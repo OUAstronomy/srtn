@@ -8,6 +8,7 @@ data: March 2017
 
 # import modules
 from __future__ import print_function
+import sys
 assert sys.version_info >= (2,5)
 import meta_parse
 import os
@@ -29,13 +30,13 @@ while True:
 
 # Read in the files
 if int(answer) == 1:
-	instring = raw_input("Please input identifying string eg gal: ")
+	instring = raw_input("Please input identifying string. Will read all files with this string in it eg gal will read beam_gal.cat and gal_1.txt: ")
 	os.system("rm -f *" + instring + "*.bak* *meta*" + instring + "*" )
 	files = [f for f in glob.glob('*'+instring+'*') if os.path.isfile(f)]
 	print(files)
 	outname0="meta_"+f
 	outname1="meta_sort_" + str(len(files)) + instring + ".txt"
-	os.system("echo '' > " + outname)
+	os.system("echo '' > " + outname0)
 
 	for f in files:
 		print("########################")
