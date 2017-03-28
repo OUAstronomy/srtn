@@ -27,7 +27,9 @@ def spectrum_parse(input_file, output_file):
     # Open the file and extract all the data to a list, split at spaces, and newline stripped
     with open(input_file, 'rb') as f:
         data = [filter(None, line.strip('\n').split(' ')) for line in f.readlines()]
-
+        #print(data)
+    length = len(data[0])-1
+    source=str(data[0][length])
     fstart = float(data[1][1])   # fstart value for the file (assumes single value per file)
     fstop = float(data[1][3])    # fstop value for the file (assumes single value per file)
     spacing = float(data[1][5])  # spacing value for the file (assumes single value per file)
@@ -58,6 +60,7 @@ def spectrum_parse(input_file, output_file):
 
     # write to output file
     with open(output_file, 'w') as f:
+        f.write(source + "\n")
         f.write('freq     vel     Tant\n')
         for i, freq in enumerate(freqs):
             # get all power values associated with the current frequency

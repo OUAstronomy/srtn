@@ -36,7 +36,8 @@ def info_parse(input_file, output_file):
 
     header_info = extract_header_info(input_data)  # get the column labels
     data = extract_values(input_data)              # get the data rows
-    #print(data)
+    print(data)
+    print(data[0])
     # determine the formatting separation. this works by checking for the max size of the string
     # at the i-th index of every list in the data list, then adding an arbitrary spacer distance
     # (which in this case is 5). This max-size data is used to generate a formatter string which
@@ -44,9 +45,10 @@ def info_parse(input_file, output_file):
     max_vals = []
     for i in range(len(data[0])):
         max_val = 0
+        print(max_val)
         for j in range(len(data)):
             max_val = max(max_val, len(data[j][i]))
-            #print(data[j][i])
+            print(data[j][i])
         max_vals.append(str(max_val + 5))
 
     formatter_string = '{:<' + '}{:<'.join(max_vals) + '}'
