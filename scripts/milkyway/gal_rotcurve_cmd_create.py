@@ -5,8 +5,8 @@
 
 # import libraries
 from __future__ import print_function
-assert sys.version_info >= (2,5)
 import sys
+assert sys.version_info >= (2,5)
 
 # declare variables
 startpos=0
@@ -25,9 +25,9 @@ while True:
 # declare array
 degree=[]
 for i in range(90+1):
-	if (i%10 == 0) or (i%10 == 10) :
-		degree.append(i)
-print degree
+    if (i%10 == 0) or (i%10 == 10) :
+        degree.append(i)
+print(degree)
 ##################
 # making cmd file
 ##################
@@ -41,9 +41,9 @@ sys.stdout = f
 
 print(': record ./' + outname + ".txt")
 for i in range(len(degree)):
-	print(': ' + "G" + str(degree[i])+'.0')
+    print(': ' + "G" + str(degree[i])+'.0')
     print(': offset ' + str(az_el[0]) + " " + str(az_el[1]))
-	print(':' + str(int_time))
+    print(':' + str(int_time))
 print(':roff')
 print(':stow')
 
@@ -91,7 +91,7 @@ print('RFI 1420.85 0.005')
 print('RFI 1421.15 0.005')
 print('')
 for i in range(len(degree)):
-	print("GALACTIC " + str(degree[i])+'.0' + " 0.0 G" + str(degree[i])+'.0')
+    print("GALACTIC " + str(degree[i])+'.0' + " 0.0 G" + str(degree[i])+'.0')
 print("GALACTIC 360.0 0.0 G360.0")
 sys.stdout = orig_stdout
 f.close
