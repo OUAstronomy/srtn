@@ -65,7 +65,7 @@ print ("Data needs to be of format: source1 source2 \\n freq vel Tant")
 while True:
     try:
         outfilename = raw_input("Input unique filename for output (no extension): ")
-        datafile = raw_input("Input data file for plot: ")
+        orig_datafile = raw_input("Input data file for plot: ")
     except ValueError:
         continue
     if outfilename != "":
@@ -73,17 +73,15 @@ while True:
 
 # handle files
 files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
+datafile = 'TEMPORARY_SPEC_REDUC_FILE.txt'
 print("Will remove these files: " + ' | '.join(files))
 print("\n")
 input("Press [RET] to continue")
 os.system("rm -vf *" + outfilename + "*")
-with open(datafile, 'r') as f:
+with open(orig_datafile, 'r') as f:
     first_line=f.readline().strip('\n').split(" ")
-backup_files = [f for f in glob.glob('.*') if os.path.isfile(f)]
-if ("." + datafile + ".bak ") in backup_files:
-    os.system("mv -vf ." + datafile + ".bak "  + datafile)
+os.system('cp -f ' + orig_datafile + ' ' + datafile)
 os.system("sed -i.bak '1d' " + datafile)
-os.system("mv -vf " + datafile + ".bak ."  + datafile + ".bak")
 data = ascii.read(datafile)
 
 # to verify correct input
@@ -316,8 +314,8 @@ for total_num in range(len(first_line)):
     answer = ""
     while True:
         try:
-            answer = raw_input("Is the guess for the line intensity okay (y or [RET]/n or [SPACE]): ")
-            if ((answer == "y") or (answer == "")):
+            answer_ok = raw_input("Is the guess for the line intensity okay (y or [RET]/n or [SPACE]): ")
+            if ((answer_ok == "y") or (answer_ok == "")):
                 intensity_mask = intensity_mask_guess
                 break
             else:
@@ -373,7 +371,7 @@ for total_num in range(len(first_line)):
         except ValueError:
             continue
 
-    print(intensity_mask)
+    print('Intensity mask: ' + ','.join(str(e) for e in intensity_mask))
     # showing Intensity Mask
     minint=min(data[col1][intensity_mask])
     maxint=max(data[col1][intensity_mask])
@@ -397,7 +395,10 @@ for total_num in range(len(first_line)):
     # intensity
     intensity=np.sum(spectra_blcorr[intensity_mask])
     chanwidth=abs(max(data[col1])-min(data[col1]))/len(data[col1])
-    intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
+    if ((answer_ok == 'y') or (answer_ok == '')):
+        intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
+    else:
+        intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
     print("\n")
     print("Intensity: ")
     print((intensity)*chanwidth, '+/-',intensity_rms, 'K km/s')
