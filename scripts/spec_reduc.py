@@ -72,7 +72,7 @@ while True:
         break
 
 # handle files
-files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
+files = [f for f in glob.glob(outfilename+'*') if os.path.isfile(f)]
 datafile = 'TEMPORARY_SPEC_REDUC_FILE.txt'
 print("Will remove these files: " + ' | '.join(files))
 print("\n")
@@ -291,9 +291,43 @@ for total_num in range(len(first_line)):
     plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
     # intensity estimate
-    intensity_mask_guess = np.where((spectra_blcorr >= 5. * rms) & (spectra_blcorr >= -5. * rms))
-    minint=min(data[col1][intensity_mask_guess])
-    maxint=max(data[col1][intensity_mask_guess])
+    while True:
+        try:
+            intensity_answer = raw_input('Sigma value for Guassian (integers * rms) or [RET] for default 5 sigma: ')
+            if intensity_answer == '':
+                intensity_answer = 5.0
+            intensity_answer = float(intensity_answer)
+        except ValueError:
+            print('Please input integer or float.')
+            continue
+        if intensity_answer <= 3.:
+            print('Low signal Gaussian, result maybe incorrect.')
+            print('Gaussian signal: ' + str(intensity_answer) + '*rms')
+            break
+        if intensity_answer > 3.:
+            print('Gaussian signal: ' + str(intensity_answer) + '*rms')
+            break
+    while True:
+        try:
+            intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
+            minint=min(data[col1][intensity_mask_guess])
+            maxint=max(data[col1][intensity_mask_guess])
+            while True:
+                print('Intensity_mask_guess: ' + ','.join(map(str,intensity_mask_guess)))
+                if len(intensity_mask_guess) == 0:
+                    intensity_answer -=1
+                    intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
+                    minint=min(data[col1][intensity_mask_guess])
+                    maxint=max(data[col1][intensity_mask_guess])
+                if intensity_answer == 0:
+                    intensity_mask_guess = np.linspace(len(data[col1])/4-1,3*len(data[col1])/4-1, num = len(data[col1])/2)
+                if len(intensity_mask_guess) > 0:
+                    break
+        except ValueError:
+            continue
+        if len(intensity_mask_guess) > 0:
+            break
+
     plt.figure(6)
     plt.xlim(minvel,maxvel)
     plt.ylim(-5,max(spectra_blcorr) * 1.1)
@@ -417,6 +451,7 @@ print("\n")
 files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
 print("Made the following files:")
 print(files)
+os.system('rm -vf ' + datafile + '*')
 plt.close()
 
 #############
