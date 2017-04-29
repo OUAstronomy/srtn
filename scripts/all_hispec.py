@@ -67,144 +67,96 @@ if __name__ == "__main__":
     answer = 2
     outname_array = []
     first_line= []      
-    source_list = []
-    position = []
-    count = 0
-    # first section to run
-    if answer == 1:
-        outname_array = []
-        for filenum,f in enumerate(files):
-            print("Running file: " + origfiles[filenum])
-            os.system('cp -vf ' + origfiles[filenum] + ' TEMPORARY_HISPEC.txt')
-            f = 'TEMPORARY_HISPEC.txt'
-            outname0 = "h1spec_"+origfiles[filenum]
-            outname1 = "h1spec_sort_" + origfiles[filenum]
-            os.system("rm -vf " + outname0)
-            outname_array.append(outname0)
-            os.system("sed -i '/entered/d' " + f)
-            print(f)
-            with open(f,'r') as feel:
-                k = feel.readlines()
-            tmp = [x for x in k[0].strip('\n').split(' ') if x]   
-            tmp = tmp[len(tmp)-1]
-            source_list.append(tmp)
-            outname3 = "master_h1spec_sort_" + instring + '_source_' + tmp + ".txt"
 
+    for filenum in range(len(files)):
+        source_list = []
+        position = []
+        count = 0
+        filenaming = []
+
+        print("Running file: " + origfiles[filenum])
+        tmpname = origfiles[filenum].strip('.txt').strip('.dat').strip('.rad')
+        os.system('cp -vf ' + origfiles[filenum] + ' ' + f)
+        os.system("sed -i '/entered/d' " + f)
+
+        with open(f,'r') as feel:
+            k = feel.readlines()
+
+        for i,j in enumerate(k):
+            if (i%4) == 0:
+                tmp = [x for x in j.strip('\n').split(' ') if x]   
+                tmp = tmp[len(tmp)-1]
+                source_list.append(tmp)
+        print(source_list)
+        print(len(source_list))
+        for i,j in enumerate(source_list):
+            if i != (len(source_list)-1):
+                if source_list[i+1] == source_list[i]:
+                    if i == (len(source_list)-2):
+                        position.append(i+1)
+                        i += 1
+                else:
+                    position.append(i)
+                    if i == (len(source_list)-2):
+                        position.append(i+1)
+                        i += 1
+        if len(source_list) == 0:
+            position = [0,]
+        if not position:
+            position = [0,]
+        print(position)
+        print(source_list)
+        for i in position:
+            print('Starting source: ' + source_list[i])
+            with open(f,'w') as p:
+                for j in range(4):
+                    p.write(k[4*i + j])
+            tmp = source_list[i]
+            filenaming.append(source_list[i])
+
+            outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
+            outname0 = "h1spec_" + source_list[i] + '_'  + f
+            outname1 = "h1spec_sort_" + source_list[i] + '_' + f
+            os.system("rm -vf " + outname0 + ' ' + outname1 + ' ' + outname3)
+
+
+            # run beam command
             beam.spectrum_parse(f,outname0)
-            print("Finished file: " + origfiles[filenum])
+
+            # copy to new file and remove sources
             os.system("cat " + outname0+ " >> " + outname1)
-            with open(outname1, 'r') as f:
-                first_line.append(f.readline().strip('\n'))
+            with open(outname1, 'r') as g:
+                first_line.append(g.readline().strip('\n'))
             os.system("sed -i '1d' " + outname1)
 
+            # intelligently concat files
             if count == 0:
-                data = ascii.read(outname1)
+                pdata = ascii.read(outname1)
                 #print(data)
                 count = 1
             else:
                 ndata = ascii.read(outname1)
                 #print(ndata)
-                data.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
+                pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
             count = 1
-        ascii.write(data,outname3)
+
+            print("Finished source: " + source_list[i])
+
+        # write outdata
+        ascii.write(pdata,outname3)
         with open(outname3, 'r') as original: data = original.read()
-        with open(outname3, 'w') as modified: modified.write(' '.join(first_line) + "\n" + data)    
-        os.system('rm -vf *TEMPORARY_HISPEC*')
+        with open(outname3, 'w') as modified: modified.write(' '.join(first_line) + "\n" + data)   
+        outname_array.append(outname3)
 
-        print("########################")
-        print("Finished with all.")
-        print("These are the sources processed: " + ' | '.join(first_line))
-        print("If single file, then " + outname1 + " | " + outname3 + " are the same.")
-        print("Made files: " + ' | '.join(outname_array) + " | " + outname1 + " | " + outname3)    
+        print("Finished file: " + origfiles[filenum])
+    os.system('rm -vf *' + f)
 
-    # second section
-    else:
-        for filenum in range(len(files)):
-            source_list = []
-            position = []
-            count = 0
-            print("Running file: " + origfiles[filenum])
-            tmpname = origfiles[filenum].strip('.txt').strip('.dat').strip('.rad')
-            os.system('cp -vf ' + origfiles[filenum] + ' ' + f)
-            os.system("sed -i '/entered/d' " + f)
-
-            with open(f,'r') as feel:
-                k = feel.readlines()
-
-            for i,j in enumerate(k):
-                if (i%4) == 0:
-                    tmp = [x for x in j.strip('\n').split(' ') if x]   
-                    tmp = tmp[len(tmp)-1]
-                    source_list.append(tmp)
-            print(source_list)
-            print(len(source_list))
-            for i,j in enumerate(source_list):
-                if i != (len(source_list)-1):
-                    if source_list[i+1] == source_list[i]:
-                        if i == (len(source_list)-2):
-                            position.append(i+1)
-                            i += 1
-                    else:
-                        position.append(i)
-                        if i == (len(source_list)-2):
-                            position.append(i+1)
-                            i += 1
-            if len(source_list) == 0:
-                position = [0,]
-            if not position:
-                position = [0,]
-            print(position)
-            print(source_list)
-            for i in position:
-                print('Starting source: ' + source_list[i])
-                with open(f,'w') as p:
-                    for j in range(4):
-                        p.write(k[4*i + j])
-                tmp = source_list[i]
-
-                outname3 = "master_h1spec_sort_" + tmpname + '_source_' + '_'.join(source_list) + ".txt"
-                outname0 = "h1spec_" + source_list[i] + '_'  + f
-                outname1 = "h1spec_sort_" + source_list[i] + '_' + f
-                os.system("rm -vf " + outname0 + ' ' + outname1 + ' ' + outname3)
-
-
-                # run beam command
-                beam.spectrum_parse(f,outname0)
-
-                # copy to new file and remove sources
-                os.system("cat " + outname0+ " >> " + outname1)
-                with open(outname1, 'r') as g:
-                    first_line.append(g.readline().strip('\n'))
-                os.system("sed -i '1d' " + outname1)
-
-                # intelligently concat files
-                if count == 0:
-                    pdata = ascii.read(outname1)
-                    #print(data)
-                    count = 1
-                else:
-                    ndata = ascii.read(outname1)
-                    #print(ndata)
-                    pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
-                count = 1
-
-                print("Finished source: " + source_list[i])
-
-            # write outdata
-            ascii.write(pdata,outname3)
-            with open(outname3, 'r') as original: data = original.read()
-            with open(outname3, 'w') as modified: modified.write(' '.join(first_line) + "\n" + data)   
-            outname_array.append(outname3)
-
-            print("Finished file: " + origfiles[filenum])
-        os.system('rm -vf *' + f)
-
-        # finished
-        print("########################")
-        print("Finished with all.")
-        print("These are the sources processed: " + ' | '.join(first_line))
-        
-        print("Made files: " + ' | '.join(outname_array))    
+    # finished
+    print("########################")
+    print("Finished with all.")
+    print("These are the sources processed: " + ' | '.join(first_line))
+    
+    print("Made files: " + ' | '.join(outname_array))    
 
     #############
     # end of code
