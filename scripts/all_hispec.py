@@ -41,7 +41,7 @@ if __name__ == "__main__":
             if not tempfiles:
                 example_data()
             instring = raw_input("Please input file unique identifying string eg gal: ")
-            sedanswer = raw_input('Does data have azoff eloff parameters: ')
+            sedanswer = raw_input('Does data have azoff eloff parameters ([RET] or y / n): ')
         except ValueError:
             print("Please input an integer, 1 or 2.")
             continue
@@ -112,10 +112,9 @@ if __name__ == "__main__":
                 for j in range(4):
                     p.write(k[4*i + j])
             tmp = source_list[i]
-            filenaming = [source_list[position[0]],source_list[position[len(position)-1]]]
+            filenaming = [source_list[position[0]].replace(".", "_"),source_list[position[len(position)-1]].replace(".", "_")]
 
             outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
-            outname3 = outname3.replace(".", "_")
             outname0 = "h1spec_" + source_list[i] + '_'  + f
             outname1 = "h1spec_sort_" + source_list[i] + '_' + f
             os.system("rm -vf " + outname0 + ' ' + outname1 + ' ' + outname3)
