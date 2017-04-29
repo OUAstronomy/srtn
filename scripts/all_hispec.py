@@ -127,8 +127,6 @@ if __name__ == "__main__":
                 print('Error running beam command on: ' + origfiles[filenum] + ' on source: ' + source_list[i])
             # copy to new file and remove sources
             os.system("cat " + outname0+ " >> " + outname1)
-            with open(outname1, 'r') as g:
-                first_line.append(g.readline().strip('\n'))
             os.system("sed -i '1d' " + outname1)
 
             # intelligently concat files
@@ -150,6 +148,8 @@ if __name__ == "__main__":
             print("Finished source: " + source_list[i])
 
         # write outdata
+        with open(outname0, 'r') as g:
+            first_line.append(g.readline().strip('\n'))
         ascii.write(pdata,outname3)
         with open(outname3, 'r') as original: data = original.read()
         with open(outname3, 'w') as modified: modified.write(' '.join(first_line) + "\n" + data)   
