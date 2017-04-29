@@ -115,6 +115,7 @@ if __name__ == "__main__":
             filenaming = [source_list[position[0]],source_list[position[len(position)-1]]]
 
             outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
+            outname3 = outname3.replace(".", "_")
             outname0 = "h1spec_" + source_list[i] + '_'  + f
             outname1 = "h1spec_sort_" + source_list[i] + '_' + f
             os.system("rm -vf " + outname0 + ' ' + outname1 + ' ' + outname3)
