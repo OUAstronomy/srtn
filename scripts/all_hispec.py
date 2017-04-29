@@ -41,6 +41,7 @@ if __name__ == "__main__":
             if not tempfiles:
                 example_data()
             instring = raw_input("Please input file unique identifying string eg gal: ")
+            sedanswer = raw_input('Does data have azoff eloff parameters: ')
         except ValueError:
             print("Please input an integer, 1 or 2.")
             continue
@@ -76,6 +77,8 @@ if __name__ == "__main__":
         tmpname = origfiles[filenum].strip('.txt').strip('.dat').strip('.rad')
         os.system('cp -vf ' + origfiles[filenum] + ' ' + f)
         os.system("sed -i '/entered/d' " + f)
+        if (sedanswer != 'Yes') and (sedanswer != 'Y') and (sedanswer != 'YES') and (sedanswer != '') and (sedanswer != 'y'):
+            os.system("sed -i -e 's/source/azoff 0.00 eloff 0.00 source/g' " + f)
 
         with open(f,'r') as feel:
             k = feel.readlines()
