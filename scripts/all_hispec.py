@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     origfiles = files
     f = 'TEMPORARY_HISPEC.txt'
-
+    tempbac = 'TOTAL' + f
     # initialize arrays and constants
     outname_array = []
     first_line= []      
@@ -77,19 +77,20 @@ if __name__ == "__main__":
         tmpname = origfiles[filenum].strip('.txt').strip('.dat').strip('.rad')
         os.system('cp -vf ' + origfiles[filenum] + ' ' + f)
         os.system("sed -i '/entered/d' " + f)
+        os.system("sed -i '/cmd out of limits/d' " + f)
         if (sedanswer != 'Yes') and (sedanswer != 'Y') and (sedanswer != 'YES') and (sedanswer != '') and (sedanswer != 'y'):
             os.system("sed -i -e 's/source/azoff 0.00 eloff 0.00 source/g' " + f)
 
         with open(f,'r') as feel:
             k = feel.readlines()
-
+        with open(tempbac,'w') as feelgood:
+            for i in k:
+                feelgood.write(i + '\n')
         for i,j in enumerate(k):
             if (i%4) == 0:
                 tmp = [x for x in j.strip('\n').split(' ') if x]   
                 tmp = tmp[len(tmp)-1]
                 source_list.append(tmp)
-        print(source_list)
-        print(len(source_list))
         for i,j in enumerate(source_list):
             if i != (len(source_list)-1):
                 if source_list[i+1] == source_list[i]:
@@ -105,8 +106,6 @@ if __name__ == "__main__":
             position = [0,]
         if not position:
             position = [0,]
-        print(position)
-        print(source_list)
         for i in position:
             print('Starting source: ' + source_list[i])
             with open(f,'w') as p:
@@ -122,8 +121,10 @@ if __name__ == "__main__":
 
 
             # run beam command
-            beam.spectrum_parse(f,outname0)
-
+            try:
+                beam.spectrum_parse(f,outname0)
+            except ValueError:
+                print('Error running beam command on: ' + origfiles[filenum] + ' on source: ' + source_list[i])
             # copy to new file and remove sources
             os.system("cat " + outname0+ " >> " + outname1)
             with open(outname1, 'r') as g:
@@ -131,15 +132,20 @@ if __name__ == "__main__":
             os.system("sed -i '1d' " + outname1)
 
             # intelligently concat files
-            if count == 0:
-                pdata = ascii.read(outname1)
-                #print(data)
+            try:              
+                if count == 0:
+                    pdata = ascii.read(outname1)
+                    #print(data)
+                    count = 1
+                else:
+                    ndata = ascii.read(outname1)
+                    #print(ndata)
+                    pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
                 count = 1
-            else:
-                ndata = ascii.read(outname1)
-                #print(ndata)
-                pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
-            count = 1
+            except ValueError:
+                raw_input('Press return to view file of problems.')
+                os.system('cat ' + outname1)
+                sys.exit('Quitting Program')
 
             print("Finished source: " + source_list[i])
 
