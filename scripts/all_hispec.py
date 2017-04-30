@@ -64,15 +64,19 @@ if __name__ == "__main__":
     origfiles = files
     f = 'TEMPORARY_HISPEC.txt'
     tempbac = 'TOTAL' + f
+    os.system('rm -vf ' + f + ' ' + tempbac)
     # initialize arrays and constants
     outname_array = []
-    first_line= []      
+    all_first = []   
 
     for filenum in range(len(files)):
         source_list = []
         position = []
+        pdata = []
+        ndata = []
+        first_line= [] 
         count = 0
-
+        print('#################################')
         print("Running file: " + origfiles[filenum])
         tmpname = origfiles[filenum].strip('.txt').strip('.dat').strip('.rad')
         os.system('cp -vf ' + origfiles[filenum] + ' ' + f)
@@ -106,62 +110,64 @@ if __name__ == "__main__":
             position = [0,]
         if not position:
             position = [0,]
+        newindex = [i for i,x in enumerate(source_list) if x == 'at_stow']
         for i in position:
-            print('Starting source: ' + source_list[i])
-            with open(f,'w') as p:
-                for j in range(4):
-                    p.write(k[4*i + j])
-            tmp = source_list[i]
-            filenaming = [source_list[position[0]].replace(".", "_"),source_list[position[len(position)-1]].replace(".", "_")]
+            if not i in newindex:
+                print('Starting source: ' + source_list[i])
+                with open(f,'w') as p:
+                    for j in range(4):
+                        p.write(k[4*i + j])
+                tmp = source_list[i]
+                filenaming = [source_list[position[0]].replace(".", "_"),source_list[position[len(position)-1]].replace(".", "_")]
 
-            outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
-            outname0 = "h1spec_" + source_list[i] + '_'  + f
-            outname1 = "h1spec_sort_" + source_list[i] + '_' + f
-            os.system("rm -vf " + outname0 + ' ' + outname1 + ' ' + outname3)
+                outname0 = "h1spec_" + source_list[i] + '_'  + f
+                outname1 = "h1spec_sort_" + source_list[i] + '_' + f
+                os.system("rm -vf " + outname0 + ' ' + outname1)
 
 
-            # run beam command
-            try:
-                beam.spectrum_parse(f,outname0)
-            except ValueError:
-                print('Error running beam command on: ' + origfiles[filenum] + ' on source: ' + source_list[i])
-            # copy to new file and remove sources
-            os.system("cat " + outname0+ " >> " + outname1)
-            os.system("sed -i '1d' " + outname1)
+                # run beam command
+                try:
+                    beam.spectrum_parse(f,outname0)
+                except ValueError:
+                    print('Error running beam command on: ' + origfiles[filenum] + ' on source: ' + source_list[i])
+                # copy to new file and remove sources
+                os.system("cat " + outname0+ " >> " + outname1)
+                os.system("sed -i '1d' " + outname1)
 
-            # intelligently concat files
-            try:              
-                if count == 0:
-                    pdata = ascii.read(outname1)
-                    #print(data)
+                # intelligently concat files
+                try:              
+                    if count == 0:
+                        pdata = ascii.read(outname1)
+                        #print(data)
+                        count = 1
+                    else:
+                        ndata = ascii.read(outname1)
+                        #print(ndata)
+                        pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
                     count = 1
-                else:
-                    ndata = ascii.read(outname1)
-                    #print(ndata)
-                    pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
-                count = 1
-            except ValueError:
-                raw_input('Press return to view file of problems.')
-                os.system('cat ' + outname1)
-                sys.exit('Quitting Program')
+                except ValueError:
+                    raw_input('Press return to view file of problems.')
+                    os.system('cat ' + outname1)
+                    sys.exit('Quitting Program')
 
-            print("Finished source: " + source_list[i])
+                print("Finished source: " + source_list[i])
+                first_line.append(source_list[i])
+        outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
+        os.system('rm -vf ' + outname3)
 
-        # write outdata
-        with open(outname0, 'r') as g:
-            first_line.append(g.readline().strip('\n'))
         ascii.write(pdata,outname3)
         with open(outname3, 'r') as original: data = original.read()
         with open(outname3, 'w') as modified: modified.write(' '.join(first_line) + "\n" + data)   
         outname_array.append(outname3)
 
         print("Finished file: " + origfiles[filenum])
+        all_first.append(','.join(first_line))
     os.system('rm -vf *' + f)
 
     # finished
     print("########################")
     print("Finished with all.")
-    print("These are the sources processed: " + ' | '.join(first_line))
+    print("These are the sources processed: " + ' | '.join(all_first))
     
     print("Made files: " + ' | '.join(outname_array))    
 

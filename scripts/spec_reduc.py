@@ -74,18 +74,39 @@ if __name__ == "__main__":
     print("Will remove these files: " + ' | '.join(files))
     print("\n")
     input("Press [RET] to continue")
-    os.system("rm -vf *" + ooutfilename + "*")
+    os.system("rm -vf " + ooutfilename + "*")
     with open(orig_datafile, 'r') as f:
         first_line=f.readline().strip('\n').split(" ")
+        all_line = f.readlines()
     os.system('cp -f ' + orig_datafile + ' ' + datafile)
     os.system("sed -i '1d' " + datafile)
     data = ascii.read(datafile)
 
     # to verify correct input
     print("Will reduce these sources: " + " | ".join(first_line))
-
+    
+    acstart = ''
+    counting = 0
+    newstart = raw_input('Do you wish to start at a source (y or [SPACE]/[RET] or n): ')
+    while True:
+        try:
+            if(newstart == ' ' ) or (newstart == 'y'):
+                acstart = raw_input('Input source exactly: ')
+            elif (newstart == '' ) or (newstart == 'n'):
+                break
+        except ValueError:
+            continue
+        if first_line.index(acstart):
+            counting = 1
+            break
+        else:
+            continue
     # actual plotting now
-    for total_num in range(len(first_line)):
+    total_num = 0
+    while total_num < len(first_line):
+        if counting == 1:
+            total_num = first_line.index(acstart)
+            counting = 0
         if total_num == 0:     
             col1 = "vel"
             col2 = "Tant"
@@ -441,6 +462,7 @@ if __name__ == "__main__":
         # close and reset
         input("Press [RET] to continue")
         plt.close("all")
+        total_num +=1
 
     input("Press [RET] to exit")
     plt.show()
