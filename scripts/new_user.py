@@ -14,11 +14,12 @@ from argparse import ArgumentParser
 from time import strftime
 
 # constants
-_HOME_ = '/home/reynolds/ryle'
-_SRTDIR_ = _HOME_ + '/active_coding'
+_HOME_ = '/home/jjtobin'
+_SRTDIR_ = _HOME_ + '/srtn'
 _DATADIR_ = _SRTDIR_ + '/data'
-_LOGDIR_ = _SRTDIR_ + '/logs'
-_ORIGDIR = _SRTDIR_ + '/.srtnver5_working'
+_LOGDIR_ = _HOME_ + '/logs'
+_ORIGDIR5 = _SRTDIR_ + '/.srtnver5_working'
+_ORIGDIR6 = _SRTDIR_ + '/.srtnver6_working'
 _CODER_ = 'Nick Reynolds, nickreynolds@ou.edu, NH406'
 _CURR_TIME_ = '{}'.format(strftime("%Y_%B_%d"))
 PY2 = version_info[0] == 2 
@@ -106,18 +107,21 @@ if __name__ == "__main__":
 
     dir_help = 'Name of directory to create.'
     name_help = 'Name of observer or group.'
+    version = 'Version of the SRT program to use.'
 
     # Initialize instance of an argument parser
     parser = ArgumentParser(description=description)
 
     parser.add_argument('--o', help=dir_help,dest='output')
-    parser.add_argument('--n', help=name_help,dest='user')
+    parser.add_argument('--u', help=name_help,dest='user')
+    parser.add_argument('--n', help=version,dest='version')
 
 
     # Get the arguments
     args = parser.parse_args()
     _TEMP_OUT_= args.output
     _TMP_USER_= args.user
+    _TMP_VER_=args.version
 
     # ask for file and check for existance
     fcounter = 0
@@ -139,10 +143,13 @@ if __name__ == "__main__":
             elif _TEMP_OUT_:
                 _TMP_ = _TEMP_OUT_
                 _TEMP_OUT_ = ''
-            _TMP_ = _SRTDIR_ + '/' + _TMP_
+            if not _TMP_VER_:
+                if PY2:
+                    _TMP_VER_ = raw_input('Please input srt version you wish to have [5,6]: ').strip(' ').strip('\\')
+                elif PY3:
+                    _TMP_VER_ = input('Please input srt version you wish to have [5,6]: ').strip(' ').strip('\\')
             if _chkdir(_TMP_):
                 print('Invalid directory! Please input a new directory name.')
-
                 continue
             elif not _chkdir(_TMP_):
                 break
@@ -151,6 +158,12 @@ if __name__ == "__main__":
             print('Cancelled program, did not make any directories or files.')
     while True:
         try:
+            if _TMP_VER_ == '5':
+                _ORIGDIR = _ORIGDIR5
+            elif _TMP_VER_ == '6':
+                _ORIGDIR = _ORIGDIR6
+            else:
+                _ORIGDIR = _ORIGDIR5
             _OUTPUT_DIR_ = _makedir(_TMP_)
             _INIT_ = _OUTPUT_DIR_ + '/observer.init'
             _makeinit(_INIT_,_TMP_USER_)
