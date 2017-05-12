@@ -114,7 +114,7 @@ if __name__ == "__main__":
             col1 = "vel_" + str(total_num)
             col2 = "Tant_" + str(total_num)
         outfilename = ooutfilename + "_" + first_line[total_num]
-        print(outfilename)
+        print('Working on: ' + outfilename)
         minvel = min(data[col1])
         maxvel = max(data[col1])
         data.sort([col1])
@@ -135,14 +135,14 @@ if __name__ == "__main__":
         # baseline
         baseline_med=np.median(data[col2])-0.5
         baseline_ul=baseline_med*1.02
-        print(baseline_med, baseline_ul)
+        print('Median of baseline: ' + str(baseline_med) + ' and 2sigma baseline ' + str(baseline_ul))
 
         # actual defining mask
         msk_array = []
         temp = []
         while True:
             selector = SelectFromCollection(f, rawdata)
-            print("Draw mask regions around the Gaussians")
+            print("Draw mask regions around the non-baseline features...")
             draw()
             input('Press Enter to accept selected points')
             temp = selector.xys[selector.ind]
@@ -180,7 +180,7 @@ if __name__ == "__main__":
 
         # show projected baselines
         fig=plt.figure(2)
-        plt.title("projected baselines")
+        plt.title("Projected Baselines")
         lin1=plt.plot(data[col1],data[col2],color='black',linestyle='steps')
         lin2=plt.plot([minvel,maxvel],[baseline_med,baseline_med],color='red',linestyle='steps')
         lin3=plt.plot([minvel,maxvel],[baseline_ul,baseline_ul],color='red',linestyle='steps')
@@ -193,22 +193,45 @@ if __name__ == "__main__":
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
-        # fitting polynomial 4th order to baseline
-        fit = np.polyfit(data[col1][mask],data[col2][mask],4)
-        fit_fn = np.poly1d(fit) 
-        input("Press [RET] to continue")
+        newask = ' '
+        while (newask == 'n') or (newask == 'N') or (newask == ' '):
+            polyfit = ''
+            asking = 0
+            while True:
+                try:
+                    asking = raw_input('What order polynomial do you want to fit to the baseline or [RET] for 4? ')
+                    if asking == '':
+                        polynumfit = 4
+                        break
+                    polynumfit = int(asking)
+                except ValueError:
+                    print('Please input an integer.')
+                    continue
+                if polynumfit:
+                    break
+            # fitting polynomial 4th order to baseline
+            fit = np.polyfit(data[col1][mask],data[col2][mask],polynumfit)
+            fit_fn = np.poly1d(fit) 
+            input("Press [RET] to continue")
 
-        # plotting fitted baseline to original image
-        plt.figure(3)
-        plt.title("plotting fitted baseline")
-        lin1=plt.plot(data[col1],data[col2],color='black',linestyle='steps')
-        lin2=plt.plot(data[col1],fit_fn(data[col1]),color='red',linestyle='steps')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (kms/s)', fontsize=18)
-        draw()
+            # plotting fitted baseline to original image
+            plt.figure(3)
+            plt.clf()
+            plt.title("plotting fitted baseline")
+            lin1=plt.plot(data[col1],data[col2],color='black',linestyle='steps')
+            lin2=plt.plot(data[col1],fit_fn(data[col1]),color='red',linestyle='steps')
+            plt.tick_params('both', which='major', length=15, width=1, pad=15)
+            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
+            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
+            plt.ylabel('Antenna Temperature (K)', fontsize=18)
+            plt.xlabel('V$_{lsr}$ (kms/s)', fontsize=18)
+            draw()
+            newask = raw_input('Was this acceptable?(y or [RET]/n or [SPACE]) ')
+            if (newask == 'y') or (newask == 'Y') or (newask == ''):
+                input("Press [RET] to continue")
+                break
+
+
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
