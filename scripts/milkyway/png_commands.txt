@@ -1,0 +1,9 @@
+set terminal pngcairo color enhanced solid font "Times,12"
+set output 'radio_heat_map_corr.png'
+set xlabel 'Longitude ({/Symbol \260})'
+set ylabel 'V_{LSR} (km/s)'
+set cblabel 'T_{corr}'
+set title '
+unset key
+load 'plasma.pal'
+plot 'PLOTTING_TEMPORARY_FILE' using ($1):($2):3 with image
