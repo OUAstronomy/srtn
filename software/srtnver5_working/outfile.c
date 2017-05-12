@@ -72,14 +72,14 @@ void outfile(char *txt)
         ppwr = pwr;
     if (soutrack[0] > 0 || d1.stow != -1)
         fprintf(file1,
-                "DATE %4d:%03d:%02d:%02d:%02d obsn %3d az %3.0f el %2.0f freq_MHz %10.4f Tsys %6.3f Tant %6.3f vlsr %7.2f glat %6.3f glon %6.3f source %s\n",
+                "DATE %4d:%03d:%02d:%02d:%02d obsn %3d az %3.0f el %2.0f freq_MHz %10.4f Tsys %6.3f Tant %6.3f vlsr %7.2f glat %6.3f glon %6.3f azoff %3.2f eloff %3.2f source %s\n",
                 yr, da, hr, mn, sc, d1.obsn, d1.aznow, d1.elnow, d1.freq, d1.tsys, ppwr, d1.vlsr, d1.glat,
-                d1.glon, soutrack);
+                d1.glon, d1.azoff, d1.eloff, soutrack);
     else
         fprintf(file1,
-                "DATE %4d:%03d:%02d:%02d:%02d obsn %3d az %3.0f el %2.0f freq_MHz %10.4f Tsys %6.3f Tant %6.3f vlsr %7.2f glat %6.3f glon %6.3f source at_stow\n",
+                "DATE %4d:%03d:%02d:%02d:%02d obsn %3d az %3.0f el %2.0f freq_MHz %10.4f Tsys %6.3f Tant %6.3f vlsr %7.2f glat %6.3f glon %6.3f azoff %3.2f eloff %3.2f source at_stow\n",
                 yr, da, hr, mn, sc, d1.obsn, d1.aznow, d1.elnow, d1.freq, d1.tsys, ppwr, d1.vlsr, d1.glat,
-                d1.glon);
+                d1.glon, d1.azoff, d1.eloff);
     if (d1.record_spec) {
         istart = d1.f1 * d1.nfreq + 0.5;
         istop = d1.f2 * d1.nfreq + 0.5;
