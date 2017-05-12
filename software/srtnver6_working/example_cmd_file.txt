@@ -1,0 +1,35 @@
+* cmd.txt - this is the default command file name which will run if cmdf is
+* clicked
+* any command file defined by the COMMAND keyword in srt.cat will run
+* when program is started
+* yyyy:ddd:hh:mm:ss - waits for this time 
+* LST:hh:mm:ss - waits for this time
+* :n - waits at this line for n seconds
+* : is always in column 1 
+*     : sourcename (any name in catalog)
+*     : stow
+*     : calibrate
+*     : quit
+*     : vplot   // makes postscript of current integration
+*     : clearint      // clears intergation 
+*     : record (turns on data file if not already on) [filename] [recmode]
+*     : roff (turns off data file)
+*     : freq fcenter_MHz [bandwidth_MHz]
+*     : Sun n  - n for 25 point
+*     : Sun b - b for beamswitch
+*     : azel 50 25
+* go to position of bushes - cal position is defined in srt.cat  
+* only put comments on line starting with "*"
+: azel 50 25
+:50
+: cal  
+: calibrate
+: Sun b
+: record
+:50
+: roff
+: G160
+:50
+: vplot 
+: stow
+
