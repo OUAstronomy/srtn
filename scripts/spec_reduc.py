@@ -79,7 +79,7 @@ if __name__ == "__main__":
         first_line=f.readline().strip('\n').split(" ")
         all_line = f.readlines()
     os.system('cp -f ' + orig_datafile + ' ' + datafile)
-    os.system("sed -i '1d' " + datafile)
+    os.system("sed -i '2d' " + datafile)
     data = ascii.read(datafile)
 
     # to verify correct input
