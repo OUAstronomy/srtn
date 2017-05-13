@@ -73,34 +73,40 @@ if __name__ == "__main__":
     datafile = 'TEMPORARY_SPEC_REDUC_FILE.txt'
     print("Will remove these files: " + ' | '.join(files))
     print("\n")
-    input("Press [RET] to continue")
-    os.system("rm -vf " + ooutfilename + "*")
-    with open(orig_datafile, 'r') as f:
-        first_line=f.readline().strip('\n').split(" ")
-        all_line = f.readlines()
-    os.system('cp -f ' + orig_datafile + ' ' + datafile)
-    os.system("sed -i '2d' " + datafile)
-    data = ascii.read(datafile)
+    _TEMP_ = 'TEMPORARY_FILE_SPECREDUC.txt'
+    _TEMP1_ = 'TEMPORARY_FILE_SPECREDUC_1.txt'
 
+    input("Press [RET] to continue")
+    os.system("rm -vf " + ooutfilename + "* " + _TEMP_ + ' ' + _TEMP1_)
+    os.system('cp -f ' + orig_datafile + ' ' + datafile)
+    os.system('head -n 1 ' + datafile + ' > ' + _TEMP_)
+    os.system("sed -i '1d' " + datafile)
+    with open(datafile, 'r') as f:
+        first_line=f.readline().strip('\n').split(" ")
+    os.system("sed -i '1d' " + datafile)
+    data = ascii.read(datafile)
+    print(first_line)
     # to verify correct input
     print("Will reduce these sources: " + " | ".join(first_line))
     
     acstart = ''
     counting = 0
-    newstart = raw_input('Do you wish to start at a source (y or [SPACE]/[RET] or n): ')
     while True:
         try:
+            newstart = raw_input('Do you wish to start at a source (y or [SPACE]/[RET] or n): ')
             if(newstart == ' ' ) or (newstart == 'y'):
                 acstart = raw_input('Input source exactly: ')
             elif (newstart == '' ) or (newstart == 'n'):
                 break
+            if acstart in first_line:
+                counting = 1
+                break
+            else:
+                print('Try again')
+                continue
         except ValueError:
             continue
-        if first_line.index(acstart):
-            counting = 1
-            break
-        else:
-            continue
+
     # actual plotting now
     total_num = 0
     while total_num < len(first_line):
@@ -118,7 +124,7 @@ if __name__ == "__main__":
         minvel = min(data[col1])
         maxvel = max(data[col1])
         data.sort([col1])
-
+        print(minvel)
         # plot raw data
         plt.ion()
         f=plt.subplot(121)
@@ -480,7 +486,12 @@ if __name__ == "__main__":
 
         # write to file
         spec_final = Table([data[col1],data[col2],spectra_blcorr], names=('vel', 'Tant_raw', 'Tant_corr'))
-        ascii.write(spec_final, outfilename + "_spectra_corr.txt")
+        ascii.write(spec_final,_TEMP1_)
+        with open(_TEMP_, 'r') as firstlines: first = firstlines.read()
+        with open(_TEMP1_, 'r') as original: data = original.read()
+        with open(_TEMP1_, 'w') as modified: modified.write(first + first_line[total_num] + '\n'+str((intensity)*chanwidth) + '+/-' + str(intensity_rms) + 'K km/s' + '\n' + data) 
+        os.system('cp -f ' + _TEMP1_ + ' ' + outfilename + "_spectra_corr.txt")
+        os.system('rm -vf *' + _TEMP_ + '* ' + _TEMP1_)
 
         # close and reset
         input("Press [RET] to continue")

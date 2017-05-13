@@ -257,7 +257,7 @@ if __name__ == "__main__":
                         p.write('\n')
                 tmp = source_list[i]
                 # file handling
-                if (i==position[0]) and ((filenum == 0) or (filenume == (len(files)-1))):
+                if (i==position[0]) and ((filenum == 0) or (filenum == (len(files)-1))):
                     filenaming.append(source_list[position[0]])
 
                 outname0 = "h1spec_" + source_list[i] + '_'  + _TEMP1_
@@ -272,7 +272,7 @@ if __name__ == "__main__":
 
                 # copy to new file and remove sources
                 _SYSTEM_("cat " + outname0+ " >> " + outname1)
-                _SYSTEM_("sed -i '2d' " + outname1)
+                _SYSTEM_("sed -i '1,2d' " + outname1)
 
                 # intelligently concat files
                 try:              
@@ -300,7 +300,6 @@ if __name__ == "__main__":
 
     outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
     _SYSTEM_('rm -vf ' + outname3)
-    _SYSTEM_("sed -i '1d' " + _TEMP2_)
     with open(_TEMP2_, 'r') as original: data = original.read()
     with open(_TEMP2_, 'w') as modified: modified.write('Made from files: ' + ','.join(files) + '\n'+ ' '.join(first_line) + "\n" + data) 
     _SYSTEM_('cp -f ' + _TEMP2_ + ' ' + outname3)
