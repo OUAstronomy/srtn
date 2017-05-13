@@ -80,12 +80,13 @@ if __name__ == "__main__":
     os.system("rm -vf " + ooutfilename + "* " + _TEMP_ + ' ' + _TEMP1_)
     os.system('cp -f ' + orig_datafile + ' ' + datafile)
     os.system('head -n 1 ' + datafile + ' > ' + _TEMP_)
+    with open(_TEMP_, 'r') as firstlines: first = firstlines.read()
+
     os.system("sed -i '1d' " + datafile)
     with open(datafile, 'r') as f:
         first_line=f.readline().strip('\n').split(" ")
     os.system("sed -i '1d' " + datafile)
     data = ascii.read(datafile)
-    print(first_line)
     # to verify correct input
     print("Will reduce these sources: " + " | ".join(first_line))
     
@@ -116,9 +117,11 @@ if __name__ == "__main__":
         if total_num == 0:     
             col1 = "vel"
             col2 = "Tant"
+            col0 = "vel_vlsr"
         else:
             col1 = "vel_" + str(total_num)
             col2 = "Tant_" + str(total_num)
+            col0 = "vel_vlsr_" + str(total_num)
         outfilename = ooutfilename + "_" + first_line[total_num]
         print('Working on: ' + outfilename)
         minvel = min(data[col1])
@@ -485,13 +488,11 @@ if __name__ == "__main__":
         print((intensity)*chanwidth, '+/-',intensity_rms, 'K km/s')
 
         # write to file
-        spec_final = Table([data[col1],data[col2],spectra_blcorr], names=('vel', 'Tant_raw', 'Tant_corr'))
+        spec_final = Table([data[col0],data[col1],data[col2],spectra_blcorr], names=('vel_sub', 'vel', 'Tant_raw', 'Tant_corr'))
         ascii.write(spec_final,_TEMP1_)
-        with open(_TEMP_, 'r') as firstlines: first = firstlines.read()
-        with open(_TEMP1_, 'r') as original: data = original.read()
-        with open(_TEMP1_, 'w') as modified: modified.write(first + first_line[total_num] + '\n'+str((intensity)*chanwidth) + '+/-' + str(intensity_rms) + 'K km/s' + '\n' + data) 
+        with open(_TEMP1_, 'r') as original: ndata = original.read()
+        with open(_TEMP1_, 'w') as modified: modified.write(first + first_line[total_num] + '\n'+str((intensity)*chanwidth) + '+/-' + str(intensity_rms) + 'K km/s' + '\n' + ndata) 
         os.system('cp -f ' + _TEMP1_ + ' ' + outfilename + "_spectra_corr.txt")
-        os.system('rm -vf *' + _TEMP_ + '* ' + _TEMP1_)
 
         # close and reset
         input("Press [RET] to continue")
@@ -501,6 +502,14 @@ if __name__ == "__main__":
     input("Press [RET] to exit")
     plt.show()
     print("\n")
+
+    # finished
+    os.system('rm -vf *' + _TEMP_ + ' *' + _TEMP1_)
+
+    print("#################################")
+    print("Finished with all.")
+    print("These are the sources processed: " + ' | '.join(first_line))
+    print("These are the files processed: " + orig_datafile)  
     files = [f for f in glob.glob('*'+outfilename+'*') if os.path.isfile(f)]
     print("Made the following files:")
     print(files)

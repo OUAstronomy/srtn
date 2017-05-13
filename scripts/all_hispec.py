@@ -77,17 +77,19 @@ def spectrum_parse(input_file, _SPEC, output_file):
     elif _SPEC:
         q = 1./_SPEC
     c = 299792.458 # m/s
+    velsub = []
     vels = []
     for r in freqs:
         w = 1./r
         vsrc = c*((w-q)/q)
-        vels.append(vsrc-vlsr)
+        velsub.append(vsrc-vlsr)
+        vels.append(vsrc)
 
     # write to output file
     with open(output_file, 'w') as f:
         f.write('#! Spawned from File: ' + input_file + '\n')
         f.write(source + "\n")
-        f.write('freq     vel     Tant\n')
+        f.write('freq     vel     vel_vlsr     Tant\n')
         for i, freq in enumerate(freqs):
             # get all power values associated with the current frequency
             freq_pwrs = [str(spec[i]) for spec in spec_data]
@@ -95,6 +97,7 @@ def spectrum_parse(input_file, _SPEC, output_file):
             freq_pwrs.insert(0, str(freq))
             # ADD VELOCITIES TO COLUMN AFTER FREQ
             freq_pwrs.insert(1, str(vels[i]))
+            freq_pwrs.insert(1, str(velsub[i]))
             # set the format spacing to 15 (arbitrarily) to make even columns
             spacing_size = ['18'] * len(freq_pwrs)
             formatter_string = '{:<' + '}{:<'.join(spacing_size) + '}\n'
@@ -283,7 +286,7 @@ if __name__ == "__main__":
                     else:
                         ndata = ascii.read(outname1)
                         #print(ndata)
-                        pdata.add_columns([ndata['freq'],ndata['vel'],ndata['Tant']],rename_duplicate=True)
+                        pdata.add_columns([ndata['freq'],ndata['vel'],ndata['vel_vlsr'],ndata['Tant']],rename_duplicate=True)
                     count = 1
                 except ValueError:
                     raw_input('Press return to view file of problems.')
