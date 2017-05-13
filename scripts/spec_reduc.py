@@ -127,7 +127,7 @@ if __name__ == "__main__":
         minvel = min(data[col1])
         maxvel = max(data[col1])
         data.sort([col1])
-        print(minvel)
+        
         # plot raw data
         plt.ion()
         f=plt.subplot(121)
