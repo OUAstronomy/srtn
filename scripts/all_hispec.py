@@ -138,7 +138,7 @@ if __name__ == "__main__":
         example_data()
 
     # if input file not specified
-    while instring == '':
+    while (instring == '') or (not tmpname):
         try:
             instring = raw_input("Please input file unique identifying string eg gal: ")
         except ValueError:
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             break
 
     # if output Line not specified
-    while tmpname == '':
+    while (tmpname == '') or (not tmpname):
         try:
             answer = raw_input("Please specify unique output filename string: ")
         except ValueError:
@@ -164,11 +164,11 @@ if __name__ == "__main__":
             break
 
     # if input Line not specified
-    while _LINE_ == '':
+    while (_LINE_ == '') or (not _LINE_):
         try:
             _LINE_ = raw_input('What Line Emission do you want from list? {} : '.format(','.join([x[0] for x in LINES])))
-            if _LINE_ == '':
-                _LINE__ = LINES[0][1]
+            if (_LINE_ == '') or (not _LINE_):
+                _LINE_ = LINES[0][0]
             break
         except ValueError:
             print('Error with input, try again.')
