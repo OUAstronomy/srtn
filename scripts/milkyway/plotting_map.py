@@ -16,7 +16,15 @@ from astropy.table import Column,join,Table
 
 # useful filenames
 _tempfile_ = 'PLOTTING_TEMPORARY_FILE'
-os.system('rm -vf ' + _tempfile_ + '*')
+_TEMP_ = 'TEMPORARY'
+
+os.system('rm -vf ' + _tempfile_ + '* ' + _TEMP_)
+
+answer = raw_input('Want to plot with VLSR subtracted or Raw Velocity: [1 or 2 respectively] ')
+if answer == '1':
+    columnvel = 'vel'
+elif answer == '2':
+    columnvel = 'vel_sub'
 
 # load files
 files = [f for f in glob.glob('*G*') if os.path.isfile(f)]
@@ -62,12 +70,14 @@ maxt = 0
 for i,j in enumerate(degfile):
     # intelligently concat files
     print('Starting file: ' + files[i])
+    os.system('cp -vf ' + files[i] + ' ' + _TEMP_)
+    os.system("sed -i '1,2,3d' " + _TEMP_)
     try:              
         if count == 0:
             pdata = ascii.read(files[i])
             pdata.remove_column('Tant_raw')
             temparray = []
-            for k in range(len(pdata['vel'])):
+            for k in range(len(pdata[columnvel])):
                 temparray.append(j)
             aa = Column(temparray, name='lon')
             pdata.add_column(aa, index=0)
@@ -81,7 +91,7 @@ for i,j in enumerate(degfile):
             ndata = ascii.read(files[i])
             ndata.remove_column('Tant_raw')
             temparray = []
-            for k in range(len(ndata['vel'])):
+            for k in range(len(ndata[columnvel])):
                 temparray.append(j)
             aa = Column(temparray, name='lon')
             ndata.add_column(aa, index=0)
@@ -128,3 +138,4 @@ pdata.sort('lon')
 ascii.write(pdata,_tempfile_)
 os.system("sed -i 's/lon/#lon/' " + _tempfile_)
 os.system("sed -i 's/ /      /g' " + _tempfile_)
+os.system('rm -vf ' + _TEMP_)
