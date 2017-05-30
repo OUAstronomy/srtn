@@ -15,7 +15,7 @@ description:
 from __future__ import print_function
 from sys import version_info, exit
 assert version_info >= (2,5)
-__version__ = "0.0.1"
+__version__ = "0.1"
 from argparse import ArgumentParser
 import time
 from os import system as _SYSTEM_
@@ -24,6 +24,10 @@ from glob import glob
 from six.moves import input
 from astropy.io import ascii
 from astropy.table import Table
+
+PY2 = version_info[0] == 2 
+PY3 = version_info[0] == 3
+
 
 # lines to evaluate
 LINES = [['H1',1420.406]]
@@ -114,7 +118,8 @@ if __name__ == "__main__":
     description = 'parser to format srtn spectrum data into a gnuplot-readable form. this parses a file ' \
                   'for rotation curve surveys. it prints the column numbers of the last spectrum taken before ' \
                   'the telescope moved to the next point. the velocities associated with frequencies ' \
-                  'red/blueshifted from the center freq. of 1420.406 MHz are also calculated.'
+                  'red/blueshifted from the center freq. of 1420.406 MHz are also calculated.' \
+                  'Version: ' + __version__
 
     in_help = 'name of the file to parse'
     spec_help = 'The Line center for the spectra as string. Defaults to 21cm H1 at 1420.406 MHz '
@@ -255,6 +260,7 @@ if __name__ == "__main__":
                 print('Starting source: ' + source_list[i])
                 with open(_TEMP1_,'w') as p:
                     p.seek(0)
+                    p.write('all_hispec.py version: ' + str(__version__) + '\n')
                     for j in range(4):
                         p.write(' '.join(k[4*i + j]))
                         p.write('\n')
