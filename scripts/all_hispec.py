@@ -28,6 +28,17 @@ from astropy.table import Table
 PY2 = version_info[0] == 2 
 PY3 = version_info[0] == 3
 
+# colors
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 # lines to evaluate
 LINES = [['H1',1420.406]]
@@ -188,11 +199,11 @@ if __name__ == "__main__":
     # Read in the files
     delfiles = [f for f in glob("*h1spec*"+instring + "*") if _ISFILE_(f)]
     [delfiles.append(f) for f in glob("master*"+tmpname + "*") if _ISFILE_(f)]
-    print("Will delete: " + " | ".join(delfiles))
+    print("Will delete: " + bcolors.FAIL + " | ".join(delfiles) + bcolors.ENDC)
     input("Press [RET] to continue.")
     files = [f for f in glob(instring+'*') if _ISFILE_(f)]
 
-    print('Files to be analyzed: ' + ','.join(files))
+    print('Files to be analyzed: ' + bcolors.OKGREEN + ','.join(files) + bcolors.ENDC)
     input("Press [RET] to continue")
 
     origfiles = files
@@ -319,7 +330,7 @@ if __name__ == "__main__":
     print("Finished with all.")
     print("These are the sources processed: " + ' | '.join(all_first))
     
-    print("Made file: " + outname3)    
+    print("Made file: " + bcolors.OKGREEN + outname3 + bcolors.ENDC)    
 
     #############
     # end of code
