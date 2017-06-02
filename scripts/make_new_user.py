@@ -18,8 +18,8 @@ _HOME_ = '/home/jjtobin'
 _SRTDIR_ = _HOME_ + '/srtn'
 _DATADIR_ = _SRTDIR_ + '/data'
 _LOGDIR_ = _HOME_ + '/logs'
-_ORIGDIR5 = _SRTDIR_ + '/.srtnver5_working'
-_ORIGDIR6 = _SRTDIR_ + '/.srtnver6_working'
+_ORIGDIR5 = _SRTDIR_ + '/.srt_program/srtnver5_working'
+_ORIGDIR6 = _SRTDIR_ + '/.srt_program/srtnver6_working'
 _CODER_ = 'Nick Reynolds, nickreynolds@ou.edu, NH406'
 _CURR_TIME_ = '{}'.format(strftime("%Y_%B_%d"))
 PY2 = version_info[0] == 2 
@@ -148,6 +148,7 @@ if __name__ == "__main__":
                     _TMP_VER_ = raw_input('Please input srt version you wish to have [5,6]: ').strip(' ').strip('\\')
                 elif PY3:
                     _TMP_VER_ = input('Please input srt version you wish to have [5,6]: ').strip(' ').strip('\\')
+            _TMP_ = _SRTDIR_ + '/' + _TMP_
             if _chkdir(_TMP_):
                 print('Invalid directory! Please input a new directory name.')
                 continue
