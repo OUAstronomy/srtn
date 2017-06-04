@@ -53,11 +53,13 @@
 \newcommand{\code}[1]{\colorbox{backcolour}{\text{#1}}}
 \newcommand{\git}{\url{https://github.com/OUsrt/srtn.git}}
 \newcommand{\ben}{\url{https://github.com/BenningtonCS/Telescope-2014/wiki}}
+\newcommand{\discord}{\url{https://discord.gg/vx536X2}}
+\newcommand{\web}{\url{https://www.nhn.ou.edu/srt}}
 
 % Book's title and subtitle
-\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual}
+\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual \\ \huge Version 0.1}
 % Author
-\author{\textsc{John Tobin\footnote{jjtobin@ou.edu}}\footnote{GitHub: \git , Group Email: \url{nhnradiotelescope@groups.ou.edu}}\\\textsc{Nickalas Reynolds\footnotemark[2]\footnote{nickreynolds@ou.edu}}}
+\author{\textsc{John Tobin\footnote{jjtobin@ou.edu}}\footnote{GitHub: \git , Group Email: \url{nhnradiotelescope@groups.ou.edu}}\footnote{Discord Chat: \discord , Website: \web}\\\textsc{Nickalas Reynolds\footnotemark[2]\footnotemark[3]\footnote{nickreynolds@ou.edu}}}
 
 
 \begin{document}
@@ -159,7 +161,7 @@ The capabilities of the SRT are as follow:
     & \text{Frequency Range} & 1420-1470 & \text{\space MHz} \nonumber\\
     & \text{Pointing Accuracy} & 0.2 & \text{\space Degree} \nonumber\\
     & \text{Beam Width\footnote{Refer to equation: \ref{eq:beamwidth}}} & 4.92 & \text{\space Degrees} \nonumber\\
-    & \text{wind speed} & 120 & \text{\space km/h} \nonumber
+    & \text{Max wind speed} & 120 & \text{\space km/h} \nonumber
 \end{align}
 
 
@@ -195,6 +197,13 @@ Since you are just starting out, use the command with the \code{-ViewOnly} flag 
 
 To walk you through the commands: VNC is the program used that uses ssh protocol to provide a graphical interface between two computers, \code{vncviewer} is the command to view an existing VNC server on a host computer, \code{-Shared} allows multiple users to access the server at once, \code{-ViewOnly} does not send keyboard or mouse controls to the hosting server, \code{-via} specifies to route to the domain and specific server, \code{jjtobin@reber.ou.edu} is the domain under which the server presides, \code{reber:1} designates the computer and server window.
 There are probably a few VNC servers operating on the server computer at one time and can be listed with \code{vncserver -list}. However, unless you are not the one that created those windows, please do not close them as they might be in use. 
+
+Once you have the display window open, you can now begin your observation. First, open up the Firefox session by either toggling the Icon in the application menu or by opening a Terminal window and issuing \code{firefox} into the prompt. This should open up several windows which are crucial for observations. The windows are: IP camera to display the telescope, the IP power supply which controls the power to the telescope/controller/noise generator, the SRT website, the Discord chat service, and the Intellicast website to view current weather conditions in Norman, OK.
+
+To turn on the telescope, power first must be supplied to the telescope. Go to the Firefox window and to the IP power supply tab. Scroll down and toggle the socket icon next to the Telescope/Controller panel. You can now start the SRT software.
+
+Make sure the Noise Generator is toggled off currently. We will revisit this later in order to properly calibrate the system.
+
 {
 \vfill
 \centering``With power comes great responsibility''-- Uncle Ben
@@ -205,11 +214,15 @@ There are probably a few VNC servers operating on the server computer at one tim
 % Software %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{SRT Software}
-Do not change the code of the SRT software on the SRT controller computer until you have thoroughly tested the code and passed it by the senior antenna operator. 
+Do not change the code of the SRT software on the SRT controller computer until you have thoroughly tested the code and passed it by the senior SRT operator. Only a single SRTN program can be running at any one time with a few exceptions noted below. The next few subsections are for trying out your own version of the software on your personal computer. However, you will need to create an account on the REBER computer in order to use the telescope. In order to do this, run the command \code{makeusr --help}, which will display the parameters for making a new account. Or you can simply run \code{makeusr} and follow the in-terminal prompts. The following message ``Finished with all. Exiting program'' should appear and your directory can be found in $\sim$/srtn/ , fully populated. If any errors occuried, please contact the local operator.
+
+Two versions of the code are currently in use and I will very briefly describe the differences. Version 5 is the more stable of the two programs however, it has a 1 degree tracking increment. Compared to the beam size of 5 degrees, this can yield a fairly large error if accurate position tracking is needed. Version 6 allows for 0.5 degree tracking, however, some issues with commands not passing through correctly have been noted. In order to work around this issue, simply close and reopen the program.
+
+Multiple directories probably already exist on the computer. Most of these directories will be personal ones and please respect the integrity of other people's work. There exist two simulation5/6 directories which are for public use and can be used simultaneously with the main srtn program. These are for determining observation plans for later times and they can be used to simulate the positions of objects at any time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Commands}
-For extended help on any commands, within the terminal window, you can type man [COMMAND] e.g. man tar and it will display the internal manual for the given command, tar in this case. 
+For extended help on any commands, within the terminal window, you can type man [COMMAND] e.g. man tar and it will display the internal manual for the given command, tar in this case. You can also simply pass --help at the end of the command for a quick help section on how to execute the command.
 \begin{lstlisting}[language=Bash]
 cd # changes directory to home directory ~/ or if given input e.g. 
 cd ~/Downloads/ # will move to Downloads directory in home
@@ -394,11 +407,10 @@ Help on the various C code files in the source directory.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 \section{Command Files}
-Adapted from Bennington\footnote{\ben}
 {\obeylines
 \setlength{\parindent}{0pt}{
 \hfill
-It is suggested to use input command files as this will add speed the entry of SRT commands as well as reduce command entry mistakes. By default the srtn software provides the syntax for setting up a cmd file if you mouse over the Rcmdfl button in the srtn software. The command file is ASCII formatted and can: accept instruction lines (active lines), blank lines (ignored), comment lines (begins with *, ignored), and comment sections (begins with /, ignored).
+It is suggested to use input command files as this will add speed the entry of SRT commands as well as reduce command entry mistakes. By default the srtn software provides the syntax for setting up a cmd file if you mouse over the cmdfl button in the srtn software. The command file is ASCII formatted and can: accept instruction lines (active lines), blank lines (ignored), comment lines (begins with *, ignored), and comment sections (begins with /, ignored).
 \hfill
 }}
 Instruction line: Must start with a time mark (either UT or LST) or a colon (current time). 
@@ -452,27 +464,30 @@ If this input command file were named galactic.cmd, the user could initiate this
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Example Procedure}
-Adapted from Bennington\footnote{\ben}. 
 {\obeylines
 \setlength{\parindent}{0pt}{
 \textbf{Calibrate the telescope:}
 \hfill
-    First thing you will have to do before any observing will be to calibrate the telescope. 
-\hfill
-    Your intended source will determine the calibration procedure and the subsequent method of observing. Some sources have to use ``beamsw'' others cannot use this method. 
+    First thing you will have to do before any observing will be to calibrate the telescope. Your intended source will determine the calibration procedure and the subsequent method of observing.
+
+    To transform your relative flux into absolute flux, you need to do a careful calibration. You can do this by pointing to a radio quiet patch of the sky and press the cal button. This will first sample this ``cold load'' source. The software will then prompt you to place the absorber in the feed. You can either turn on the noise source now by toggling the button in the IP Power supply Firefox window or you can go to the roof and physically place the carbon-impreginated foam absorber infront of the feed. 
+    You will have to do this for roughly 10 seconds. Make sure you do not place anything infront of the antenna or the feed beforehand and that the feed is completely covered or supplied known noise for the full calibration time. Otherwise, your calibration will be off. In the terminal you used to open the srtn program, a line of parameters will appear when the calibration procedure is done. Pay special attention to these parameters. Example line: \code{yfac 2.616403 tsys 174.554743 pwr 445.649653 pwrprev 169.683193 calmode 20 max\_pwr 1420.362 MHz}. 
+    These are the parameters used to calibrate the telescope. You can look at the formula given in section \ref{sec:formulas}. The typical tsys value for the telescope is 180 on a hot day and 175 on a cold day. Options are still being explored to better stabilize the telescope components. It is suggested to do several calibrations until you get one that is suitable. A new tsys value is not imposed unless the yfac is $>$1.5. 
+
+    Changing frequencies will reset calibrations and pointing offsets.
+
+    Some sources have to use ``beamsw'' others cannot use this method. 
     \hfill
-    For observing the Milk Way HI and for doing the sun radio profile do not use ``beamsw'' as this will corrupt your spectra. To observe the HI you will have to adjust the frequency. To observe the sun the beam width of the SRT will have to be adjusted to offset further than the 5 degrees currently set. This can be done in the srt.cat file 
+    For observing the Milk Way HI and for doing the sun radio profile do not use ``beamsw'' as this will corrupt your spectra. To observe the Sun you will have to adjust the frequency to 1418MHz. 
     \hfill
     Beam switching is used for faint sources like Cas A, Cygnus A, the Moon. M33 and Andromeda can use the beam switching method but it is currently untested if this will yield good results. 
     \hfill
-    Generally you will not have to adjust the frequency unless doing continuum measures (1413MHz is clean of RFI) or source is near another bright radio source
+    Generally you will not have to adjust the frequency unless doing continuum measurements, (1413MHz is clean of RFI), source is near another bright radio source, the source peaks $>$ 2MHz  away from 1420MHz, or the radio source has a high VLSR.
     \hfill
     For observing Cas A, you're going to need to perform the ``advanced'' calibration procedure.
 \hfill    
     Make sure that your center frequency is set to something that is OFF THE H1 LINE, 1415.00 MHz works well. Your center frequency must be off the H1 line because Cas A lies pretty much right in the galactic plane, so any H1 emissions would muddy up the Cas A signal.
-\hfill    
-    Refer to the calibration page for details on how to carry out the advanced calibration.
-\hfill    
+\hfill        
     Take note of your new Tsys and you're ready to observe!
 \hfill
 \textbf{Observing Cas A:}
@@ -506,39 +521,29 @@ For extremely precise measurements, it is suggested to find the beam profile. Th
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parsing the Data Files}
-Adapted from Bennington\footnote{\ben}.
-
-Section still needs a lot of work.
-
 Parsing and Plotting the Spectra.
 \begin{itemize}
     \item Copy the data from the server computer to your personal computer to run the reduction sequence. 
     \item The command \code{scp /file/to/move/ /destination/} will help.
     \item Make sure you acquire the parsing code\footnote{\git} in order the parse the data.
-    \item The metadata parser is called meta\_parse.py. The meta\_parse script lists columns of data in the order: Date, obsn, az, el, center freq, Tsys, Tant, vlsr, galactic latitude, galactic longitude, source, fstart, fstop, spacing, bw, fbw, nfreq, nsam, npoint, integ, sigma, bsw.
-    \item The spectrum parser is called spectrum\_parse.py. The spectrum\_parse script lists each frequency in the spectrum in the first column, and then the power values associated with each frequency in each subsequent columns
-    \item The rotation curve parser is called rot\_curve\_spec\_parse.py. The rot\_curve\_spec\_parse script usage is the same as the previous two programs. The printing of the data is a little different, however. The first column prints the frequency channels present in the spectrum like the other parser, but then prints the velocities associated with the red/blueshift of the frequencies away from the 1420.406 MHz center frequency in the second column. The next column is the average spectrum for glon 0, then glon 10, then glon 20, and so on until glon 90. It averages all spectra taken at a single point in the galactic plane to produce an average spectrum for that point.
-    \item Another parser is called hi\_spec\_parse.py. It prints the column numbers of the last spectrum taken before the telescope moved to the next point. The velocities associated with frequencies red/blueshifted from the center freq. of 1420.406 MHz are also calculated.
-    \item To run the files, use \code{$\sim$\$ python meta\_parse.py test\_data.rad -o meta\_output.txt}. You might have to specify a different python version. These should work with python2.7, it is untested for python3+.
-    \item Once you have your spectra parsed out and written to a new file, you can start to plot them all.
-    \item First, open up the original output file you made. This is sort of tedious but you're going to need to look at the spectra (large blocks of numbers) to see which ones if any pop out at you. Generally if the numbers that make up a certain spectra are larger than the numbers of the other spectra, those are the ones you're looking for. 
-    \item Alternatively, look for the spectra that were taken at the Az/El of the source. You'll be able to tell because the spectra will always come back to a certain central Az/El and then go off to one side azimuthally. 
-    \item Count how many spectra into the file your spectrum of choice is - this number plus 1 is going to be the column number of your spectrum in the parsed file. Hold on to this number -- you will need it when plotting.
-    \item Now that you've picked out the spectra you want to plot (it is a good idea to plot off-source spectra for comparison), you can actually plot the spectra..
+    \item For continuum analysis:
+    \item The metadata parser is called all\_meta\_parse.py. The all\_meta\_parse script lists columns of data in the order: Date, obsn, az, el, center freq, Tsys, Tant, vlsr, galactic latitude, galactic longitude, source, fstart, fstop, spacing, bw, fbw, nfreq, nsam, npoint, integ, sigma, bsw.
+    \item For spectrum analysis:
+    \item The spectrum parser is called all\_hispec.py. The all\_hispec script lists: frequency, vel, vel-vlsr, and Tant. 
+    \item To run the files, use \code{$\sim$\$ python all\_hispec.py --test}. Follow the input parameters or just simply run \code{python all\_hispec.py }
+    \item Once you have your spectra parsed out and written to a new file, you can start to plot them all. 
+    \item You can reduce and plot the spectra by running the code \code{python spec\_reduc.py --help}. This code will walk you through the reduction, but to summarize the steps you are flattening the baseline, removing RFI, and then finding the integrated intensity.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gnuplot}
-Adapted from Bennington\footnote{\ben}.
-
-Section still needs a lot of work.
-
 Understanding, Interpreting, and changing the units of your plots into something useful.
 \begin{itemize}
     \item So the y-axis in your plot will have units of Kelvins. The numbers in the spectrum correspond to the power level measured at a given frequency, and these numbers are given in Kelvins. 
     \item We want to convert Kelvins to Janskys with $\text{kT}_a = \frac{\text{S}_{\nu}\times \text{A}_{\text{dish}}}{2}$, T$_a$ is Antenna temperature.S$_{nu}$ is spectra flux at a certain frequency. A$_{dish}$, k is Boltzmann's constant. The value you get at this point will be in J/s/m$^2$/Hz, and 1 Jansky = $1\times10^{26}$, so you'll need to multiply the value you just got by $1\times10^{26}$, and then you'll have your spectral flux density in Janskys. Now you can compare to established continuous spectra. 
+    \item The output of spec\_reduc.py will put the data in a format that can be directly read into the Gnuplot software.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Formulas}
+\section{Formulas}\label{sec:formulas}
 \begin{align}
     \text{Diameter} & \text{=} 3 \text{\space m} \nonumber\\
     \text{Frequency} & \text{=} 1.420401 \text{\space GHz} \nonumber\\
