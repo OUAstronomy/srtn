@@ -233,6 +233,8 @@ if __name__ == "__main__":
         _SYSTEM_('cp -vf ' + origfiles[filenum] + ' ' + _TEMP0_)
         _SYSTEM_("sed -i '/entered/d' " + _TEMP0_)
         _SYSTEM_("sed -i '/cmd out of limits/d' " + _TEMP0_)
+        _SYSTEM_("sed -i '/Scan/d' " + _TEMP0_)
+
         with open(_TEMP0_,'r') as f:
             f.seek(0)
             _TMPLINE_=f.readline().strip('\n').split(' ')

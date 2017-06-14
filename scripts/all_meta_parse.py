@@ -47,9 +47,9 @@ def info_parse(input_file, output_file):
         input_data = [filter(None, line.replace('\n', '').split(' ')) for line in f.readlines()]
 
 
-    # full header
+        # full header
     header=[]
-    for _T_ in range(2):
+    for _T_ in range(3):
         for _R_ in range(len(input_data[_T_])):
             if ((_R_%2)==0):
                 header.append(input_data[_T_][_R_])
@@ -61,8 +61,8 @@ def info_parse(input_file, output_file):
             for _R_ in range(len(input_data[_K_])):
                 if ((_R_%2)==1):
                     headernum.append(input_data[_K_][_R_])
-        if (_K_ == 2):
-            headernum.append('\n')
+            if (_K_%4 == 2):
+                headernum.append('\n')
 
 
     with open(output_file,'w') as f:
@@ -131,6 +131,9 @@ if __name__ == "__main__":
         print('#################################')
         print("Running file: " + _FILE_)
         _SYSTEM_('cp -vf ' + _FILE_ + ' ' + _TEMP0_)
+        _SYSTEM_("sed -i '/entered/d' " + _TEMP0_)
+        _SYSTEM_("sed -i '/cmd out of limits/d' " + _TEMP0_)
+        _SYSTEM_("sed -i '/Scan/d' " + _TEMP0_)
 
         # Read in the files    
         outname1="master_meta_" + instring + '_' + str(_NUM_) + ".txt"
