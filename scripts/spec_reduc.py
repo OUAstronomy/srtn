@@ -26,7 +26,7 @@ from argparse import ArgumentParser
 from scipy.optimize import curve_fit
 
 # version control
-__version__ = '0.1'
+__version__ = '0.2'
 PY2 = version_info[0] == 2 
 PY3 = version_info[0] == 3
 
@@ -476,11 +476,11 @@ if __name__ == "__main__":
                 print(bcolors.WARNING + 'Auto fitting RFI failed, setting values to zero...' + bcolors.ENDC)
                 _TEMPSPEC_[rfi_mask] = 0.0
                 break
-
+            '''
             for I in data[col1]:
-                if I < 100:
-                    print(I,_TEMPSPEC_[I])
-
+                if I < 100 && I >= 0:
+                    print(I,_TEMPSPEC_[int(I)])
+            '''
             # plotting fitted baseline to original image
             plt.figure(plt_iter+1)
             plt_iter += 1

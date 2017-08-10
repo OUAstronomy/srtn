@@ -15,7 +15,7 @@ description:
 from __future__ import print_function
 from sys import version_info, exit
 assert version_info >= (2,5)
-__version__ = "0.1"
+__version__ = "0.2"
 from argparse import ArgumentParser
 import time
 from os import system as _SYSTEM_
@@ -156,7 +156,10 @@ if __name__ == "__main__":
     # if input file not specified
     while (instring == '') or (not tmpname):
         try:
-            instring = raw_input("Please input file unique identifying string eg gal: ")
+            if PY2:
+                instring = raw_input("Please input file unique identifying string eg gal: ")
+            if PY3:
+                instring = input("Please input file unique identifying string eg gal: ")
         except ValueError:
             print("Please input a valid chars.")
             continue
@@ -169,7 +172,10 @@ if __name__ == "__main__":
     # if output Line not specified
     while (tmpname == '') or (not tmpname):
         try:
-            answer = raw_input("Please specify unique output filename string: ")
+            if PY2:
+                answer = raw_input("Please specify unique output filename string: ")
+            if PY3:
+                answer = input("Please specify unique output filename string: ")
         except ValueError:
             print("Please input a valid chars.")
             continue
@@ -182,7 +188,10 @@ if __name__ == "__main__":
     # if input Line not specified
     while (_LINE_ == '') or (not _LINE_):
         try:
-            _LINE_ = raw_input('What Line Emission do you want from list? {} : '.format(','.join([x[0] for x in LINES])))
+            if PY2:
+                _LINE_ = raw_input('What Line Emission do you want from list? {} : '.format(','.join([x[0] for x in LINES])))
+            if PY3:
+                _LINE_ = input('What Line Emission do you want from list? {} : '.format(','.join([x[0] for x in LINES])))
             if (_LINE_ == '') or (not _LINE_):
                 _LINE_ = LINES[0][0]
             break
@@ -273,7 +282,6 @@ if __name__ == "__main__":
                 print('Starting source: ' + source_list[i])
                 with open(_TEMP1_,'w') as p:
                     p.seek(0)
-                    p.write('all_hispec.py version: ' + str(__version__) + '\n')
                     for j in range(4):
                         p.write(' '.join(k[4*i + j]))
                         p.write('\n')
@@ -320,10 +328,11 @@ if __name__ == "__main__":
         print("Finished file: " + origfiles[filenum])
         all_first.append(','.join(first_line))
 
-    outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + ".txt"
+    outname3 = "master_h1spec_" + tmpname + '_s_' + '_'.join(filenaming) + '_v'+ str(__version__) +".txt"
+
     _SYSTEM_('rm -vf ' + outname3)
     with open(_TEMP2_, 'r') as original: data = original.read()
-    with open(_TEMP2_, 'w') as modified: modified.write('Made from files: ' + ','.join(files) + '\n'+ ' '.join(first_line) + "\n" + data) 
+    with open(_TEMP2_, 'w') as modified: modified.write('all_hispec.py version: ' + str(_AVERSION_) + ' ' +'Made from files: ' + ','.join(files) + '\n'+ ' '.join(first_line) + "\n" + data) 
     _SYSTEM_('cp -f ' + _TEMP2_ + ' ' + outname3)
     _SYSTEM_('rm -vf *' + _TEMP_ + '*')
 
