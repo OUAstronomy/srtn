@@ -332,7 +332,7 @@ if __name__ == "__main__":
 
     _SYSTEM_('rm -vf ' + outname3)
     with open(_TEMP2_, 'r') as original: data = original.read()
-    with open(_TEMP2_, 'w') as modified: modified.write('all_hispec.py version: ' + str(__version___) + ' ' +'Made from files: ' + ','.join(files) + '\n'+ ' '.join(first_line) + "\n" + data) 
+    with open(_TEMP2_, 'w') as modified: modified.write('all_hispec.py version: ' + str(__version__) + ' ' +'Made from files: ' + ','.join(files) + '\n'+ ' '.join(first_line) + "\n" + data) 
     _SYSTEM_('cp -f ' + _TEMP2_ + ' ' + outname3)
     _SYSTEM_('rm -vf *' + _TEMP_ + '*')
 
