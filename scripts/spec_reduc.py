@@ -3,15 +3,25 @@ Creates plots to correct baselines
 author: John Tobin and Nick Reynolds
 Date: March 2017
 '''
+#!/usr/bin/env python
+'''
+Name  : Spectrum Reduction, specreduc.py
+Author: Nickalas Reynolds
+Date  : Fall 2017
+Misc  : Will reduce the 1d spectra data from the specparse program
+        Will output numerous plots along the way and ask if you want to delete the intermediate steps at the end
+'''
 
-# import modules
-from __future__ import print_function
+# import standard modules
 from sys import version_info,exit
-assert version_info >= (2,5)
-import numpy as np
 from os import system as _SYSTEM_
 from os.path import isfile
 from glob import glob
+from argparse import ArgumentParser
+import time
+
+# import nonstandard modules
+import numpy as np
 from astropy.table import Table
 from astropy.io import ascii
 import matplotlib as mpl
@@ -22,24 +32,14 @@ import matplotlib.ticker as ticker
 from six.moves import input
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
-from argparse import ArgumentParser
 from scipy.optimize import curve_fit
 
-# version control
-__version__ = '0.2'
-PY2 = version_info[0] == 2 
-PY3 = version_info[0] == 3
-
-# colors
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# import custom modules
+from colours import colours
+from constants import constants
+from utilities import *
+from version import *
+__version__ = package_version()
 
 # prepare mask lasso command
 class SelectFromCollection(object):
@@ -84,103 +84,77 @@ if __name__ == "__main__":
                   'Will flatten baselines, remove RFI, and find the integrated intensity. ' \
                   'Version: ' + __version__
 
-
-    in_help = 'name of the file to parse'
-    spec_help = bcolors.OKGREEN + 'Current things to work on:\n-Make final pretty plot\n' + bcolors.ENDC
-    f_help = 'The output file identifying string'
-
-    fd = ''
-    fi = ''
-    worki = ''
-    ver = ''
+    in_help   = 'name of the file to parse'
+    spec_help = colours.OKGREEN + 'Current things to work on:\n-Make final pretty plot\n' + colours._RST_
+    f_help    = 'The output file identifying string'
+    a_help    = 'If toggled will run the script non interactively'
+    log_help  = 'name of logfile'
+    v_help    = 'Integer 1-5 of verbosity level'
 
     # Initialize instance of an argument parser
     parser = ArgumentParser(description=description)
-    parser.add_argument('-i', '--input', type=str, help=in_help, dest='fin',default=fd)
-    parser.add_argument('-o','--output',type=str, help=f_help,dest='fout',default=fi)
-    parser.add_argument('-w','--work', help=spec_help,default=worki,dest='work',action='store_true')
-    parser.add_argument('-v','--version',default=ver,dest='ver',action='store_true')
+    parser.add_argument('-i', '--input', type=str, help=in_help, dest='fin',default='')
+    parser.add_argument('-o','--output',type=str, help=f_help,dest='fout',default='')
+    parser.add_argument('-w','--work', help=spec_help,default='',dest='work',action='store_true')
+    parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
+    parse.add_argument('-l', '--logger',type=str, help=log_help,dest='log')
+    parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
 
     # Get the arguments
     args = parser.parse_args()
     orig_datafile = args.fin
     ooutfilename = args.fout
     worki = args.work
-    versionans = args.ver
+    auto = args.auto
+    logfile = args.log
+    verbosity = args.verb
+
+    # Set up message logger            
+    if not logfile:
+        logfile = ('{}_{}.log'.format(__file_[:-3],time.time()))
+    logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
+    logger.header1("Starting {}....".format(__file__))
 
     # checking for extra dep
     if worki is True:
-        print(spec_help)
-        exit()
-    if versionans is True:
-        print('Version',__version__)
+        logger.debug(spec_help)
         exit()
 
     # checking if args exist
     if not orig_datafile:
-        print ("Data needs to be of format: source1 source2 \\n freq vel_vlsr Tant")
-        while True:
-            try:
-                orig_datafile = raw_input("Input data file for plot: ")
-            except ValueError:
-                continue
-            if orig_datafile != "":
-                break
-    if not ooutfilename:
-        while True:
-            try:
-                    ooutfilename = raw_input("Input unique filename for output (no extension): ")
-            except ValueError:
-                continue
-            if ooutfilename != "":
-                break
+        logger.message("Make sure data is if correct format")
+    while not orig_datafile:
+        try:
+            orig_datafile = logger.pyinput("data file name for plotting: ")
+        except ValueError:
+            continue
+        if orig_datafile != "":
+            break
+    while not ooutfilename:
+        try:
+            ooutfilename = logger.pyinput("unique output filename (no extension): ")
+            break
+        except ValueError:
+            continue
 
 
     # version control
-    with open(orig_datafile,'r') as orig:
-        _VLINE_ = orig.readline()
+    _VLINE_ = orig_datafile.split(".txt")[0].split("_v")[1]
     try:
-        _AVERSION_ = _VLINE_.strip('\n').split(' ')[2]
-        _AVERSION_ = float(_AVERSION_)
-        assert _AVERSION_ >= float(__version__)
-    except ValueError:
-        print(bcolors.WARNING + 'all_hispec version is incorrect. Read all_hispec.py version: ' + str(_AVERSION_) + ' . Please use version: ' + __version__ + ' or higher.'+ bcolors.ENDC)
-        if PY3:
-            _A_ = input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
-        elif PY2:
-            _A_ = raw_input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
-        if (_A_ == ' ') or (_A_ == 'n') or (_A_ == 'N'):
-            exit()
-        else:
-            print('Continuing...')
-
-    except TypeError:
-        print(bcolors.WARNING + 'all_hispec version is incorrect. Read all_hispec.py version: ' + str(_AVERSION_) + ' . Please use version: ' + __version__ + ' or higher.'+ bcolors.ENDC)
-        if PY3:
-            _A_ = input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
-        elif PY2:
-            _A_ = raw_input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
-        if (_A_ == ' ') or (_A_ == 'n') or (_A_ == 'N'):
-            exit()
-        else:
-            print('Continuing...')
-
+        assert _VLINE_ == __version__
     except AssertionError:
-        print(bcolors.WARNING + 'all_hispec version is incorrect. Read all_hispec.py version: ' + str(_AVERSION_) + ' . Please use version: ' + __version__ + ' or higher.'+ bcolors.ENDC)
-        if PY3:
-            _A_ = input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
-        elif PY2:
-            _A_ = raw_input('Would you like to continue, ignoring error (y [RET] or n [SPACE]): ')
+        logger.warning('Input file version {} doesn\'t match programs version {}'.format(_VLINE_,__version__))
+        _A_ = logger.waiting(auto)
         if (_A_ == ' ') or (_A_ == 'n') or (_A_ == 'N'):
             exit()
         else:
-            print('Continuing...')
+            logger.message('Continuing...')
 
 
 
     # handle files
     files = [f for f in glob(ooutfilename+'*') if isfile(f)]
-    print("Will remove these files: " +  bcolors.FAIL + ' | '.join(files) + bcolors.ENDC)
+    logger.warn("Will remove these files: {}".format(' | '.join(files)))
     print("\n")
 
     datafile = 'TEMPORARY_SPECREDUCFILE.txt'
@@ -189,8 +163,9 @@ if __name__ == "__main__":
     _TEMP1_ = 'TEMPORARY_FILE_SPECREDUC_1.txt'
     _TEMP2_ = 'TEMPORARY_FILE_SPECREDUC_2.txt'
 
-    input("Press [RET] to continue")
-    _SYSTEM_("rm -vf " + ooutfilename + "* " + _TEMPB_ + '*')
+    logger.waiting(auto)
+    logger._REMOVE_(logger,ooutfilename)
+    _REMOVE_(logger,TEMPB)
     _SYSTEM_('cp -f ' + orig_datafile + ' ' + datafile)
 
     # getting firstlines
@@ -204,27 +179,29 @@ if __name__ == "__main__":
     data = ascii.read(datafile)
 
     # to verify correct input
-    print("Will reduce these sources: " + " | ".join(first_line))
+    logger.header2("Will reduce these sources: {}".format(" | ".join(first_line)))
     
     # starting at non-zero source
     acstart = ''
     counting = 0
     while True:
         try:
-            newstart = raw_input('Do you wish to start at a source (y or [SPACE]/[RET] or n): ')
+            newstart = logger.pyinput('Do you wish to start at a source (y or [SPACE]/[RET] or n): ')
             if(newstart == ' ' ) or (newstart == 'y'):
-                acstart = raw_input('Input source exactly: ')
+                acstart = logger.pyinput('Input source exactly: ')
             elif (newstart == '' ) or (newstart == 'n'):
                 break
             if acstart in first_line:
                 counting = 1
                 break
             else:
-                print('Try again')
+                logger.debug('Try again')
                 continue
         except ValueError:
             continue
-
+################################################################################################
+# last checked spot
+################################################################################################
     # actual plotting now
     total_num = 0
     while total_num < len(first_line):
@@ -240,7 +217,7 @@ if __name__ == "__main__":
             col2 = "Tant_" + str(total_num)
             col0 = "vel_vlsr_" + str(total_num)
         outfilename = ooutfilename + "_" + first_line[total_num]
-        print('Working on: ' + outfilename)
+        logger.warn('Working on: ' + outfilename)
         with open(_TEMP2_,'w') as _T_:
             _T_.write('Working on: ' + outfilename + '\n')
         minvel = min(data[col1])
@@ -283,7 +260,7 @@ if __name__ == "__main__":
             plt.show()
             if ((answer == "n") or (answer == "")):
                 break
-        input("Press [RET] to continue")
+        logger.waiting(auto)
 
         # draw and reset
         plt_iter = 0
@@ -304,7 +281,7 @@ if __name__ == "__main__":
         mask_tot = np.linspace(0,len(data)-1,num=len(data))
         mask = np.delete(mask_tot,mask_inv)
         mask = map(int,mask)
-        input("Press [RET] to continue")
+        logger.waiting(auto)
 
         # show projected baselines
         fig=plt.figure(plt_iter+1)
@@ -343,7 +320,7 @@ if __name__ == "__main__":
             # fitting polynomial 4th order to baseline
             fit = np.polyfit(data[col1][mask],data[col2][mask],polynumfit)
             fit_fn = np.poly1d(fit)
-            input("Press [RET] to continue")
+            logger.waiting(auto)
 
             # plotting fitted baseline to original image
             plt.figure(plt_iter+1)
@@ -360,7 +337,7 @@ if __name__ == "__main__":
             draw()
             newask = raw_input('Was this acceptable?(y or [RET]/n or [SPACE]) ')
             if (newask == 'y') or (newask == 'Y') or (newask == ''):
-                input("Press [RET] to continue")
+                logger.waiting(auto)
                 with open(_TEMP2_,'a') as _T_:
                     _T_.write("The polynomial is: \n %s" % fit_fn + '\n')
                 break
@@ -380,7 +357,7 @@ if __name__ == "__main__":
         print('RMS Noise: ',rms, 'K')
         with open(_TEMP2_,'a') as _T_:
             _T_.write('RMS Noise: ' + str(rms) + 'K' + '\n')
-        input("Press [RET] to continue")
+        logger.waiting(auto)
 
         # plotting the corrected baseline
         plt.figure(plt_iter+1)
@@ -394,7 +371,7 @@ if __name__ == "__main__":
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
         plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
         draw()
-        input("Press [RET] to continue")
+        logger.waiting(auto)
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
@@ -428,7 +405,7 @@ if __name__ == "__main__":
             plt.show()
             if ((answer == "n") or (answer == "")):
                 break
-        input("Press [RET] to continue")
+        logger.waiting(auto)
 
         newask = ' '
         _TRY_ =1
@@ -473,7 +450,7 @@ if __name__ == "__main__":
                 rfi_fit_fn = 'gauss(x,mu1,sigma1,A1)+gauss(x,mu2,sigma2,A2)' + ','.join(map(str,_params2))
 
             elif _TRY_ >= 4:
-                print(bcolors.WARNING + 'Auto fitting RFI failed, setting values to zero...' + bcolors.ENDC)
+                print(colours.WARNING + 'Auto fitting RFI failed, setting values to zero...' + colours._RST_)
                 _TEMPSPEC_[rfi_mask] = 0.0
                 break
             '''
@@ -514,7 +491,7 @@ if __name__ == "__main__":
             draw()
             newask = raw_input('Was this acceptable?(y or [RET]/n or [SPACE]) ')
             if (newask == 'y') or (newask == 'Y') or (newask == ''):
-                input("Press [RET] to continue")
+                logger.waiting(auto)
                 with open(_TEMP2_,'a') as _T_:
                     _T_.write("The polynomial is: \n %s" % rfi_fit_fn + '\n')
                 break
@@ -536,7 +513,7 @@ if __name__ == "__main__":
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
         plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
         draw()
-        input("Press [RET] to continue")
+        logger.waiting(auto)
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
@@ -553,7 +530,7 @@ if __name__ == "__main__":
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
         plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
         draw()
-        input("Press [RET] to continue")
+        logger.waiting(auto)
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
@@ -612,7 +589,7 @@ if __name__ == "__main__":
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
         plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
         draw()
-        input("Press [RET] to continue")
+        logger.waiting(auto)
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
@@ -654,7 +631,7 @@ if __name__ == "__main__":
                         plt.show()
                         if ((answer == "n") or (answer == "")):
                             break
-                    input("Press [RET] to continue")
+                    logger.waiting(auto)
                     for i in range(len(intensity_mask_array)):
                         intensity_mask = np.append(intensity_mask,np.where(data[col1] == intensity_mask_array[i]))
                     intensity_mask = map(int,intensity_mask)
@@ -693,7 +670,7 @@ if __name__ == "__main__":
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
         plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
         draw()
-        input("Press [RET] to continue")
+        logger.waiting(auto)
         outfilename_iter +=1
         plt.savefig(outfilename + "_" + str(outfilename_iter) + ".pdf")
 
