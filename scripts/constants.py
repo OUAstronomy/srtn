@@ -1,4 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+'''
+Name  : Constants, constants.py
+Author: Nickalas Reynolds
+Date  : Fall 2017
+Misc  : File for handling miscellaneous constants
+'''
 
 class constants:
 	# %&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&
@@ -43,3 +49,6 @@ class constants:
 	restfreq_hi   = 1420405751.786 # 21cm transition (Hz)
 	restfreq_co   = 115271201800.  # CO J=1-0 (Hz)
 	cm2perkkms_hi = 1.823e18       # HI column per intensity (thin)
+
+if __name__ == "__main__":
+    print('Testing module')
