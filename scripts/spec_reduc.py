@@ -37,7 +37,7 @@ from scipy.optimize import curve_fit
 # import custom modules
 from colours import colours
 from constants import constants
-from utilities import *
+import utilities
 from version import *
 __version__ = package_version()
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     spec_help = colours.OKGREEN + 'Current things to work on:\n-Make final pretty plot\n' + colours._RST_
     f_help    = 'The output file identifying string'
     a_help    = 'If toggled will run the script non interactively'
-    log_help  = 'name of logfile'
+    log_help  = 'name of logfile with extension'
     v_help    = 'Integer 1-5 of verbosity level'
 
     # Initialize instance of an argument parser
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument('-o','--output',type=str, help=f_help,dest='fout',default='')
     parser.add_argument('-w','--work', help=spec_help,default='',dest='work',action='store_true')
     parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
-    parse.add_argument('-l', '--logger',type=str, help=log_help,dest='log')
+    parser.add_argument('-l', '--logger',type=str, help=log_help,dest='log')
     parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
 
     # Get the arguments
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     if not logfile:
         logfile = ('{}_{}.log'.format(__file_[:-3],time.time()))
     logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
-    logger.header1("Starting {}....".format(__file__))
+    logger.header1("Starting {}....".format(__file__[:-3]))
 
     # checking for extra dep
     if worki is True:
@@ -155,17 +155,18 @@ if __name__ == "__main__":
     # handle files
     files = [f for f in glob(ooutfilename+'*') if isfile(f)]
     logger.warn("Will remove these files: {}".format(' | '.join(files)))
-    print("\n")
+    logger.message("\n")
 
-    datafile = 'TEMPORARY_SPECREDUCFILE.txt'
-    _TEMPB_ = 'TEMPORARY_FILE_SPECREDUC'
-    _TEMP0_ = 'TEMPORARY_FILE_SPECREDUC.txt'
-    _TEMP1_ = 'TEMPORARY_FILE_SPECREDUC_1.txt'
-    _TEMP2_ = 'TEMPORARY_FILE_SPECREDUC_2.txt'
+    _TEMP_ = time.time()
+    datafile = 'TEMPORARY_FILE_SPECREDUC_{}_0.txt'.format(_TEMP_)
+    _TEMPB_ = 'TEMPORARY_FILE_SPECREDUC_{}'.format(_TEMP_)
+    _TEMP0_ = 'TEMPORARY_FILE_SPECREDUC_{}.txt'.format(_TEMP_)
+    _TEMP1_ = 'TEMPORARY_FILE_SPECREDUC_{}_1.txt'.format(_TEMP_)
+    _TEMP2_ = 'TEMPORARY_FILE_SPECREDUC_{}_2.txt'.format(_TEMP_)
 
     logger.waiting(auto)
-    logger._REMOVE_(logger,ooutfilename)
-    _REMOVE_(logger,TEMPB)
+    utilities._REMOVE_(logger,ooutfilename)
+    utilities._REMOVE_(logger,TEMPB)
     _SYSTEM_('cp -f ' + orig_datafile + ' ' + datafile)
 
     # getting firstlines
@@ -199,9 +200,7 @@ if __name__ == "__main__":
                 continue
         except ValueError:
             continue
-################################################################################################
-# last checked spot
-################################################################################################
+
     # actual plotting now
     total_num = 0
     while total_num < len(first_line):
@@ -240,7 +239,7 @@ if __name__ == "__main__":
         # baseline
         baseline_med=np.median(data[col2])-0.5
         baseline_ul=baseline_med*1.02
-        print('Median of baseline: ' + str(baseline_med) + ' and 2sigma baseline ' + str(baseline_ul))
+        logger.message('Median of baseline: ' + str(baseline_med) + ' and 2sigma baseline ' + str(baseline_ul))
         with open(_TEMP2_,'a') as _T_:
             _T_.write('Median of baseline: ' + str(baseline_med) + ' and 2sigma baseline ' + str(baseline_ul) + '\n')
 
@@ -249,14 +248,14 @@ if __name__ == "__main__":
         temp = []
         while True:
             selector = SelectFromCollection(f, rawdata)
-            print("Draw mask regions around the non-baseline features...")
+            logger.header2("Draw mask regions around the non-baseline features...")
             draw()
-            input('Press Enter to accept selected points')
+            logger.pyinput('[RET] to accept selected points')
             temp = selector.xys[selector.ind]
             msk_array = np.append(msk_array,temp)
             selector.disconnect()
             # Block end of script so you can check that the lasso is disconnected.
-            answer = raw_input("Want to draw another lasso region (y or [SPACE]/n or [RET]): ")
+            answer = logger.pyinput("if you want to draw another lasso region (y or [SPACE]/n or [RET]): ")
             plt.show()
             if ((answer == "n") or (answer == "")):
                 break
@@ -306,13 +305,13 @@ if __name__ == "__main__":
             asking = 0
             while True:
                 try:
-                    asking = raw_input('What order polynomial do you want to fit to the baseline (integer) or [RET] for 4? ')
+                    asking = logger.pyinput('what order polynomial do you want to fit to the baseline (integer) or [RET] for 4? ')
                     if asking == '':
                         polynumfit = 4
                         break
                     polynumfit = int(asking)
                 except ValueError:
-                    print('Please input an integer.')
+                    logger.message('Please input an integer.')
                     continue
                 if polynumfit:
                     break
@@ -335,11 +334,11 @@ if __name__ == "__main__":
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
             plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
             draw()
-            newask = raw_input('Was this acceptable?(y or [RET]/n or [SPACE]) ')
+            newask = logger.pyinput('Was this acceptable?(y or [RET]/n or [SPACE]) ')
             if (newask == 'y') or (newask == 'Y') or (newask == ''):
                 logger.waiting(auto)
                 with open(_TEMP2_,'a') as _T_:
-                    _T_.write("The polynomial is: \n %s" % fit_fn + '\n')
+                    _T_.write("The polynomial is: \n {}\n".format(fit_fn))
                 break
 
 
@@ -354,9 +353,9 @@ if __name__ == "__main__":
 
         # defining RMS
         rms=np.std(spectra_blcorr[mask])
-        print('RMS Noise: ',rms, 'K')
+        logger.message('RMS Noise: {}K'.format(rms))
         with open(_TEMP2_,'a') as _T_:
-            _T_.write('RMS Noise: ' + str(rms) + 'K' + '\n')
+            _T_.write('RMS Noise: {}K\n'.format(rms))
         logger.waiting(auto)
 
         # plotting the corrected baseline
@@ -394,14 +393,14 @@ if __name__ == "__main__":
         rfi_mask = []
         while True:
             selector = SelectFromCollection(t, lin10)
-            print("Draw RFI mask regions")
+            logger.header2("Draw RFI mask regions")
             draw()
-            input('Press Enter to accept selected points')
+            logger.pyinput('[RET] to accept selected points')
             temp = selector.xys[selector.ind]
             rfi_mask_array = np.append(rfi_mask_array,temp)
             selector.disconnect()
             # Block end of script so you can check that the lasso is disconnected.
-            answer = raw_input("Want to draw another lasso region (y or [SPACE]/n or [RET]): ")
+            answer = logger.pyinput("if you want to draw another lasso region (y or [SPACE]/n or [RET]): ")
             plt.show()
             if ((answer == "n") or (answer == "")):
                 break
@@ -412,7 +411,7 @@ if __name__ == "__main__":
         for i in range(len(rfi_mask_array)):
             rfi_mask = np.append(rfi_mask,np.where(data[col1] == rfi_mask_array[i]))
         rfi_mask = map(int,rfi_mask)
-        print('RFI: ' + ','.join(map(str,rfi_mask)))
+        logger.message('RFI: {}'.format(','.join(map(str,rfi_mask))))
 
         def gauss(x,mu,sigma,A):
             return A*np.exp(-(x-mu)**2/2./sigma**2)
@@ -443,14 +442,14 @@ if __name__ == "__main__":
                 _sigma2=np.sqrt(np.diag(_cov2))
 
                 for _RFI_ in rfi_mask:
-                    print(_TEMPSPEC_[_RFI_])
+                    logger.warn("Region of RFI: {}".format(_TEMPSPEC_[_RFI_]))
                     _TEMPSPEC_[_RFI_] = bimodal(_RFI_,_params2[0],_params2[1],_params2[2],_params2[3],_params2[4],_params2[5])
-                    print(_TEMPSPEC_[_RFI_])
+                    logger.warn("Region of RFI after fit {}".format(_TEMPSPEC_[_RFI_]))
 
                 rfi_fit_fn = 'gauss(x,mu1,sigma1,A1)+gauss(x,mu2,sigma2,A2)' + ','.join(map(str,_params2))
 
             elif _TRY_ >= 4:
-                print(colours.WARNING + 'Auto fitting RFI failed, setting values to zero...' + colours._RST_)
+                logger.fail('Auto fitting RFI failed, setting values to zero...')
                 _TEMPSPEC_[rfi_mask] = 0.0
                 break
             '''
@@ -489,7 +488,7 @@ if __name__ == "__main__":
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
             plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
             draw()
-            newask = raw_input('Was this acceptable?(y or [RET]/n or [SPACE]) ')
+            newask = logger.pyinput('if this is acceptable?(y or [RET]/n or [SPACE]) ')
             if (newask == 'y') or (newask == 'Y') or (newask == ''):
                 logger.waiting(auto)
                 with open(_TEMP2_,'a') as _T_:
@@ -537,22 +536,22 @@ if __name__ == "__main__":
         # intensity estimate
         while True:
             try:
-                intensity_answer = raw_input('Sigma value for Guassian (integers * rms) or [RET] for default 5 sigma: ')
+                intensity_answer = logger.pyinput('Sigma value for Guassian (integers * rms) or [RET] for default 5 sigma: ')
                 if intensity_answer == '':
                     intensity_answer = 5.0
                 intensity_answer = float(intensity_answer)
             except ValueError:
-                print('Please input integer or float.')
+                logger.warn('Please input integer or float.')
                 continue
             if intensity_answer <= 3.:
-                print('Low signal Gaussian, result maybe incorrect.')
-                print('Gaussian signal: ' + str(intensity_answer) + '*rms')
+                logger.warn('Low signal Gaussian, result maybe incorrect.')
+                logger.warn('Gaussian signal: {}*rms'.format(intensity_answer))
                 break
             if intensity_answer > 3.:
-                print('Gaussian signal: ' + str(intensity_answer) + '*rms')
+                logger.message('Gaussian signal: {}*rms'.format(intensity_answer))
                 break
         with open(_TEMP2_,'a') as _T_:
-            _T_.write('Sigma value for Guassian: ' + str(intensity_answer) + '\n')
+            _T_.write('Sigma value for Guassian: {}\n'.format(intensity_answer))
 
         while True:
             try:
@@ -596,7 +595,7 @@ if __name__ == "__main__":
         answer = ""
         while True:
             try:
-                answer_ok = raw_input("Is the guess for the line intensity okay (y or [RET]/n or [SPACE]): ")
+                answer_ok = logger.pyinput("if the guess for the line intensity okay (y or [RET]/n or [SPACE]): ")
                 if ((answer_ok == "y") or (answer_ok == "")):
                     intensity_mask = intensity_mask_guess
                     break
@@ -620,14 +619,14 @@ if __name__ == "__main__":
                     intensity_mask = []
                     while True:
                         selector = SelectFromCollection(t, lin10)
-                        print("Draw a box around all Gaussian points.")
+                        plt.header2("Draw a box around all Gaussian points.")
                         draw()
-                        input('Press Enter to accept selected points')
+                        logger.pyinput('Press Enter to accept selected points')
                         temp = selector.xys[selector.ind]
                         intensity_mask_array = np.append(intensity_mask_array,temp)
                         selector.disconnect()
                         # Block end of script so you can check that the lasso is disconnected.
-                        answer = raw_input("Want to draw another lasso region (y or [SPACE]/n or [RET]): ")
+                        answer = logger.pyinput("Want to draw another lasso region (y or [SPACE]/n or [RET]): ")
                         plt.show()
                         if ((answer == "n") or (answer == "")):
                             break
@@ -681,10 +680,10 @@ if __name__ == "__main__":
             intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
         else:
             intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
-        print("Intensity: ")
-        print((intensity)*chanwidth, '+/-',intensity_rms, 'K km/s')
+        logger.message("Intensity: ")
+        logger.message("{} +- {} (K km/s)".format((intensity)*chanwidth,intensity_rms))
         with open(_TEMP2_,'a') as _T_:
-            _T_.write('Intensity: ' + str((intensity)*chanwidth) +  '+/-' + str(intensity_rms) +  'K km/s \n')
+            _T_.write('Intensity: {} +- {} (K km/s)'.format((intensity)*chanwidth,intensity_rms))
 
         # write to file
         try:
@@ -706,25 +705,23 @@ if __name__ == "__main__":
 
 
         # close and reset
-        input("Press [RET] to continue to complete this source...")
+        logger.pyinput("[RET] to continue to complete this source...")
         plt.close("all")
         total_num +=1
 
-    input("Press [RET] to exit")
+    logger.pyinput("[RET] to exit")
     plt.show()
     print("\n")
 
     # finished
-    _SYSTEM_('rm -vf ' + _TEMPB_ + '*')
+    utilities._REMOVE_(_TEMPB_)
 
-    print("#################################")
-    print("Finished with all.")
-    print("These are the sources processed: " + ' | '.join(first_line))
-    print("These are the files processed: " + orig_datafile)  
+    logger.header2("#################################")
+    logger.success("Finished with all.")
+    logger.message("These are the sources processed: {}".format(' | '.join(first_line)))
+    logger.message("These are the files processed: {}".format(orig_datafile))
     files = [f for f in glob(outfilename+'*') if isfile(f)]
-    print("Made the following files:")
-    print(files)
-    _SYSTEM_('rm -vf ' + datafile + '*')
+    logger.header2("Made the following files: {} and logfile: {}".format(', '.join(files),logfile))
     plt.close()
 
     #############

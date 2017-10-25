@@ -134,7 +134,7 @@ if __name__ == "__main__":
     spec_help = 'The Line center for the spectra as string. Defaults to 21cm H1 at 1420.406 MHz '
     f_help    = 'The output file identifying string'
     a_help    = 'If toggled will run the script non interactively'
-    log_help  = 'name of logfile'
+    log_help  = 'name of logfile with extension'
     v_help    = 'Integer 1-5 of verbosity level'
 
     # Initialize instance of an argument parser
@@ -158,8 +158,11 @@ if __name__ == "__main__":
     # Set up message logger            
     if not logfile:
         logfile = ('{}_{}.log'.format(__file__[:-3],time.time()))
-    logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
-    logger.header1("Starting {}....".format(__file__))
+    if verbosity >= 3:
+        logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
+    else:
+        logger = utilities.Messenger(verbosity=verbosity, add_timestamp=False,logfile=logfile)
+    logger.header1("Starting {}....".format(__file__[:-3]))
 
     logger.header2('Make sure your file follows the appropriate format in `exampledata_hispec.txt`')
     logger.header2('This program will create and remove numerous temporary files for debugging.')
@@ -348,7 +351,7 @@ if __name__ == "__main__":
     logger.success("Finished with all.")
     logger.debug("These are the sources processed: {}".format(' | '.join(all_first)))
     
-    logger.header1("Made file:  {}".format(outname3)) 
+    logger.header1("Made files:  {} and logfile: {}".format(outname3,logfile)) 
 
     #############
     # end of code
