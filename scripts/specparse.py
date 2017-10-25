@@ -34,6 +34,7 @@ from astropy.io import ascii
 from astropy.table import Table
 
 # checking python version
+assert assertion()
 __version__ = package_version()
 
 # lines to evaluate
@@ -61,8 +62,8 @@ def spectrum_parse(input_file, _SPEC, output_file):
     :return:
     """
     # Open the file and extract all the data to a list, split at spaces, and newline stripped
-    with open(input_file, 'rb') as f:
-        data = [filter(None, line.strip('\n').split(' ')) for line in f.readlines()]
+    with open(input_file, 'r') as f:
+        data = [[x for x in line.strip('\n').split(' ') if x != ''] for line in f.readlines()]
 
     length        = len(data[0])-1
     source        = str(data[0][data[0].index('source')+1])
@@ -112,7 +113,7 @@ def spectrum_parse(input_file, _SPEC, output_file):
             freq_pwrs.insert(1, str(vels[i]))
             freq_pwrs.insert(1, str(velsub[i]))
             # set the format spacing to 18 (arbitrarily) to make even columns
-            spacing_size = ['18'] * len(freq_pwrs)
+            spacing_size = ['25'] * len(freq_pwrs)
             formatter_string = '{:<' + '}{:<'.join(spacing_size) + '}\n'
 
             # write out line of data to file
@@ -125,8 +126,8 @@ if __name__ == "__main__":
     # Argument Parser Setup
     # -----------------------
     description = 'Spectra parser to format srtn spectrum data into a gnuplot-readable form. This parses a file ' \
-                  'for rotation curve surveys. it prints the column numbers of the last spectrum taken before ' \
-                  'the telescope moved to the next point. the velocities associated with frequencies ' \
+                  'for rotation curve surveys. It prints the column numbers of the last spectrum taken before ' \
+                  'the telescope moved to the next point, the velocities associated with frequencies ' \
                   'red/blueshifted from the center freq. of 1420.406 MHz are also calculated.\n' \
                   '{} Version: {} {}'.format(colours.WARNING,__version__,colours._RST_)
 
@@ -258,7 +259,7 @@ if __name__ == "__main__":
 
         with open(_TEMP0_,'r') as f:
             f.seek(0)
-            k = [filter(None, line.strip('\n').split(' ')) for line in f.readlines()]
+            k = [[x for x in line.strip('\n').split(' ') if x != ''] for line in f.readlines()]
 
 
         # creating source list
@@ -305,10 +306,10 @@ if __name__ == "__main__":
                 try:
                     spectrum_parse(_TEMP1_,_SPECTRA_,outname0)
                 except ValueError:
-                    logger.fail('Error running spectrum_parse command on: {} on source: {}'.format(origfiles[filenum],source_list[i]))
+                    logger.failure('Error running spectrum_parse command on: {} on source: {}'.format(origfiles[filenum],source_list[i]))
 
                 # copy to new file and remove sources
-                _SYSTEM_("cat " + outname0+ " >> " + outname1)
+                _SYSTEM_("cp -f " + outname0+ " " + outname1)
                 _SYSTEM_("sed -i '1,2d' " + outname1)
 
                 # intelligently concat files
@@ -323,9 +324,7 @@ if __name__ == "__main__":
                         pdata.add_columns([ndata['freq'],ndata['vel'],ndata['vel_vlsr'],ndata['Tant']],rename_duplicate=True)
                     count = 1
                 except ValueError:
-                    logger.fail("Error in concat:")
-                    print pdata
-                    print ndata
+                    logger.failure("Error in concat:")
                     logger.waiting(auto)
                     logger.warn('Check file {}'.format(outname1))
                     exit('Quitting Program')
@@ -342,7 +341,7 @@ if __name__ == "__main__":
 
     utilities._REMOVE_(logger,outname3)
     with open(_TEMP2_, 'r') as original: data = original.read()
-    with open(_TEMP2_, 'w') as modified: modified.write('Made from files: {}\'\n\'{}\'\n\'{}'.format(','.join(files),' '.join(first_line),data))
+    with open(_TEMP2_, 'w') as modified: modified.write('Made from files: {}\n{}\n{}\n'.format(','.join(files),' '.join(first_line),data))
     _SYSTEM_('cp -f ' + _TEMP2_ + ' ' + outname3)
     utilities._REMOVE_(logger,_TEMP_)
 
