@@ -135,8 +135,14 @@ class Messenger(object):
         if type(self.logfile) is str:
             self.f.write(msg + '\n')
 
-    # PRINT COMMANDS ##########################################################
-    def warn(self, msg, verb_level=0):
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    """
+    The following commands are the ones
+    to use when calling the logger
+    will handle writing to the log
+    file and to the terminal
+    """
+    def warn(self, msg, verb_level=2):
 
         if verb_level <= self.verbosity:
             full_msg = self._make_full_msg(msg, verb_level)
@@ -172,7 +178,7 @@ class Messenger(object):
             full_msg = self._make_full_msg(msg, verb_level)
             self._write(self.MESSAGE, full_msg)
 
-    def debug(self, msg, verb_level=3):
+    def debug(self, msg, verb_level=4):
 
         if verb_level <= self.verbosity:
             full_msg = self._make_full_msg(msg, verb_level)
@@ -190,7 +196,7 @@ class Messenger(object):
             self._write(self.DEBUG, full_msg,False)      
         return out
 
-    def waiting(self,auto,seconds=10,verb_level=1):
+    def waiting(self,auto,seconds=10,verb_level=0):
         if not auto:
             self.pyinput('[RET] to continue or CTRL+C to escape')
         elif verb_level <= self.verbosity:  
