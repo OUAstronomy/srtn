@@ -18,41 +18,55 @@ import time
 # custom modules
 from colours import colours
 
-
 # function that creates a logger
 class Messenger(object):
+    """
+    The Messenger class which handles pretty
+    logging both to terminal and to a log
+    file which was intended for running 
+    codes on clusters in batch jobs where
+    terminals were not slaved.
+    """
     PY2 = version_info[0] == 2
     PY3 = version_info[0] == 3
 
     use_structure = ".    "
-    def __init__(self, verbosity=2, use_color=True, use_structure=False,add_timestamp=True, logfile=None):
+    def __init__(self, verbosity=2, use_colour=True, use_structure=False,add_timestamp=True, logfile=None):
         """
-        Initialize the messenger class. Set overall verbosity level,
-        use_color, use_structure flags, and add_timestamp flags.
+        Setting the parameters for the Messenger class.
         """
         self.verbosity = verbosity
-        self.use_color = use_color
-        if use_color:
-            self.enable_color()
+
+        # specifying colour options
+        self.use_colour = use_colour
+        if use_colour:
+            self.enable_colour()
         else:
-            self.disable_color()
+            self.disable_colour()
 
         self.use_structure = use_structure
         self.add_timestamp = add_timestamp
-
         self.logfile = logfile
+
+        # overrides existing file
         if logfile is not None:
-            self.f = open(logfile, 'w')  # always overwrites existing files.
+            self.f = open(logfile, 'w') 
 
     def set_verbosity(self, verbosity):
+        """
+        Set the verbosity level for the class
+        """
         self.verbosity = verbosity
 
     def get_verbosity(self):
+        """
+        Returns the verbosity level of the class
+        """
         return self.verbosity
 
-    def disable_color(self):
+    def disable_colour(self):
         """
-        Turns off all color formatting.
+        Turns off all colour formatting.
         """
         self.BOLD    = ''
         self.HEADER1 = ''
@@ -64,11 +78,12 @@ class Messenger(object):
         self.DEBUG   = ''
         self.CLEAR   = ''
 
-    def enable_color(self):
+    def enable_colour(self):
         """
-        Enable all color formatting.
+        Enable all colour formatting.
         """
-        # Color definitions
+
+        # colour definitions
         self.BOLD    = colours.BOLD
         self.HEADER1 = self.BOLD + colours.HEADER
         self.HEADER2 = self.BOLD + colours.OKBLUE
@@ -81,8 +96,8 @@ class Messenger(object):
 
     def _get_structure_string(self, level):
         """
-        Returns a string containing the structural part of the message based
-        on the integer level provided in the input.
+        Returns the string of the message with the specified level
+        Which is dependent on the verbosity
         """
 
         string = ''
@@ -93,8 +108,7 @@ class Messenger(object):
 
     def _get_time_string(self):
         """
-        Returns a string containing the structural part of the message based
-        on the integer level provided in the input.
+        Returns the detailed datetime for extreme debugging
         """
 
         string = ''
@@ -103,11 +117,19 @@ class Messenger(object):
         return string
     
     def _make_full_msg(self, msg, verb_level):
+        """
+        Constructs the full string that carries the message
+        with the specified verbosity parameters
+        """
         struct_string = self._get_structure_string(verb_level)
         time_string = self._get_time_string()
         return time_string + struct_string + msg
 
     def _write(self, cmod, msg,out=True):
+        """
+        Write the message to the file and print 
+        it to the terminal if it is wanted
+        """
         if out:
             print("{}{}{}".format(cmod,msg,self.CLEAR))
         if type(self.logfile) is str:
@@ -176,13 +198,27 @@ class Messenger(object):
             time.sleep(seconds)
 
 def _REMOVE_(logger,file):
-    for f in glob('*'+file+'*'):
-        if isfile(f):
-            try:
-                remove(f)
-                logger.debug("Removed file {}".format(f))
-            except OSError:
-                logger.debug("Cannot find {} to remove".format(f))
+    """
+    This is a restructure of the os.system(rm) or the os.remove command
+    such that the files removed are displayed appropriately or not removed
+    if the file is not found
+    """
+    if type(file) is str:
+        for f in glob('*'+file+'*'):
+            if isfile(f):
+                try:
+                    remove(f)
+                    logger.debug("Removed file {}".format(f))
+                except OSError:
+                    logger.debug("Cannot find {} to remove".format(f))
+    else:
+        for f in file:
+            if isfile(f):
+                try:
+                    remove(f)
+                    logger.debug("Removed file {}".format(f))
+                except OSError:
+                    logger.debug("Cannot find {} to remove".format(f))                   
 
 
 if __name__ == "__main__":
