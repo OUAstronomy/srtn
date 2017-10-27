@@ -160,7 +160,7 @@ if __name__ == "__main__":
     logger.failure("Will remove these files: {}".format(' | '.join(files)))
     logger.message("\n")
 
-    _TEMP_ = time.time()
+    _TEMP_ = str(time.time())
     datafile = 'TEMPORARY_FILE_SPECREDUC_{}_0.txt'.format(_TEMP_)
     _TEMPB_ = 'TEMPORARY_FILE_SPECREDUC_{}'.format(_TEMP_)
     _TEMP0_ = 'TEMPORARY_FILE_SPECREDUC_{}.txt'.format(_TEMP_)
@@ -169,8 +169,8 @@ if __name__ == "__main__":
     _TEMP3_ = []
 
     logger.waiting(auto)
-    utilities._REMOVE_(logger,ooutfilename)
-    utilities._REMOVE_(logger,_TEMPB_)
+    logger._REMOVE_(files)
+    logger._REMOVE_(_TEMP_)
     _SYSTEM_('cp -f ' + orig_datafile + ' ' + datafile)
 
     # getting firstlines
@@ -770,7 +770,7 @@ if __name__ == "__main__":
     print("\n")
 
     # finished
-    utilities._REMOVE_(_TEMPB_)
+    logger._REMOVE_(_TEMPB_)
 
     logger.header2("#################################")
     logger.success("Finished with all.")
@@ -778,10 +778,10 @@ if __name__ == "__main__":
     logger.message("These are the files processed: {}".format(orig_datafile))
     files = [f for f in glob(outfilename+'*') if isfile(f)]
     logger.header2("Made the following files: {} and logfile: {}".format(', '.join(files),logfile))
-    ans = logger.pyinput("if you would like to delete the intermediate files (y or [RET] / n or [SPACE])")
+    ans = logger.pyinput("(y or [RET] / n or [SPACE]) if you would like to delete the intermediate files")
     if ans == "" or ans.lower() == 'y':
         for delfile in _TEMP3_:
-            utilities._REMOVE_(delfile)
+            logger._REMOVE_(delfile)
 
     plt.close()
 
