@@ -197,28 +197,28 @@ class Messenger(object):
             self.warn('Will continue in {}s. CTRL+C to escape'.format(seconds))
             time.sleep(seconds)
 
-def _REMOVE_(logger,file):
-    """
-    This is a restructure of the os.system(rm) or the os.remove command
-    such that the files removed are displayed appropriately or not removed
-    if the file is not found
-    """
-    if type(file) is str:
-        for f in glob('*'+file+'*'):
-            if isfile(f):
-                try:
-                    remove(f)
-                    logger.debug("Removed file {}".format(f))
-                except OSError:
-                    logger.debug("Cannot find {} to remove".format(f))
-    else:
-        for f in file:
-            if isfile(f):
-                try:
-                    remove(f)
-                    logger.debug("Removed file {}".format(f))
-                except OSError:
-                    logger.debug("Cannot find {} to remove".format(f))                   
+    def _REMOVE_(self,file):
+        """
+        This is a restructure of the os.system(rm) or the os.remove command
+        such that the files removed are displayed appropriately or not removed
+        if the file is not found
+        """
+        if type(file) is str:
+            for f in glob('*'+file+'*'):
+                if isfile(f):
+                    try:
+                        remove(f)
+                        self.debug("Removed file {}".format(f))
+                    except OSError:
+                        self.debug("Cannot find {} to remove".format(f))
+        else:
+            for f in file:
+                if isfile(f):
+                    try:
+                        remove(f)
+                        self.debug("Removed file {}".format(f))
+                    except OSError:
+                        self.debug("Cannot find {} to remove".format(f))                   
 
 
 if __name__ == "__main__":
