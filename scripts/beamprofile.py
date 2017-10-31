@@ -115,14 +115,14 @@ if __name__ == "__main__":
     # file 1d
     with open(fname1,'w') as f:
         f.write(': Sun\n')
-        f.write(': {}\n'.format(fname3))
+        f.write(': record {}\n'.format(fname3))
         for i in phasespace:
-            f.write(":{} offset {} {}".format(inti,0,i))
+            f.write(":{} offset {} {}\n".format(inti,0,round(i,2)))
         for i in phasespace:
             if i != 0:
-                f.write(":{} offset {} {}".format(inti,i,0))   
-        f.write(": roff")
-        f.write(": stow")
+                f.write(":{} offset {} {}\n".format(inti,round(i,2),0))   
+        f.write(": roff\n")
+        f.write(": stow\n")
 
     logger.success('Made 1d file')
 
@@ -130,16 +130,16 @@ if __name__ == "__main__":
     count = False
     with open(fname2,'w') as f:
         f.write(': Sun\n')
-        f.write(': {}\n'.format(fname4))
+        f.write(': record {}\n'.format(fname4))
         for i in phasespace:
             for j in phasespace:
                 if (j !=0) and (i != 0) and (count != True):
-                    f.write(":{} offset {} {}".format(inti,i,j))
+                    f.write(":{} offset {} {}\n".format(inti,round(i,2),round(j,2)))
                 else:
-                    f.write(":{} offset {} {}".format(inti,i,j))
+                    f.write(":{} offset {} {}\n".format(inti,round(i,2),round(j,2)))
                     count = True 
-        f.write(": roff")
-        f.write(": stow")
+        f.write(": roff\n")
+        f.write(": stow\n")
 
     logger.success('Made 2d file')
 
