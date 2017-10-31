@@ -156,6 +156,7 @@ if __name__ == "__main__":
     else:
         logger = utilities.Messenger(verbosity=verbosity, add_timestamp=False,logfile=logfile)
     logger.header1("Starting {}....".format(__file__[:-3]))
+    logger.debug("Commandline Arguments: {}".format(args))
 
     logger.header2('This program will create and remove numerous temporary files for debugging.')
     example_data(logger)

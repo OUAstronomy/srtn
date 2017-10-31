@@ -79,6 +79,7 @@ if __name__ == "__main__":
         logger = utilities.Messenger(verbosity=verbosity, add_timestamp=False,logfile=logfile)
     logger.header1("Starting {}....".format(__file__[:-3]))
     logger.header2('This program will create and remove numerous temporary files for debugging.')
+    logger.debug("Commandline Arguments: {}".format(','.join(args)))
 
     # check location listing
     if args.list:

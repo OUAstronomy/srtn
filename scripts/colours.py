@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 '''
 Name  : Colours, colours.py
 Author: Nickalas Reynolds

@@ -103,6 +103,7 @@ if __name__ == "__main__":
     logger.header1("Starting {}....".format(__file__[:-3]))
 
     logger.header2('This program will create and remove numerous temporary files for debugging.')
+    logger.debug("Commandline Arguments: {}".format(args))
     example_data(logger)
 
     _TEMP_ = str(time.time())

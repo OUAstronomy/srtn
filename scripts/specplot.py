@@ -117,6 +117,7 @@ if __name__ == "__main__":
         logfile = ('{}_{}.log'.format(__file_[:-3],time.time()))
     logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
     logger.header1("Starting {}....".format(__file__[:-3]))
+    logger.debug("Commandline Arguments: {}".format(args))
 
     # checking for extra dep
     if worki is True:
