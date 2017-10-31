@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # Initialize instance of an argument parser
     parser = ArgumentParser(description=description)
-    parser.add_argument('-o','--o',type=str,default=time.time(),help=f_help,dest='fout')
+    parser.add_argument('-o','--o',type=str,default=int(time.time()),help=f_help,dest='fout')
     parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
     parser.add_argument('-l','--logger',type=str, help=log_help,dest='log')
     parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
