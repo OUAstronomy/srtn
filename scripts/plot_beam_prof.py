@@ -116,6 +116,7 @@ if __name__ == "__main__":
     y = np.linspace(-10,10,len(x))
     y1p=np.linspace(np.min(y),np.max(y),2*len(y))
     z = data['Tant'][:]
+    madefiles=[]
 
     # separate dimension
     if dimensions == 1:
@@ -150,7 +151,8 @@ if __name__ == "__main__":
         logger.message('FWHM for el: ' + str(abs(fwhm)))
         plt.legend()
         plt.draw()
-        plt.savefig('beam_profile_fit_1d.pdf')
+        madefiles.append('beam_profile_fit_1d.pdf')
+        plt.savefig(file)
         if verbosity >= 2:
             plt.show()
 
@@ -183,9 +185,13 @@ if __name__ == "__main__":
         plt.imshow(zj, vmin=min(z), vmax=max(z), origin='lower',
                    extent=[min(x), max(x), min(y), max(y)])
         plt.xlabel("Az")
-
+        madefile.append('beam_profile_fit_2d.pdf')
         plt.colorbar()
         plt.show()
+
+    logger.success("Finished with file: {}".format(inname))
+    logger.header2("Made file(s): {}".format(' | '.join(madefiles)))
+    logger._REMOVE_(temp)
 
 #############
 # end of code
