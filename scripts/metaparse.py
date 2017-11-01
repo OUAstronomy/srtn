@@ -37,30 +37,40 @@ def info_parse(input_file, output_file):
     _SYSTEM_("sed -i 's/ MHz / /g' " + input_file)
     _SYSTEM_("sed -i 's/ integration periods//g' " + input_file)
     with open(input_file, 'r') as f:
-        input_data = [[x for x in line.replace('\n', '').split(' ') if x != ''] for line in f.readlines()]
+        input_data = [[x for x in line.strip('\n').split(' ') if x != ''] for line in f.readlines()]
+
+    #print(input_data[0])
 
     # full header
     header=[]
     for _T_ in range(3):
         for _R_ in range(len(input_data[_T_])):
-            if ((_R_%2)==0):
+            if ((_R_%2)==0) and (input_data[_T_][_R_] != 'Spectrum'):
                 header.append(input_data[_T_][_R_])
 
-    headernum=[]
+    #print(header)
 
+    headernum=[]
     for _K_ in range(len(input_data)):
+        if ((_K_%4) == 0):
+            temp = []
         if ((_K_%4) < 3):
             for _R_ in range(len(input_data[_K_])):
                 if ((_R_%2)==1):
-                    headernum.append(input_data[_K_][_R_])
-            if (_K_%4 == 2):
-                headernum.append('\n')
+                    temp.append(input_data[_K_][_R_])
+        if ((_K_%4) == 3):
+            headernum.append([item for item in temp])
 
+    print(len(header))
+    print(len(headernum[0]))
+    print(header)
+    print(headernum[0])
+    #raise RuntimeError('Custom')
 
     with open(output_file,'w') as f:
         f.write(' '.join(header)+'\n')
         for _I_ in headernum:
-            f.write("%s " % _I_)
+            f.write("{}\n".format(' '.join(_I_)))
 
 
 # main function
@@ -141,6 +151,8 @@ if __name__ == "__main__":
     logger.waiting(auto)
 
     origfiles = [f for f in glob(instring+'*') if _ISFILE_(f)]
+    if origfiles == []:
+        origfiles.append(instring)
 
     logger.success('Files to be analyzed: {}'.format(','.join(origfiles)))
     logger.waiting(auto)
