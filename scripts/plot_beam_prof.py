@@ -1,150 +1,191 @@
-#! / usr / bin / env python
-# - * - coding: utf-8 - * -
-"""
-name: plot_beam_prof
-Author Nickalas Reynolds
-edits by Patrick Vallely
-data: March 2017
-"""
-# import modules
-from __future__ import print_function
-assert sys.version_info >= (2,5)
+#!/usr/bin/env python
+'''
+Name  : Plot Beam, plotbeam.py
+Author: Nickalas Reynolds
+Date  : Fall 2017
+Misc  : Will plot the beam profile from the metadata.
+'''
+
+# import standard modules
 import os
+import time
+from sys import exit
+_TIME_=time.time()
+from argparse import ArgumentParser
+import pylab
+import math
+
+# import nonstandard modules
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import ascii
-import pylab
-import math
-from scipy.optimize import curve_fit
 from scipy import asarray as ar , exp
-from scipy.special import yn
 import scipy.interpolate
+from scipy.optimize import curve_fit
 
-# read file
-while True:
-	try:
-		fname = raw_input("Input master meta filename: ")
-		answer = raw_input("1 or 2 dimensions: ")
-		answer = int(answer)
-		data = ascii.read(fname)
-	except ValueError:
-		print("Please input an integer, 1 2.")
-		continue
-	if (int(answer) != 1) and (int(answer) != 2):
-		print("Please input an integer, 1 2.")
-		continue
-	else:
-		break
+# import custom modules
+from colours import colours
+from version import *
+import utilities
+from srtutilities import special
 
-# reading data
+# checking python version
+assert assertion()
+__version__ = package_version()
 
-# splitting data
-x1 = []
-x2 = []
-y1 = []
-y2 = []
-for i in range(len(data)):
-	# azoff
-	if data['Azoff'][i] == 0:
-		if data['eloff'][i] == 0:
-			x1.append(data['Azoff'][i])
-			y1.append(data['Tant'][i])
-	elif data['Azoff'][i] != 0:
-		x1.append(data['Azoff'][i])
-		y1.append(data['Tant'][i])
-	# eloff
-	if data['eloff'][i] == 0:
-		if data['Azoff'][i] == 0:
-			x2.append(data['eloff'][i])
-			y2.append(data['Tant'][i])
-	elif data['eloff'][i] != 0:
-		x2.append(data['eloff'][i])
-		y2.append(data['Tant'][i])
-print("Starting...")
 
-# separate dimension
-if answer == 1:
+# main function
+if __name__ == "__main__":
+    # -----------------------
+    # Argument Parser Setup
+    # -----------------------
+    description = 'Plots the beam profile from the metadata\n' \
+                  '{} Version: {} {}'.format(colours.WARNING,__version__,colours._RST_)
 
-	# gaussian
-	def gaus(x , a , x0 , sigma):
-	 	return a * exp(-(x-x0) ** 2 / (2 * sigma ** 2))
-	def bessel2(a , b , var):
-	 	return yn(a , b * var)
+    i_help    = 'The input filename with ext'
+    f_help    = 'The output filename without ext'
+    a_help    = 'If toggled will run the script non interactively'
+    log_help  = 'name of logfile with extension'
+    v_help    = 'Integer 1-5 of verbosity level'
+    dim_help  = 'number of dimensions to be plotted'
 
-	# max for plotting
-	max_val = 0
-	for i in range(len(data)):
-	 	max_val = max(max_val , data['eloff'][i])
+    # Initialize instance of an argument parser
+    parser = ArgumentParser(description=description)
+    parser.add_argument('-i','--input',type=str,help=i_help,dest='fin')
+    parser.add_argument('-o','--o',type=str,default=int(_TIME_),help=f_help,dest='fout')
+    parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
+    parser.add_argument('-l','--logger',type=str, help=log_help,dest='log')
+    parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
+    parser.add_argument('-d','--dim', help=dim_help,default=1,dest='dim',type=int)
 
-	# plotting
-	plt.figure(1)
+    # Get the arguments
+    args       = parser.parse_args()
+    inname     = args.fin
+    outname    = args.fout
+    auto       = args.auto
+    logfile    = args.log
+    verbosity  = args.verb
+    dimensions = args.dim
 
-	# azoff
-	plt.subplot(221)
-	plt.scatter(x1 , y1 , color = "red" , label = 'Azoff' , marker = 's' , edgecolors = 'none')
-	mu1 = np.array(y1).mean()
-	sigma1 = np.array(y1).std()
-	plt.xlabel('Offset (degrees)' , fontsize = 18)
-	plt.ylabel('T$_{bol}$ (K)' , fontsize = 18)
-	popt , pcov = curve_fit(gaus , x1 , y1 , p0 = [1 , mu1 , sigma1])
-	x1p=np.linspace(-20,20,100)
-	plt.plot(x1p , gaus(x1p , *popt) , '--' , color = 'red' , label = 'fit')
-	fwhm = 2. * ((2 * math.log1p(2)) ** 0.5) * (popt[2])
-	print('FWHM for az: ' + str(abs(fwhm)))
-	#print(popt)
-	'''
-	a = 2
-	func1 = lambda var1 , b1 : bessel2(a , b1 , var1)
-	[b] , pcov = curve_fit(func1 , x1 , y1)
-	print pcov # plt.plot(x1,bessel2(a,*b))
-	'''
-	# eloff
-	plt.subplot(222)
-	plt.scatter(x2 , y2 , color = "blue" , label = 'eloff' , marker = 's' , edgecolors = 'none')
-	mu2 = np.array(y2).mean()
-	sigma2 = np.array(y2).std()
-	plt.xlabel('Offset (degrees)' , fontsize = 18)
-	popt2 , pcov2 = curve_fit(gaus , x2 , y2 , p0 = [1 , mu2 , sigma2])
-	plt.plot(x1p , gaus(x1p , *popt2) , '--' , color = 'blue' , label = 'fit')
-	plt.savefig('bp_1d_Gaussian_fits.pdf')
-	fwhm = 2. * ((2 * math.log1p(2)) ** 0.5) * (popt2[2])
-	print('FWHM for el: ' + str(abs(fwhm)))
-	#print(popt2)
+    # Set up message logger    
+    if not logfile:
+        logfile = ('{}_{}.log'.format(__file__[:-3],_TIME_))
+    if verbosity >= 3:
+        logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
+    else:
+        logger = utilities.Messenger(verbosity=verbosity, add_timestamp=False,logfile=logfile)
+    logger.header1("Starting {}....".format(__file__[:-3]))
+    logger.debug("Commandline Arguments: {}".format(args))
+    logger.header2('This program will create and remove numerous temporary files for debugging.')
 
-	plt.show()
+    # if output Line not specified
+    while (inname == '') or (not inname):
+        try:
+            inname = logger.pyinput("filename with ext")
+            break
+        except ValueError:
+            logger.warn("Please input a valid chars.")
+            continue
+        except IOError:
+            logger.warn('File not found, try again')
+            continue
 
-elif answer == 2:
-	print("Brace yourself, this takes awhile...")
-	x=[]
-	y=[]
-	z=[]
-	for i in range(len(data)):
-		x.append(data['Azoff'][i])
-		y.append(data['eloff'][i])
-		z.append(data['Tant'][i])
-	# Set up a regular grid of interpolation points
-	nInterp = 200
-	xi, yi = np.linspace(min(x), max(x), nInterp), np.linspace(min(y), max(y), nInterp)
-	xi, yi = np.meshgrid(xi, yi)
+    # reading data
+    temp = "TEMPORARY_PLOTBEAM_{}".format(_TIME_)
+    tempf = "{}.txt".format(temp)
+    logger._REMOVE_(temp)
+    os.system('cp -f {} {}'.format(inname,tempf))
+    count = 0
+    while True:
+        try:
+            if count > 9:
+                logger.failure('Failed to read in after 10 attempts')
+                exit()
+            os.system('sed -i -e "/Made/d" {}'.format(tempf))
+            data = ascii.read(tempf,delimiter=' ')
+            break
+        except IOError:
+            os.system('sed -i "1d" {}'.format(tempf))
+            count += 1
 
-	# Interpolate; there's also method='cubic' for 2-D data such as here
-	#rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
-	#zi = rbf(xi, yi)
-	zi = scipy.interpolate.griddata((x, y), z, (xi, yi), method='linear')
-	zj = scipy.interpolate.griddata((x, y), z, (xi, yi), method='nearest')
-	plt.subplot(221)
-	plt.imshow(zi, vmin=min(z), vmax=max(z), origin='lower',
-	           extent=[min(x), max(x), min(y), max(y)])
-	plt.xlabel("Az")
-	plt.ylabel("El")        
+    # splitting data
+    #x = data['azoff'][:]
+    x = np.linspace(-10,10,len(data['Tant']))
+    x1p=np.linspace(np.min(x),np.max(x),2*len(x))
+    #y = data['eloff'][:]
+    y = np.linspace(-10,10,len(x))
+    y1p=np.linspace(np.min(y),np.max(y),2*len(y))
+    z = data['Tant'][:]
 
-	plt.subplot(222)
-	plt.imshow(zj, vmin=min(z), vmax=max(z), origin='lower',
-	           extent=[min(x), max(x), min(y), max(y)])
-	plt.xlabel("Az")
+    # separate dimension
+    if dimensions == 1:
 
-	plt.colorbar()
-	plt.show()
+        # plotting
+        plt.figure(figsize=[10,7])
+
+        # azoff
+        plt.subplot(221)
+        plt.scatter(x, z, color = "red" , label = 'Azoff' , marker = 's' , edgecolors = 'none')
+        plt.show()
+        mu1  = np.average(x)
+        sig1 = np.std(x)
+        amp1 = np.max(z)
+        plt.xlabel('Offset (degrees)')
+        plt.ylabel('T$_{bol}$ (K)')
+        function = special().gaussian
+        popt , pcov = curve_fit(function, x,z, p0 = [mu1,sig1,amp1])
+        plt.plot(x1p , function(x1p , *popt) , '--' , color = 'red' , label = 'gaussian fit')
+        fwhm = special().fwhm(popt[2])
+        logger.message('FWHM for az: {}'.format(fwhm))
+
+        # eloff
+        plt.subplot(222)
+        plt.scatter(y,z , color = "blue" , label = 'Eloff' , marker = 's' , edgecolors = 'none')
+        mu2 = np.aeverage(y)
+        sig2 = np.std(y)
+        plt.xlabel('Offset (degrees)')
+        popt2 , pcov2 = curve_fit(function, y,z , p0 = [mu2,sig2,amp1])
+        plt.plot(x1p , function(y1p , *popt2) , '--' , color = 'blue' , label = 'guassian fit')
+        fwhm = special().fwhm(popt2[2])
+        logger.message('FWHM for el: ' + str(abs(fwhm)))
+        plt.legend()
+        plt.draw()
+        plt.savefig('beam_profile_fit_1d.pdf')
+        if verbosity >= 2:
+            plt.show()
+
+    elif answer == 2:
+        print("Brace yourself, this takes awhile...")
+        x=[]
+        y=[]
+        z=[]
+        for i in range(len(data)):
+            x.append(data['Azoff'][i])
+            y.append(data['eloff'][i])
+            z.append(data['Tant'][i])
+        # Set up a regular grid of interpolation points
+        nInterp = 200
+        xi, yi = np.linspace(min(x), max(x), nInterp), np.linspace(min(y), max(y), nInterp)
+        xi, yi = np.meshgrid(xi, yi)
+
+        # Interpolate; there's also method='cubic' for 2-D data such as here
+        #rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+        #zi = rbf(xi, yi)
+        zi = scipy.interpolate.griddata((x, y), z, (xi, yi), method='linear')
+        zj = scipy.interpolate.griddata((x, y), z, (xi, yi), method='nearest')
+        plt.subplot(221)
+        plt.imshow(zi, vmin=min(z), vmax=max(z), origin='lower',
+                   extent=[min(x), max(x), min(y), max(y)])
+        plt.xlabel("Az")
+        plt.ylabel("El")        
+
+        plt.subplot(222)
+        plt.imshow(zj, vmin=min(z), vmax=max(z), origin='lower',
+                   extent=[min(x), max(x), min(y), max(y)])
+        plt.xlabel("Az")
+
+        plt.colorbar()
+        plt.show()
 
 #############
 # end of code
