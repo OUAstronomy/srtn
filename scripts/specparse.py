@@ -207,6 +207,8 @@ if __name__ == "__main__":
     logger.warn("Will delete:  {}".format(" | ".join(delfiles)))
     logger.waiting(auto)
     files = [f for f in glob(instring+'*') if _ISFILE_(f)]
+    if files == []:
+        files.append(instring)
 
     logger.success('Files to be analyzed: {}'.format(','.join(files)))
     logger.waiting(auto)
