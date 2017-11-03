@@ -52,12 +52,11 @@
 \lstset{style=mystyle}
 \newcommand{\code}[1]{\colorbox{backcolour}{\text{#1}}}
 \newcommand{\git}{\url{https://github.com/OUsrt/srtn.git}}
-\newcommand{\ben}{\url{https://github.com/BenningtonCS/Telescope-2014/wiki}}
 \newcommand{\discord}{\url{https://discord.gg/vx536X2}}
 \newcommand{\web}{\url{https://www.nhn.ou.edu/srt}}
 
 % Book's title and subtitle
-\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual \\ \huge Version 0.1}
+\title{\Huge \textbf{The University of Oklahoma} \\ \textbf{Nielsen Hall SRT}\\ \huge Operator's Manual \\ \huge Version 0.2}
 % Author
 \author{\textsc{John Tobin\footnote{jjtobin@ou.edu}}\footnote{GitHub: \git , Group Email: \url{nhnradiotelescope@groups.ou.edu}}\footnote{Discord Chat: \discord , Website: \web}\\\textsc{Nickalas Reynolds\footnotemark[2]\footnotemark[3]\footnote{nickreynolds@ou.edu}}}
 
@@ -91,7 +90,7 @@ The website\footnote{\git} for this file contains:
 \begin{itemize}
 \item Hardware design, development of software, and instructions: (\url{www.haystack.mit.edu/edu/undergrad/srt/})
 \item Fabrication of the SRT parts: (\url{https://www.rfhamdesign.com} )
-\item Parse code and instructions: (\ben)
+\item Parse code and instructions: (\git)
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +123,7 @@ This list of procedures is extremely condensed and it is expected you are fairly
  \text{\#}& \text{ Simple Cal (with absorber) } \nonumber\\
  &\text{1) Slew to cold sky } \nonumber\\
  &\text{2) hit cal on calmode 20 } \nonumber\\
- &\text{3) place absorber } \nonumber\\
+ &\text{3) place absorber/or turn on noise-diode } \nonumber\\
  &\text{4) should have flat bandpass } \nonumber\\
  \text{\#}& \text{ Simple Cal (without absorber) } \nonumber\\
  &\text{1) Stow} \nonumber\\
@@ -159,7 +158,8 @@ The capabilities of the SRT are as follow:
 \begin{align}
     & \text{Aperture} & 3.0 & \text{\space meters} \nonumber\\
     & \text{Frequency Range} & 1420-1470 & \text{\space MHz} \nonumber\\
-    & \text{Pointing Accuracy} & 0.2 & \text{\space Degree} \nonumber\\
+    & \text{Mechanical Pointing Accuracy} & 0.2 & \text{\space Degree} \nonumber\\
+    & \text{Software Pointing Accuracy} & 0.5 & \text{\space Degree} \nonumber\\
     & \text{Beam Width\footnote{Refer to equation: \ref{eq:beamwidth}}} & 4.92 & \text{\space Degrees} \nonumber\\
     & \text{Max wind speed} & 120 & \text{\space km/h} \nonumber
 \end{align}
@@ -196,7 +196,7 @@ Since you are just starting out, use the command with the \code{-ViewOnly} flag 
 \noindent You will be prompted for a VNC server password which is \code{SRT1420MHz}.
 
 To walk you through the commands: VNC is the program used that uses ssh protocol to provide a graphical interface between two computers, \code{vncviewer} is the command to view an existing VNC server on a host computer, \code{-Shared} allows multiple users to access the server at once, \code{-ViewOnly} does not send keyboard or mouse controls to the hosting server, \code{-via} specifies to route to the domain and specific server, \code{jjtobin@reber.ou.edu} is the domain under which the server presides, \code{reber:1} designates the computer and server window.
-There are probably a few VNC servers operating on the server computer at one time and can be listed with \code{vncserver -list}. However, unless you are not the one that created those windows, please do not close them as they might be in use. 
+There are probably a few VNC servers operating on the server computer at one time and can be listed with \code{vncserver -list}. However, unless you are the one that created those windows, please do not close them as they might be in use. 
 
 Once you have the display window open, you can now begin your observation. First, open up the Firefox session by either toggling the Icon in the application menu or by opening a Terminal window and issuing \code{firefox} into the prompt. This should open up several windows which are crucial for observations. The windows are: IP camera to display the telescope, the IP power supply which controls the power to the telescope/controller/noise generator, the SRT website, the Discord chat service, and the Intellicast website to view current weather conditions in Norman, OK.
 
@@ -218,7 +218,7 @@ Do not change the code of the SRT software on the SRT controller computer until 
 
 Two versions of the code are currently in use and I will very briefly describe the differences. Version 5 is the more stable of the two programs however, it has a 1 degree tracking increment. Compared to the beam size of 5 degrees, this can yield a fairly large error if accurate position tracking is needed. Version 6 allows for 0.5 degree tracking, however, some issues with commands not passing through correctly have been noted. In order to work around this issue, simply close and reopen the program.
 
-Multiple directories probably already exist on the computer. Most of these directories will be personal ones and please respect the integrity of other people's work. There exist two simulation5/6 directories which are for public use and can be used simultaneously with the main srtn program. These are for determining observation plans for later times and they can be used to simulate the positions of objects at any time.
+Multiple directories probably already exist on the computer. Most of these directories will be personal ones and please respect the integrity of other people's work. There exist two simulation 5/6 directories which are for public use and can be used simultaneously with the main srtn program. These are for determining observation plans for later times and they can be used to simulate the positions of objects at any time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Commands}
@@ -233,10 +233,10 @@ tar # (un)compression algorithm, x is uncompress, z is gunzip format, v is verbo
 \end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{GitHub}
+\section{Git/GitHub}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Quick Command Breakdown}
-This is meant for just a quick overview of GitHub commands. Please understand the commands before using them. 
+This is meant for just a quick overview of Git/GitHub commands. Please understand the commands before using them. 
 \begin{lstlisting}
 new repository
 ->git init :: initialize local repository inside the repository
@@ -427,8 +427,7 @@ Instruction line: Must start with a time mark (either UT or LST) or a colon (cur
 Rules:
 : cmd /execute the command and proceed to the next line
 :120 cmd /execute the command and wait 120 seconds, taking data, before proceeding to the next line in the schedule
-:120 /wait 120 seconds, taking data, before proceeding to the next line. This is a convenient way of increasing the 
-radiometer integration to more than one scan.
+:120 /wait 120 seconds, taking data, before proceeding to the next line. This is a convenient way of increasing the  integration to more than one scan.
 \hfill
 *Note: There is NO space allowed between the colon and a time ``wait'' command
 \hfill
@@ -470,8 +469,9 @@ If this input command file were named galactic.cmd, the user could initiate this
 \hfill
     First thing you will have to do before any observing will be to calibrate the telescope. Your intended source will determine the calibration procedure and the subsequent method of observing.
 
-    To transform your relative flux into absolute flux, you need to do a careful calibration. You can do this by pointing to a radio quiet patch of the sky and press the cal button. This will first sample this ``cold load'' source. The software will then prompt you to place the absorber in the feed. You can either turn on the noise source now by toggling the button in the IP Power supply Firefox window or you can go to the roof and physically place the carbon-impreginated foam absorber infront of the feed. 
-    You will have to do this for roughly 10 seconds. Make sure you do not place anything infront of the antenna or the feed beforehand and that the feed is completely covered or supplied known noise for the full calibration time. Otherwise, your calibration will be off. In the terminal you used to open the srtn program, a line of parameters will appear when the calibration procedure is done. Pay special attention to these parameters. Example line: \code{yfac 2.616403 tsys 174.554743 pwr 445.649653 pwrprev 169.683193 calmode 20 max\_pwr 1420.362 MHz}. 
+    To transform your relative flux into absolute flux, you need to do a careful calibration. You can do this by pointing to a radio quiet patch of the sky and press the cal button. This will first sample this ``cold load'' source. The software will then prompt you to place the absorber in the feed. You can either turn on the noise source\footnote{The noise source temperature hasn't been accurately determined yet but the current temperature profile works well} now by toggling the button in the IP Power supply Firefox window or you can go to the roof and physically place the carbon-impreginated foam absorber infront of the feed. 
+    You will have to do this for roughly 10 seconds. Make sure you do not place anything infront of the antenna or the feed beforehand and that the feed is completely covered or supplied known noise for the full calibration time. Otherwise, your calibration will be off. In the terminal you used to open the srtn program, a line of parameters will appear when the calibration procedure is done. Pay special attention to these parameters. 
+    Example line: \code{yfac 2.616403 tsys 174.554743 pwr 445.649653 pwrprev 169.683193 calmode 20 max\_pwr 1420.362 MHz}. 
     These are the parameters used to calibrate the telescope. You can look at the formula given in section \ref{sec:formulas}. The typical tsys value for the telescope is 180 on a hot day and 175 on a cold day. Options are still being explored to better stabilize the telescope components. It is suggested to do several calibrations until you get one that is suitable. A new tsys value is not imposed unless the yfac is $>$1.5. 
 
     Changing frequencies will reset calibrations and pointing offsets.
@@ -527,12 +527,12 @@ Parsing and Plotting the Spectra.
     \item The command \code{scp /file/to/move/ /destination/} will help.
     \item Make sure you acquire the parsing code\footnote{\git} in order the parse the data.
     \item For continuum analysis:
-    \item The metadata parser is called all\_meta\_parse.py. The all\_meta\_parse script lists columns of data in the order: Date, obsn, az, el, center freq, Tsys, Tant, vlsr, galactic latitude, galactic longitude, source, fstart, fstop, spacing, bw, fbw, nfreq, nsam, npoint, integ, sigma, bsw.
+    \item The metadata parser is called metaparse.py. The metaparse script lists columns of data in the order: Date, obsn, az, el, center freq, Tsys, Tant, vlsr, galactic latitude, galactic longitude, azoff,eloff,source, fstart, fstop, spacing, bw, fbw, nfreq, nsam, npoint, integ, sigma, bsw.
     \item For spectrum analysis:
-    \item The spectrum parser is called all\_hispec.py. The all\_hispec script lists: frequency, vel, vel-vlsr, and Tant. 
-    \item To run the files, use \code{$\sim$\$ python all\_hispec.py --test}. Follow the input parameters or just simply run \code{python all\_hispec.py }
+    \item The spectrum parser is called specparse.py. The specparse script lists: frequency, vel, vel-vlsr, and Tant. 
+    \item To run the files, use \code{python hispec.py --help}. Follow the input parameters or just simply run \code{python specparse.py}
     \item Once you have your spectra parsed out and written to a new file, you can start to plot them all. 
-    \item You can reduce and plot the spectra by running the code \code{python spec\_reduc.py --help}. This code will walk you through the reduction, but to summarize the steps you are flattening the baseline, removing RFI, and then finding the integrated intensity.
+    \item You can reduce and plot the spectra by running the code \code{python specplot.py --help}. This code will walk you through the reduction, but to summarize the steps you are flattening the baseline, removing RFI, and then finding the integrated intensity.
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Gnuplot}
