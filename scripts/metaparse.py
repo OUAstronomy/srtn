@@ -9,8 +9,8 @@ Misc  :
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     Made from file: data.txt
     R7 S8 G10
-    freq vel vel_vlsr Tant freq_1 vel_1 vel_vlsr_1 Tant_1 freq_2 vel_2 vel_vlsr_2 Tant_2
-    1419.397 2171.19039917 2131.12039917 145.083 1419.397 2173.46039917 2131.12039917 142.132
+    DATE obsn az el freq_MHz Tsys Tant vlsr glat glon azoff eloff source Fstart fstop spacing bw fbw nfreq nsam npoint integ sigma bsw
+    2015:218:16:30:49 0 165 63 1421.5000 162.000 1125.714 8.19 36.980 211.928 0.00 0.00 Sun 1420.497 1422.503 0.009375 2.400 2.000 256 1048576 214 5 0.781 0
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '''
 
