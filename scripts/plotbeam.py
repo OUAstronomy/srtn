@@ -67,6 +67,9 @@ if __name__ == "__main__":
     verbosity  = args.verb
     dimensions = args.dim
 
+    print("Program is being worked on...")
+    exit()
+
     # Set up message logger    
     if not logfile:
         logfile = ('{}_{}.log'.format(__file__[:-3],_TIME_))
@@ -142,7 +145,7 @@ if __name__ == "__main__":
         # eloff
         plt.subplot(222)
         plt.scatter(y,z , color = "blue" , label = 'Eloff' , marker = 's' , edgecolors = 'none')
-        mu2 = np.aeverage(y)
+        mu2 = np.average(y)
         sig2 = np.std(y)
         plt.xlabel('Offset (degrees)')
         popt2 , pcov2 = curve_fit(function, y,z , p0 = [mu2,sig2,amp1])
