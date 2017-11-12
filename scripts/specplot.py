@@ -185,7 +185,7 @@ if __name__ == "__main__":
     data = ascii.read(datafile)
 
     # to verify correct input
-    logger.header2("Will reduce these sources: {}".format(" | ".join(first_line)))
+    logger.header2("Will reduce these ({}) sources: {}".format(len(first_line)," | ".join(first_line)))
     
     # starting at non-zero source
     acstart = ''
@@ -580,9 +580,11 @@ if __name__ == "__main__":
         # intensity estimate
         while True:
             try:
-                intensity_answer = logger.pyinput('Sigma value for Gaussian (integers * rms) or [RET] for default 5 sigma')
+                intensity_answer = logger.pyinput('Sigma value for Gaussian (integers * rms) or [RET] for default 5 sigma or "none" to skip')
                 if intensity_answer == '':
                     intensity_answer = 5.0
+                elif intensity_answer.lower() == 'none':
+                    break
                 intensity_answer = float(intensity_answer)
             except ValueError:
                 logger.warn('Please input integer or float.')
@@ -594,150 +596,153 @@ if __name__ == "__main__":
             if intensity_answer > 3.:
                 logger.message('Gaussian signal: {}*rms'.format(intensity_answer))
                 break
-        with open(_TEMP2_,'a') as _T_:
-            _T_.write('Sigma value for Gaussian: {}\n'.format(intensity_answer))
+        if intensity_answer.lower() != 'none':
+            with open(_TEMP2_,'a') as _T_:
+                _T_.write('Sigma value for Gaussian: {}\n'.format(intensity_answer))
 
-        while True:
-            try:
-                intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
-                minint=min(data[col1][intensity_mask_guess])
-                maxint=max(data[col1][intensity_mask_guess])
-                while True:
-                    if len(intensity_mask_guess) == 0:
-                        intensity_answer -=1
-                        intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
-                        minint=min(data[col1][intensity_mask_guess])
-                        maxint=max(data[col1][intensity_mask_guess])
-                    if intensity_answer == 0:
-                        intensity_mask_guess = np.linspace(len(data[col1])/4-1,3*len(data[col1])/4-1, num = len(data[col1])/2)
-                    if len(intensity_mask_guess) > 0:
-                        break
-            except ValueError:
-                continue
-            if len(intensity_mask_guess) > 0:
-                break
-
-        # Intensity line estimate
-        
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.xlim(minvel,maxvel)
-        plt.ylim(-5,max(spectra_blcorr) * 1.1)
-        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-        lin2=plt.plot(data[col1][intensity_mask_guess],np.zeros(len(data[col1][intensity_mask_guess])),color='blue',linestyle='dotted')
-        lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-        lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.title("Intensity Line Estimate")
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
-        draw()
-        logger.waiting(auto)
-        outfilename_iter +=1
-        _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
-        _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
-
-        answer = ""
-        while True:
-            try:
-                answer_ok = logger.pyinput("(y or [RET]/n or [SPACE]) Is region guess for the line intensity is okay")
-                if ((answer_ok.lower() == "y") or (answer_ok == "")):
-                    intensity_mask = intensity_mask_guess
-                    break
-                else:
-                    # define the Intensity
-                    plt.ion()
-                    t=plt.subplot()
-                    t.set_title('lasso selection:')
-                    lin10=plt.scatter(data[col1],spectra_blcorr,color='black')
-                    lin2=plt.plot(data[col1],spectra_blcorr,color='blue',linestyle='steps')
-                    lin3=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps')
-                    plt.tick_params('both', which='major', length=15, width=1, pad=15)
-                    plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-                    ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-                    plt.ylabel('Antenna Temperature (K)', fontsize=18)
-                    plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
-                    draw()
-                    # recovering intensity of line 
-                    temp = []
-                    intensity_mask_array = []
-                    intensity_mask = []
+            while True:
+                try:
+                    intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
+                    minint=min(data[col1][intensity_mask_guess])
+                    maxint=max(data[col1][intensity_mask_guess])
                     while True:
-                        selector = SelectFromCollection(t, lin10)
-                        plt.title("Draw a box around region of line intensity.")
-                        logger.header2("Draw a box around region of line intensity.")
-                        draw()
-                        logger.pyinput('[RET] to accept selected points')
-                        temp = selector.xys[selector.ind]
-                        intensity_mask_array = np.append(intensity_mask_array,temp)
-                        selector.disconnect()
-                        # Block end of script so you can check that the lasso is disconnected.
-                        answer = logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
-                        plt.show()
-                        if ((answer == "n") or (answer == "")):
+                        if len(intensity_mask_guess) == 0:
+                            intensity_answer -=1
+                            intensity_mask_guess = np.where((spectra_blcorr >= intensity_answer * rms) & (spectra_blcorr >= -intensity_answer * rms))
+                            minint=min(data[col1][intensity_mask_guess])
+                            maxint=max(data[col1][intensity_mask_guess])
+                        if intensity_answer == 0:
+                            intensity_mask_guess = np.linspace(len(data[col1])/4-1,3*len(data[col1])/4-1, num = len(data[col1])/2)
+                        if len(intensity_mask_guess) > 0:
                             break
-                    logger.waiting(auto)
-                    for i in range(len(intensity_mask_array)):
-                        intensity_mask = np.append(intensity_mask,np.where(data[col1] == intensity_mask_array[i]))
-                    intensity_mask = [int(x) for x in intensity_mask]
-                    # draw and reset
-                    minint=min(data[col1][intensity_mask])
-                    maxint=max(data[col1][intensity_mask])
-                    plt.figure(plt_iter+1,figsize=[10,7])
-                    plt_iter += 1
-                    f=plt.subplot()
-                    f.set_title("With Line Intensity Mask")
-                    lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-                    lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
-                    lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-                    lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')                
-                    f.set_xlabel('V$_{lsr}$ (km/s)', fontsize=18)
-                    draw()
+                except ValueError:
+                    continue
+                if len(intensity_mask_guess) > 0:
                     break
-            except ValueError:
-                continue
 
-        # showing Intensity Mask
-        minint=min(data[col1][intensity_mask])
-        maxint=max(data[col1][intensity_mask])
+            # Intensity line estimate
+            
+            plt.figure(plt_iter+1,figsize=[10,7])
+            plt_iter += 1
+            plt.xlim(minvel,maxvel)
+            plt.ylim(-5,max(spectra_blcorr) * 1.1)
+            lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
+            lin2=plt.plot(data[col1][intensity_mask_guess],np.zeros(len(data[col1][intensity_mask_guess])),color='blue',linestyle='dotted')
+            lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
+            lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
+            plt.tick_params('both', which='major', length=15, width=1, pad=15)
+            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
+            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
+            plt.title("Intensity Line Estimate")
+            plt.ylabel('Antenna Temperature (K)', fontsize=18)
+            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            draw()
+            logger.waiting(auto)
+            outfilename_iter +=1
+            _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
+            _TEMP3_.append(_TEMPNAME)
+            plt.savefig(_TEMPNAME)
 
-        
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.xlim(minvel,maxvel)
-        plt.ylim(-5,max(spectra_blcorr) * 1.1)
-        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-        lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
-        lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-        lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.title("Intensity Mask")
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
-        draw()
-        logger.waiting(auto)
-        outfilename_iter +=1
-        _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
-        #_TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+            answer = ""
+            while True:
+                try:
+                    answer_ok = logger.pyinput("(y or [RET]/n or [SPACE]) Is region guess for the line intensity is okay")
+                    if ((answer_ok.lower() == "y") or (answer_ok == "")):
+                        intensity_mask = intensity_mask_guess
+                        break
+                    else:
+                        # define the Intensity
+                        plt.ion()
+                        t=plt.subplot()
+                        t.set_title('lasso selection:')
+                        lin10=plt.scatter(data[col1],spectra_blcorr,color='black')
+                        lin2=plt.plot(data[col1],spectra_blcorr,color='blue',linestyle='steps')
+                        lin3=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps')
+                        plt.tick_params('both', which='major', length=15, width=1, pad=15)
+                        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
+                        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
+                        plt.ylabel('Antenna Temperature (K)', fontsize=18)
+                        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+                        draw()
+                        # recovering intensity of line 
+                        temp = []
+                        intensity_mask_array = []
+                        intensity_mask = []
+                        while True:
+                            selector = SelectFromCollection(t, lin10)
+                            plt.title("Draw a box around region of line intensity.")
+                            logger.header2("Draw a box around region of line intensity.")
+                            draw()
+                            logger.pyinput('[RET] to accept selected points')
+                            temp = selector.xys[selector.ind]
+                            intensity_mask_array = np.append(intensity_mask_array,temp)
+                            selector.disconnect()
+                            # Block end of script so you can check that the lasso is disconnected.
+                            answer = logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
+                            plt.show()
+                            if ((answer == "n") or (answer == "")):
+                                break
+                        logger.waiting(auto)
+                        for i in range(len(intensity_mask_array)):
+                            intensity_mask = np.append(intensity_mask,np.where(data[col1] == intensity_mask_array[i]))
+                        intensity_mask = [int(x) for x in intensity_mask]
+                        # draw and reset
+                        minint=min(data[col1][intensity_mask])
+                        maxint=max(data[col1][intensity_mask])
+                        plt.figure(plt_iter+1,figsize=[10,7])
+                        plt_iter += 1
+                        f=plt.subplot()
+                        f.set_title("With Line Intensity Mask")
+                        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
+                        lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
+                        lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
+                        lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')                
+                        f.set_xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+                        draw()
+                        break
+                except ValueError:
+                    continue
 
-        # intensity
-        intensity=np.sum(spectra_blcorr[intensity_mask])
-        chanwidth=abs(max(data[col1])-min(data[col1]))/len(data[col1])
-        if ((answer_ok.lower() == 'y') or (answer_ok == '')):
-            intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
+            # showing Intensity Mask
+            minint=min(data[col1][intensity_mask])
+            maxint=max(data[col1][intensity_mask])
+
+            
+            plt.figure(plt_iter+1,figsize=[10,7])
+            plt_iter += 1
+            plt.xlim(minvel,maxvel)
+            plt.ylim(-5,max(spectra_blcorr) * 1.1)
+            lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
+            lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
+            lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
+            lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
+            plt.tick_params('both', which='major', length=15, width=1, pad=15)
+            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
+            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
+            plt.title("Intensity Mask")
+            plt.ylabel('Antenna Temperature (K)', fontsize=18)
+            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            draw()
+            logger.waiting(auto)
+            outfilename_iter +=1
+            _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
+            #_TEMP3_.append(_TEMPNAME)
+            plt.savefig(_TEMPNAME)
+
+            # intensity
+            intensity=np.sum(spectra_blcorr[intensity_mask])
+            chanwidth=abs(max(data[col1])-min(data[col1]))/len(data[col1])
+            if ((answer_ok.lower() == 'y') or (answer_ok == '')):
+                intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
+            else:
+                intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
+            logger.message("Intensity: ")
+            logger.message("{} +- {} (K km/s)".format((intensity)*chanwidth,intensity_rms))
+            with open(_TEMP2_,'a') as _T_:
+                _T_.write('Intensity: {} +- {} (K km/s)'.format((intensity)*chanwidth,intensity_rms))
         else:
-            intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
-        logger.message("Intensity: ")
-        logger.message("{} +- {} (K km/s)".format((intensity)*chanwidth,intensity_rms))
-        with open(_TEMP2_,'a') as _T_:
-            _T_.write('Intensity: {} +- {} (K km/s)'.format((intensity)*chanwidth,intensity_rms))
-
+            with open(_TEMP2_,'a') as _T_:
+                _T_.write('No intensity guess\n')
         # write to file
         try:
             spec_final = Table([data[col0],data[col1],data[col2],spectra_blcorr], names=('vel_sub', 'vel', 'Tant_raw', 'Tant_corr'))
