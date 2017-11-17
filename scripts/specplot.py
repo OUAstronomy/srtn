@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
     # Set up message logger            
     if not logfile:
-        logfile = ('{}_{}.log'.format(__file_[:-3],time.time()))
+        logfile = ('{}_{}.log'.format(__file__[:-3],time.time()))
     logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
     logger.header1("Starting {}....".format(__file__[:-3]))
     logger.debug("Commandline Arguments: {}".format(args))
@@ -240,7 +240,7 @@ if __name__ == "__main__":
         f.tick_params('both', which='minor', length=7.5, width=1, pad=15)
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         f.set_ylabel('Antenna Temperature (K)', fontsize=18)
-        f.set_xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         draw()
         # baseline
         baseline_med=np.median(data[col2])-0.5
@@ -275,7 +275,7 @@ if __name__ == "__main__":
         f=plt.subplot()
         f.set_title("Raw Data")
         rawdata=f.plot(data[col1],data[col2],color='black',linestyle='steps')
-        f.set_xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         draw()
         outfilename_iter =0
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
@@ -303,7 +303,7 @@ if __name__ == "__main__":
         plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         draw()
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
@@ -344,7 +344,7 @@ if __name__ == "__main__":
             plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
             ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
             plt.legend()
             draw()
             newask = logger.pyinput('(y or [RET]/n or [SPACE]) Was this acceptable? ')
@@ -384,7 +384,7 @@ if __name__ == "__main__":
         plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         plt.legend()
         draw()
         logger.waiting(auto)
@@ -405,7 +405,7 @@ if __name__ == "__main__":
         plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         draw()
 
         temp = []
@@ -520,7 +520,7 @@ if __name__ == "__main__":
             plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
             ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
             plt.ylim(-1,1.2*max(spectra_blcorr))
             plt.legend()
             draw()
@@ -547,7 +547,7 @@ if __name__ == "__main__":
         plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         plt.ylim(-1,1.2*max(spectra_blcorr))
         plt.legend()
         draw()
@@ -569,7 +569,7 @@ if __name__ == "__main__":
         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
         plt.title("Final correction plot ")
         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
         draw()
         logger.waiting(auto)
         outfilename_iter +=1
@@ -583,7 +583,7 @@ if __name__ == "__main__":
                 intensity_answer = logger.pyinput('Sigma value for Gaussian (integers * rms) or [RET] for default 5 sigma or "none" to skip')
                 if intensity_answer == '':
                     intensity_answer = 5.0
-                elif intensity_answer.lower() == 'none':
+                elif str(intensity_answer).lower() == 'none':
                     break
                 intensity_answer = float(intensity_answer)
             except ValueError:
@@ -596,7 +596,7 @@ if __name__ == "__main__":
             if intensity_answer > 3.:
                 logger.message('Gaussian signal: {}*rms'.format(intensity_answer))
                 break
-        if intensity_answer.lower() != 'none':
+        if str(intensity_answer).lower() != 'none':
             with open(_TEMP2_,'a') as _T_:
                 _T_.write('Sigma value for Gaussian: {}\n'.format(intensity_answer))
 
@@ -635,7 +635,7 @@ if __name__ == "__main__":
             ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
             plt.title("Intensity Line Estimate")
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
             draw()
             logger.waiting(auto)
             outfilename_iter +=1
@@ -662,7 +662,7 @@ if __name__ == "__main__":
                         plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
                         ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
                         plt.ylabel('Antenna Temperature (K)', fontsize=18)
-                        plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+                        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
                         draw()
                         # recovering intensity of line 
                         temp = []
@@ -697,7 +697,7 @@ if __name__ == "__main__":
                         lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
                         lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
                         lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')                
-                        f.set_xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+                        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
                         draw()
                         break
                 except ValueError:
@@ -721,7 +721,7 @@ if __name__ == "__main__":
             ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
             plt.title("Intensity Mask")
             plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel('V$_{lsr}$ (km/s)', fontsize=18)
+            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
             draw()
             logger.waiting(auto)
             outfilename_iter +=1
