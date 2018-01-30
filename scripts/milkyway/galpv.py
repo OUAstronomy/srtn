@@ -35,7 +35,7 @@ def angle_clockwise(A, B):
         return 360-inner
 
 # checking python version
-assert sys.version[0] >= 3
+assert sys.version_info[0] >= 3
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--resolution',dest='r',default=5,type=float)
@@ -46,7 +46,12 @@ parser.add_argument('-i', '--integration',type=int, default=120,dest='i')
 parser.add_argument('--debug',action='store_true')
 args = parser.parse_args()
 
-outname = "galpv_{}_{}_{}".format(args.sd,args.d,args.ed)
+if args.d == '+'
+    outname = "galpv_{}_p_{}".format(args.sd,args.ed)
+else:
+    outname = "galpv_{}_m_{}".format(args.sd,args.ed)
+
+assert args.d in ['-','+']
 start = args.sd%360
 end   = args.ed%360
 
@@ -85,6 +90,7 @@ print("Total Time: {}s ".format(totaltime))
 
 # making srt.cat file
 with open(outname+'.cat','w') as f:
+    f.write('BIGRAS\n')
     f.write('CALMODE 20\n')
     f.write('STATION 35.207 97.44 Sooner_Station\n')
     f.write('SOU 00 00 00  00 00 00 Sun\n')
@@ -95,23 +101,21 @@ with open(outname+'.cat','w') as f:
     f.write('NOPRINTOUT\n')
     f.write('BEAMWIDTH 5\n')
     f.write('NBSW 10\n')
-    f.write('AZLIMITS 0 355\n')
-    f.write('ELLIMITS 0 89.0\n')
-    f.write('STOWPOS 90 0\n')
-    f.write('TSYS 171    \n')
-    f.write('TCAL 290    // should equal ambient load\n')
-    f.write('RECORD 10 SPEC\n')
-    f.write('NUMFREQ 1024   // good choise for ADC card\n')
+    f.write('AZLIMITS 0 360\n')
+    f.write('ELLIMITS 0 90.0\n')
+    f.write('STOWPOS 90 2\n')
+    f.write('TSYS 125    \n')
+    f.write('TCAL 1200    // should equal ambient load\n')
+    f.write('RECORD 5 SPEC\n')
     f.write('NUMFREQ 256    // good choice for dongle\n')
-    f.write('*FREQUENCY 1420.406\n')
     f.write('BANDWIDTH 2.0\n')
     f.write('FREQUENCY 1420.406\n')
     f.write('RESTFREQ 1420.406\n')
     f.write('FREQCORR -0.05   // TV dongle correction\n')
     f.write('NBLOCK 5   // number of blocks per update - can be reduced for Beagle board with slow display for PCI it is hardwired to 20\n')
-    f.write('RFI 1420.05 0.015\n')
-    f.write('RFI 1420.85 0.005\n')
-    f.write('RFI 1421.15 0.005\n')
+    f.write('COUNTPERSTEP 100 // to move with old SRT is steps\n')
+    f.write('ROT2SLP 2  // change rot2 sleep time to 3 seconds - default is 1 second\n')
+    f.write('NOISECAL 70 // default is 300\n')
     f.write('')
 
 #############
