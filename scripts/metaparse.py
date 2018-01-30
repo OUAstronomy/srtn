@@ -61,10 +61,6 @@ def info_parse(input_file, output_file):
         if ((_K_%4) == 3):
             headernum.append([item for item in temp])
 
-    print(len(header))
-    print(len(headernum[0]))
-    print(header)
-    print(headernum[0])
     #raise RuntimeError('Custom')
 
     with open(output_file,'w') as f:

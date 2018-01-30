@@ -1,8 +1,3 @@
-'''
-Creates plots to correct baselines
-author: John Tobin and Nick Reynolds
-Date: March 2017
-'''
 #!/usr/bin/env python
 '''
 Name  : Spectrum Reduction, specreduc.py
@@ -26,13 +21,12 @@ from astropy.table import Table
 from astropy.io import ascii
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import draw as draw
 from matplotlib.ticker import ScalarFormatter
 import matplotlib.ticker as ticker
-from six.moves import input
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
 from scipy.optimize import curve_fit
+ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
 
 # import custom modules
 from colours import colours
@@ -44,7 +38,9 @@ from version import *
 assert assertion()
 __version__ = package_version()
 
+####################################################################################
 # prepare mask lasso command
+####################################################################################
 class SelectFromCollection(object):
     def __init__(self, ax, collection, alpha_other=0.3):
         self.canvas = ax.figure.canvas
@@ -78,7 +74,88 @@ class SelectFromCollection(object):
         self.collection.set_facecolors(self.fc)
         self.canvas.draw_idle()
 
+####################################################################################
+# plotting command
+####################################################################################
+class plotter(object):
+    def __init__(self,title,logger=None,size=[10,7]):
+        self.size   = size
+        self.title  = title
+        self.logger = logger
+        self.data   = {}
+
+    def open(self,numsubs=(1,1),xlabel=None,ylabel=None):
+        self.numsubs = numsubs
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.f = plt.subplots(nrows=numsubs[0], ncols=numsubs[1],figsize=self.size)
+        self.f[1].tick_params('both', which='major', length=15, width=1, pad=15)
+        self.f[1].tick_params('both', which='minor', length=7.5, width=1, pad=15)
+        self.f[1].set_ylabel(ylabel, fontsize=18)
+        self.f[1].set_xlabel(xlabel, fontsize=18)
+        self.f[1].set_title(self.title)
+
+    def scatter(self,x,y,datalabel,**kwargs):
+        self.data[datalabel] = self.f[1].scatter(x,y,**kwargs)
+
+    def plot(self,x,y,datalabel,**kwargs):
+        self.data[datalabel] = self.f[1].plot(x,y,**kwargs)
+
+    def int(self):
+        plt.ion()
+
+    def draw(self):
+        plt.legend()
+        plt.draw()
+
+    def selection(self,label):
+        temp      = []
+        msk_array = []
+        while True:
+            selector = SelectFromCollection(self.f[1], self.data[label],0.1)
+            self.logger.header2("Draw mask regions around the non-baseline features...")
+            self.draw()
+            self.logger.pyinput('[RET] to accept selected points')
+            temp = selector.xys[selector.ind]
+            msk_array = np.append(msk_array,temp)
+            selector.disconnect()
+            # Block end of script so you can check that the lasso is disconnected.
+            answer = self.logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
+            plt.show()
+            if ((answer.lower() == "n") or (answer == "")):
+                self.save('TEMPORARY_FILE_SPECREDUC_PLOT.pdf')
+                break
+        self.logger.waiting(auto)
+        return msk_array
+
+    def save(self,name):
+        plt.savefig(name)
+
+    def resetplot(self,title):
+        plt.clf()
+        self.title = title
+        self.data = {}
+        self.open(self.numsubs,self.xlabel,self.ylabel)
+        self.limits()
+
+    def limits(self,xlim=None,ylim=None):
+        if xlim:
+            self.f[1].set_xlim(xlim[0],xlim[1])
+        if ylim:
+            self.f[1].set_ylim(ylim[0],ylim[1])
+
+####################################################################################
+# create fitting code for gauss bimodal lines etc
+####################################################################################
+def gauss(x,mu,sigma,A):
+    return A*np.exp(-(x-mu)**2/2./sigma**2)
+
+def bimodal(x,mu1,sigma1,A1,mu2,sigma2,A2):
+    return gauss(x,mu1,sigma1,A1)+gauss(x,mu2,sigma2,A2)
+
+####################################################################################
 # main function
+####################################################################################
 if __name__ == "__main__":
     # -----------------------
     # Argument Parser Setup
@@ -88,22 +165,26 @@ if __name__ == "__main__":
                   'Version: ' + __version__
 
     in_help   = 'name of the file to parse'
-    spec_help = colours.OKGREEN + 'Current things to work on:\n-Make final pretty plot\nAlso add function that uses Ridge Regression to auto fit everything' + colours._RST_
+    spec_help = colours.OKGREEN + 'Current things to work on:\
+                \n-Make final pretty plot\
+                \nAlso add function that uses Ridge Regression to auto fit everything' + colours._RST_
     f_help    = 'The output file identifying string'
     a_help    = 'If toggled will run the script non interactively'
     log_help  = 'name of logfile with extension'
     v_help    = 'Integer 1-5 of verbosity level'
 
     # Initialize instance of an argument parser
+    #############################################################################
     parser = ArgumentParser(description=description)
-    parser.add_argument('-i', '--input', type=str, help=in_help, dest='fin',default='')
-    parser.add_argument('-o','--output',type=str, help=f_help,dest='fout',default='')
-    parser.add_argument('-w','--work', help=spec_help,default='',dest='work',action='store_true')
+    parser.add_argument('-i', '--input', type=str, help=in_help, dest='fin',required=True)
+    parser.add_argument('-o','--output',type=str, help=f_help,dest='fout',required=True)
+    parser.add_argument('-w','--work', help='print things to work on',dest='work',action='store_true')
     parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
     parser.add_argument('-l', '--logger',type=str, help=log_help,dest='log')
     parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
 
     # Get the arguments
+    #############################################################################
     args = parser.parse_args()
     orig_datafile = args.fin
     ooutfilename = args.fout
@@ -112,7 +193,8 @@ if __name__ == "__main__":
     logfile = args.log
     verbosity = args.verb
 
-    # Set up message logger            
+    # Set up message logger       
+    #############################################################################     
     if not logfile:
         logfile = ('{}_{}.log'.format(__file__[:-3],time.time()))
     logger = utilities.Messenger(verbosity=verbosity, add_timestamp=True,logfile=logfile)
@@ -120,29 +202,13 @@ if __name__ == "__main__":
     logger.debug("Commandline Arguments: {}".format(args))
 
     # checking for extra dep
+    #############################################################################
     if worki is True:
-        logger.debug(spec_help)
+        logger.success(spec_help)
         exit()
 
-    # checking if args exist
-    if not orig_datafile:
-        logger.message("Make sure data is if correct format")
-    while not orig_datafile:
-        try:
-            orig_datafile = logger.pyinput("data file name for plotting: ")
-        except ValueError:
-            continue
-        if orig_datafile != "":
-            break
-    while not ooutfilename:
-        try:
-            ooutfilename = logger.pyinput("unique output filename (no extension): ")
-            break
-        except ValueError:
-            continue
-
-
     # version control
+    #############################################################################
     _VLINE_ = orig_datafile.split(".txt")[0].split("_v")[1]
     try:
         assert _VLINE_ == __version__
@@ -154,9 +220,8 @@ if __name__ == "__main__":
         else:
             logger.message('Continuing...')
 
-
-
     # handle files
+    #############################################################################
     files = [f for f in glob(ooutfilename+'*') if isfile(f)]
     logger.failure("Will remove these files: {}".format(' | '.join(files)))
     logger.message("\n")
@@ -175,6 +240,7 @@ if __name__ == "__main__":
     _SYSTEM_('cp -f ' + orig_datafile + ' ' + datafile)
 
     # getting firstlines
+    #############################################################################
     _SYSTEM_('head -n 2 ' + datafile + ' > ' + _TEMP0_)
     with open(_TEMP0_,'r') as f:
         first = ''.join(f.readlines())
@@ -185,9 +251,11 @@ if __name__ == "__main__":
     data = ascii.read(datafile)
 
     # to verify correct input
-    logger.header2("Will reduce these ({}) sources: {}".format(len(first_line)," | ".join(first_line)))
+    #############################################################################
+    logger.header2("Will reduce these ({}) sources: {}".format(len(first_line),"|".join(first_line)))
     
     # starting at non-zero source
+    #############################################################################
     acstart = ''
     counting = 0
     while True:
@@ -207,6 +275,7 @@ if __name__ == "__main__":
             continue
 
     # actual plotting now
+    #############################################################################
     total_num = 0
     while total_num < len(first_line):
         if counting == 1:
@@ -229,58 +298,38 @@ if __name__ == "__main__":
         data.sort([col1])
         
         # plot raw data
-        plt.ion()
-        plt.figure(figsize=[10,7])
-        f=plt.subplot()
-        rawdata=f.scatter(data[col1],data[col2],color='black')
-        plt.plot(data[col1],data[col2],color='red',linestyle='steps')
+        #########################################################################
+        x1label = ''
+        x2label = r'V$_{lsr}$ ($10^2$m/s)'
+        ylabel = 'Antenna Temperature (K)'
+
+        rawfig = plotter('Raw Data Lasso',logger)
+        rawfig.int()
+        rawfig.open((1,1),x1label,ylabel)
+        rawfig.scatter(data[col1],data[col2],'scatter raw')
+        rawfig.plot(data[col1],data[col2],'line raw',color='red',linestyle='steps')
         # prepare mask
-        f.set_title('lasso selection:')
-        f.tick_params('both', which='major', length=15, width=1, pad=15)
-        f.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        f.set_ylabel('Antenna Temperature (K)', fontsize=18)
-        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        draw()
+        rawfig.draw()
         # baseline
-        baseline_med=np.median(data[col2])-0.5
+        baseline_med=np.median(data[col2])/1.02
         baseline_ul=baseline_med*1.02
         logger.message('Median of baseline: {} and 2sigma baseline {}'.format(baseline_med,baseline_ul))
         with open(_TEMP2_,'a') as _T_:
             _T_.write('Median of baseline: {} and 2sigma baseline {}'.format(baseline_med,baseline_ul))
 
         # actual defining mask
-        msk_array = []
-        temp = []
-        while True:
-            selector = SelectFromCollection(f, rawdata)
-            logger.header2("Draw mask regions around the non-baseline features...")
-            draw()
-            logger.pyinput('[RET] to accept selected points')
-            temp = selector.xys[selector.ind]
-            msk_array = np.append(msk_array,temp)
-            selector.disconnect()
-            # Block end of script so you can check that the lasso is disconnected.
-            answer = logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
-            plt.show()
-            if ((answer.lower() == "n") or (answer == "")):
-                break
-        logger.waiting(auto)
+        msk_array = rawfig.selection('scatter raw')
 
         # draw and reset
         
-        plt_iter = 0
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        f=plt.subplot()
-        f.set_title("Raw Data")
-        rawdata=f.plot(data[col1],data[col2],color='black',linestyle='steps')
-        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        draw()
+        reset = plotter('Raw Data',logger)
+        reset.open((1,1),x1label,ylabel)
+        reset.plot(data[col1],data[col2],'raw data',color='black',linestyle='steps')
+        reset.draw()
         outfilename_iter =0
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        reset.save(_TEMPNAME)
 
         # need to invert mask to polyfit region
         mask_inv = []
@@ -292,23 +341,15 @@ if __name__ == "__main__":
         logger.waiting(auto)
 
         # show projected baselines
-        
-        fig=plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.title("Projected Baselines")
-        lin1=plt.plot(data[col1],data[col2],color='black',linestyle='steps')
-        lin2=plt.plot([minvel,maxvel],[baseline_med,baseline_med],color='red',linestyle='steps')
-        lin3=plt.plot([minvel,maxvel],[baseline_ul,baseline_ul],color='red',linestyle='steps')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        draw()
+        reset.resetplot('Projected Baselines')
+        reset.plot(data[col1],data[col2],'raw',color='black',linestyle='steps')
+        reset.plot([minvel,maxvel],[baseline_med,baseline_med],'lower',color='red',linestyle='steps')
+        reset.plot([minvel,maxvel],[baseline_ul,baseline_ul],'upper',color='red',linestyle='steps')
+        reset.draw()
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        reset.save(_TEMPNAME)
 
         # fitting baseline to higher order polynomial
         newask = ' '
@@ -335,18 +376,10 @@ if __name__ == "__main__":
 
             # plotting fitted baseline to original image
             
-            plt.figure(plt_iter+1,figsize=[10,7])
-            plt_iter += 1
-            plt.title("plotting fitted baseline")
-            lin1=plt.plot(data[col1],data[col2],color='black',linestyle='steps',label='data')
-            lin2=plt.plot(data[col1],fit_fn(data[col1]),color='red',linestyle='steps',label='model')
-            plt.tick_params('both', which='major', length=15, width=1, pad=15)
-            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-            plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-            plt.legend()
-            draw()
+            reset.resetplot('Plotting fitted baseline')
+            reset.plot(data[col1],data[col2],'data',color='black',linestyle='steps',label='data')
+            reset.plot(data[col1],fit_fn(data[col1]),'model',color='red',linestyle='steps',label='model')
+            reset.draw()
             newask = logger.pyinput('(y or [RET]/n or [SPACE]) Was this acceptable? ')
             if (newask.lower() == 'y') or (newask == ''):
                 logger.waiting(auto)
@@ -358,7 +391,7 @@ if __name__ == "__main__":
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        reset.save(_TEMPNAME)
 
         # defining corrected spectra
         spectra_blcorr=data[col2].copy()
@@ -374,57 +407,28 @@ if __name__ == "__main__":
         logger.waiting(auto)
 
         # plotting the corrected baseline
-        
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.title("Plotting the corrected baseline")
-        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps',label='data')
-        lin2=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps',label='flat baseline')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        plt.legend()
-        draw()
+        reset.resetplot('Plotting the corrected baseline')
+        reset.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps',label='data')
+        reset.plot([minvel,maxvel],[0,0],'baseline',color='red',linestyle='steps',label='flat baseline')
+        reset.draw()
         logger.waiting(auto)
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        reset.save(_TEMPNAME)
 
         # define the RFI
-        plt.ion()
-        plt.figure(figsize=[10,7])
-        t=plt.subplot()
-        t.set_title('lasso selection:')
-        lin10=plt.scatter(data[col1],spectra_blcorr,color='black',label='datapoints')
-        lin2=plt.plot(data[col1],spectra_blcorr,color='blue',linestyle='steps',label='rfi')
-        lin3=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps',label='flat baseline')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        draw()
+        lasso = plotter('Lasso selection:',logger)
+        lasso.int()
+        lasso.open((1,1),x1label,ylabel)
+        lasso.scatter(data[col1],spectra_blcorr,'data',color='black',label='datapoints')
+        lasso.plot(data[col1],spectra_blcorr,'rfi',color='blue',linestyle='steps',label='rfi')
+        lasso.plot([minvel,maxvel],[0,0],'flat',color='red',linestyle='steps',label='flat baseline')
+        lasso.draw()
 
         temp = []
-        rfi_mask_array = []
+        rfi_mask_array = lasso.selection('data')
         rfi_mask = []
-        while True:
-            selector = SelectFromCollection(t, lin10)
-            logger.header2("Draw mask around RFI regions")
-            draw()
-            logger.pyinput('[RET] to accept selected points')
-            temp = selector.xys[selector.ind]
-            rfi_mask_array = np.append(rfi_mask_array,temp)
-            selector.disconnect()
-            # Block end of script so you can check that the lasso is disconnected.
-            answer = logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
-            plt.show()
-            if ((answer.lower() == "n") or (answer == "")):
-                break
-        logger.waiting(auto)
 
         newask = ' '
         _TRY_ =1
@@ -433,14 +437,9 @@ if __name__ == "__main__":
         rfi_mask = [int(x) for x in rfi_mask]
         logger.debug('RFI mask region: {}'.format(','.join(map(str,rfi_mask))))
 
-        def gauss(x,mu,sigma,A):
-            return A*np.exp(-(x-mu)**2/2./sigma**2)
-
-        def bimodal(x,mu1,sigma1,A1,mu2,sigma2,A2):
-            return gauss(x,mu1,sigma1,A1)+gauss(x,mu2,sigma2,A2)
-
         # remove rfi
         logger.message("Will try fitting with simple polynomial, gaussian, bimodal, or fail")
+        rfi_fit_fn_ans=''
         while (newask.lower() == 'n')or (newask == ' '):
             _TEMPSPEC_ = spectra_blcorr
             FITX    = np.delete(data[col1],rfi_mask)
@@ -452,8 +451,9 @@ if __name__ == "__main__":
                 if _TRY_ == 1:
                     logger.warn('Polynomial fit...')
                     rfi_fit = np.polyfit(FITX,FITSPEC,20)
-                    rfi_fit_fn = np.poly1d(rfi_fit)
-                    function = rfi_fit_fn(data[col1])
+                    rfi_poly_fn = np.poly1d(rfi_fit)
+                    rfi_fit_fn = rfi_poly_fn
+                    function = rfi_poly_fn(data[col1])
 
                 # fit Gaussian
                 elif _TRY_ == 2:
@@ -480,55 +480,47 @@ if __name__ == "__main__":
 
                 elif _TRY_ >= 4:
                     logger.failure('Auto fitting RFI failed...')
-                    ans = ''
-                    ans = logger.pyinput("(integer or [RET]) input integer of better fit or set values to zero with [RET]")
-                    if ans in [1,2,3]:
-                        _TRY_ = ans
+                    functions = ['polynomial','gaussian','bimodal']
+                    ans = logger.pyinput("(integer or [RET]) name of better fit {} or set values to zero with [RET]".format(functions))
+                    if ans.lower() in functions:
+                        _TRY_ = int(functions.index(ans)+1)
                     else:
                         _TEMPSPEC_[rfi_mask] = 0.0
                         break
 
                 # plotting fitted baseline to original image
                 
-                plt.figure(plt_iter+1,figsize=[10,7])
-                plt_iter += 1
-                plt.title("Plotting RFI removal")
+                reset.resetplot('Plotting RFI removal')
                 if _TRY_ == 1:
                     for _RFI_ in rfi_mask:
                         logger.debug("Region of RFI: {}".format(_TEMPSPEC_[_RFI_]))
-                        _TEMPSPEC_[_RFI_] = rfi_fit_fn(data[col1][_RFI_]) 
+                        _TEMPSPEC_[_RFI_] = rfi_poly_fn(data[col1][_RFI_]) 
                         logger.debug("Region of RFI after fit: {}".format(_TEMPSPEC_[_RFI_]))
-                    lin2=plt.plot(data[col1],rfi_fit_fn(data[col1]) ,color='yellow',linestyle='steps',label='Poly model')
+                    reset.plot(data[col1],rfi_poly_fn(data[col1]),'polyfit',color='yellow',linestyle='steps',label='Poly model')
                 elif _TRY_ == 2:
                     for _RFI_ in rfi_mask:
                         logger.debug("Region of RFI: {}".format(_TEMPSPEC_[_RFI_]))
                         _TEMPSPEC_[_RFI_] = gauss(data[col1][_RFI_],*_params1)
                         logger.debug("Region of RFI after fit: {}".format(_TEMPSPEC_[_RFI_]))
-                    lin3=plt.plot(data[col1],gauss(data[col1],*_params1),color='yellow',linestyle='steps',label='Gauss model')
+                    reset.plot(data[col1],gauss(data[col1],*_params1),'gauss',color='red',linestyle='steps',label='Gauss model')
                 elif _TRY_ == 3:
                     for _RFI_ in rfi_mask:
                         logger.debug("Region of RFI: {}".format(_TEMPSPEC_[_RFI_]))
                         _TEMPSPEC_[_RFI_] = bimodal(data[col1][_RFI_],*_params2)
                         logger.debug("Region of RFI after fit: {}".format(_TEMPSPEC_[_RFI_]))
-                    lin4=plt.plot(data[col1],bimodal(data[col1],*_params2),color='yellow',linestyle='steps',label='Bimodal model')
+                    reset.plot(data[col1],bimodal(data[col1],*_params2),'bimodal',color='orange',linestyle='steps',label='Bimodal model')
             except RuntimeError:
                 logger.failure('Couldn\'t converge on try {}, setting values to zero...'.format(_TRY_))
                 rfi_fit_fn = "Fitter failed...."
                 _TEMPSPEC_[rfi_mask] = 0.0            
-            lin1=plt.plot(data[col1],_TEMPSPEC_,color='black',linestyle='steps',label='data')
-            plt.tick_params('both', which='major', length=15, width=1, pad=15)
-            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-            plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-            plt.ylim(-1,1.2*max(spectra_blcorr))
-            plt.legend()
-            draw()
+            reset.plot(data[col1],_TEMPSPEC_,'data',color='black',linestyle='steps',label='data')
+            reset.limits(ylim=(-1,1.2*max(spectra_blcorr)))
+            reset.draw()
             newask = logger.pyinput('(y or [RET]/n or [SPACE]) Is this acceptable? ')
             if (newask.lower() == 'y') or (newask == ''):
                 logger.waiting(auto)
                 with open(_TEMP2_,'a') as _T_:
-                    _T_.write("The function is: \n {}\n".format(rfi_fit_fn))
+                    _T_.write("The function is: \n{}\n".format(rfi_fit_fn))
                 break
             else:
                 _TRY_ +=1
@@ -536,46 +528,30 @@ if __name__ == "__main__":
         # draw and reset
         spectra_blcorr = _TEMPSPEC_
 
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.title("Corrected Baseline and RFI removed")
-        lin2=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps',label='corrected')
-        if _TRY_ == 1:
-            lin4=plt.plot(data[col1],rfi_fit_fn(data[col1]),color='green',linestyle='steps',label='model')
-        lin3=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps',label='flat baseline')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        plt.ylim(-1,1.2*max(spectra_blcorr))
-        plt.legend()
-        draw()
+        corr = plotter("Corrected Baseline and RFI removed",logger)
+        corr.open((1,1),x1label,ylabel)
+        corr.plot(data[col1],spectra_blcorr,'corrected',color='black',linestyle='steps',label='corrected')
+        corr.plot([minvel,maxvel],[0,0],'flat',color='red',linestyle='steps',label='flat baseline')
+        corr.limits(ylim=(-1,1.2*max(spectra_blcorr)))
+        corr.draw()
         logger.waiting(auto)
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        corr.save(_TEMPNAME)
 
         # Final correction plot 
         
-        plt.figure(plt_iter+1,figsize=[10,7])
-        plt_iter += 1
-        plt.xlim(minvel,maxvel)
-        plt.ylim(-5,maxt * 1.1)
-        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-        plt.title("Final correction plot ")
-        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-        draw()
+        final = plotter('Final corrected plot',logger)
+        final.open((1,1),x1label,ylabel)
+        final.limits(xlim=(minvel,maxvel),ylim=(mint-1,maxt * 1.1))
+        final.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps')
+        final.draw()
         logger.waiting(auto)
         outfilename_iter +=1
         _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
         _TEMP3_.append(_TEMPNAME)
-        plt.savefig(_TEMPNAME)
+        final.save(_TEMPNAME)
 
         # intensity estimate
         while True:
@@ -621,27 +597,19 @@ if __name__ == "__main__":
                     break
 
             # Intensity line estimate
-            
-            plt.figure(plt_iter+1,figsize=[10,7])
-            plt_iter += 1
-            plt.xlim(minvel,maxvel)
-            plt.ylim(-5,max(spectra_blcorr) * 1.1)
-            lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-            lin2=plt.plot(data[col1][intensity_mask_guess],np.zeros(len(data[col1][intensity_mask_guess])),color='blue',linestyle='dotted')
-            lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-            lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
-            plt.tick_params('both', which='major', length=15, width=1, pad=15)
-            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-            plt.title("Intensity Line Estimate")
-            plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-            draw()
+            lie = plotter('Intensity Line Estimate',logger)
+            lie.open((1,1),x1label,ylabel)
+            lie.limits(xlim=(minvel,maxvel),ylim=(mint-1,maxt * 1.1))
+            lie.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps',label='data')
+            lie.plot(data[col1][intensity_mask_guess],np.zeros(len(data[col1][intensity_mask_guess])),'est',color='blue',linestyle='dotted')
+            lie.plot([minint,minint],[0,maxt],'lower',color='blue',linestyle='dotted')
+            lie.plot([maxint,maxint],[0,maxt],'upper',color='blue',linestyle='dotted')
+            lie.draw()
             logger.waiting(auto)
             outfilename_iter +=1
             _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
             _TEMP3_.append(_TEMPNAME)
-            plt.savefig(_TEMPNAME)
+            lie.save(_TEMPNAME)
 
             answer = ""
             while True:
@@ -652,53 +620,31 @@ if __name__ == "__main__":
                         break
                     else:
                         # define the Intensity
-                        plt.ion()
-                        t=plt.subplot()
-                        t.set_title('lasso selection:')
-                        lin10=plt.scatter(data[col1],spectra_blcorr,color='black')
-                        lin2=plt.plot(data[col1],spectra_blcorr,color='blue',linestyle='steps')
-                        lin3=plt.plot([minvel,maxvel],[0,0],color='red',linestyle='steps')
-                        plt.tick_params('both', which='major', length=15, width=1, pad=15)
-                        plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-                        ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-                        plt.ylabel('Antenna Temperature (K)', fontsize=18)
-                        plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-                        draw()
+                        lasso.resetplot('Lasso selection:')
+                        lasso.scatter(data[col1],spectra_blcorr,'data',color='black')
+                        lasso.plot(data[col1],spectra_blcorr,'dataselect',color='blue',linestyle='steps')
+                        lasso.plot([minvel,maxvel],[0,0],'int',color='red',linestyle='steps')
+                        lasso.draw()
                         # recovering intensity of line 
                         temp = []
-                        intensity_mask_array = []
+                        intensity_mask_array = lasso.selection('data')
                         intensity_mask = []
-                        while True:
-                            selector = SelectFromCollection(t, lin10)
-                            plt.title("Draw a box around region of line intensity.")
-                            logger.header2("Draw a box around region of line intensity.")
-                            draw()
-                            logger.pyinput('[RET] to accept selected points')
-                            temp = selector.xys[selector.ind]
-                            intensity_mask_array = np.append(intensity_mask_array,temp)
-                            selector.disconnect()
-                            # Block end of script so you can check that the lasso is disconnected.
-                            answer = logger.pyinput("(y or [SPACE]/n or [RET]) Want to draw another lasso region")
-                            plt.show()
-                            if ((answer == "n") or (answer == "")):
-                                break
+
                         logger.waiting(auto)
                         for i in range(len(intensity_mask_array)):
                             intensity_mask = np.append(intensity_mask,np.where(data[col1] == intensity_mask_array[i]))
                         intensity_mask = [int(x) for x in intensity_mask]
+
                         # draw and reset
                         minint=min(data[col1][intensity_mask])
                         maxint=max(data[col1][intensity_mask])
-                        plt.figure(plt_iter+1,figsize=[10,7])
-                        plt_iter += 1
-                        f=plt.subplot()
-                        f.set_title("With Line Intensity Mask")
-                        lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-                        lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
-                        lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-                        lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')                
-                        f.set_xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-                        draw()
+                        
+                        reset.resetplot('With Line Intensity Mask')
+                        reset.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps')
+                        reset.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),'bottom',color='blue',linestyle='dotted')
+                        reset.plot([minint,minint],[0,maxt],'lower',color='blue',linestyle='dotted')
+                        reset.plot([maxint,maxint],[0,maxt],'upper',color='blue',linestyle='dotted')                
+                        reset.draw()
                         break
                 except ValueError:
                     continue
@@ -707,27 +653,21 @@ if __name__ == "__main__":
             minint=min(data[col1][intensity_mask])
             maxint=max(data[col1][intensity_mask])
 
-            
-            plt.figure(plt_iter+1,figsize=[10,7])
-            plt_iter += 1
-            plt.xlim(minvel,maxvel)
-            plt.ylim(-5,max(spectra_blcorr) * 1.1)
-            lin1=plt.plot(data[col1],spectra_blcorr,color='black',linestyle='steps')
-            lin2=plt.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),color='blue',linestyle='dotted')
-            lin3=plt.plot([minint,minint],[0,maxt],color='blue',linestyle='dotted')
-            lin4=plt.plot([maxint,maxint],[0,maxt],color='blue',linestyle='dotted')
-            plt.tick_params('both', which='major', length=15, width=1, pad=15)
-            plt.tick_params('both', which='minor', length=7.5, width=1, pad=15)
-            ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
-            plt.title("Intensity Mask")
-            plt.ylabel('Antenna Temperature (K)', fontsize=18)
-            plt.xlabel(r'V$_{lsr}$ ($10^2$m/s)', fontsize=18)
-            draw()
+            intensitymask = plotter('Intensity Mask',logger)
+            intensitymask.open((1,1),x1label,ylabel)
+            intensitymask.limits(xlim=(minvel,maxvel),ylim=(mint,maxt * 1.1))
+            intensitymask.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps')
+            intensitymask.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),'bottom',color='blue',linestyle='dotted')
+            intensitymask.plot([minint,minint],[0,maxt],'lower',color='blue',linestyle='dotted')
+            intensitymask.plot([maxint,maxint],[0,maxt],'upper',color='blue',linestyle='dotted')
+            intensitymask.draw()
             logger.waiting(auto)
             outfilename_iter +=1
             _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
             #_TEMP3_.append(_TEMPNAME)
-            plt.savefig(_TEMPNAME)
+            intensitymask.save(_TEMPNAME)
+            intensitymask.draw()
+            plt.show()
 
             # intensity
             intensity=np.sum(spectra_blcorr[intensity_mask])
@@ -748,7 +688,7 @@ if __name__ == "__main__":
             spec_final = Table([data[col0],data[col1],data[col2],spectra_blcorr], names=('vel_sub', 'vel', 'Tant_raw', 'Tant_corr'))
         except KeyError:
             spec_final = Table([data[col1],data[col2],spectra_blcorr], names=('vel', 'Tant_raw', 'Tant_corr'))           
-        ascii.write(spec_final,_TEMP1_)
+        ascii.write(spec_final,_TEMP1_,overwrite=True)
         with open(_TEMP1_, 'r') as original: ndata = original.read()
         with open(_TEMP1_, 'w') as modified: modified.write(ndata)  #first + first_line[total_num] + '\n'+str((intensity)*chanwidth) + '+/-' + str(intensity_rms) + 'K km/s' + '\n' +
         _SYSTEM_('cp -f ' + _TEMP1_ + ' ' + outfilename + "_spectra_corr.txt")
@@ -772,8 +712,6 @@ if __name__ == "__main__":
             total_num = len(first_line) + 1
 
     logger.pyinput("[RET] to exit")
-    plt.show()
-    print("\n")
 
     # finished
     logger._REMOVE_(_TEMPB_)

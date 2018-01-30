@@ -88,8 +88,8 @@ def spectrum_parse(input_file, _SPEC, output_file):
     for r in freqs:
         w = 1./r
         vsrc = c*((w-q)/q)
-        velsub.append(vsrc-vlsr)
-        vels.append(vsrc)
+        velsub.append(round(vsrc-vlsr,5))
+        vels.append(round(vsrc,5))
 
     # write to output file
     with open(output_file, 'w') as f:
@@ -132,9 +132,9 @@ if __name__ == "__main__":
 
     # Initialize instance of an argument parser
     parser = ArgumentParser(description=description)
-    parser.add_argument('-n', '--input', type=str, help=in_help, dest='infile')
-    parser.add_argument('-s', '--line', type=str, help=spec_help,dest='line')
-    parser.add_argument('-o','--o',type=str, help=f_help,dest='fout')
+    parser.add_argument('-n', '--input', type=str, help=in_help, dest='infile',required=True)
+    parser.add_argument('-s', '--line', type=str, help=spec_help,dest='line',default='H1')
+    parser.add_argument('-o','--o',type=str, help=f_help,dest='fout',required=True)
     parser.add_argument('--auto',action="store_true", help=a_help,dest='auto')
     parser.add_argument('-l', '--logger',type=str, help=log_help,dest='log')
     parser.add_argument('-v','--verbosity', help=v_help,default=2,dest='verb',type=int)
@@ -161,45 +161,6 @@ if __name__ == "__main__":
     logger.header2('This program will create and remove numerous temporary files for debugging.')
     example_data(logger)
 
-    # if input file not specified
-    while (instring == ''):
-        try:
-            instring = logger.pyinput("unique identifying input file name string")
-        except ValueError:
-            logger.warn("Please input a valid chars.")
-            continue
-        if not instring:
-            logger.warn("Please input a string")
-            continue
-        else:
-            break
-
-    # if output Line not specified
-    while (tmpname == '') or (not tmpname):
-        try:
-            answer = logger.pyinput("unique output filename string")
-        except ValueError:
-            logger.warn("Please input a valid chars.")
-            continue
-        if answer:
-            tmpname = answer
-            break
-
-    # if input Line not specified
-    while (_LINE_ == '') or (not _LINE_):
-        try:
-            _LINE_ = logger.pyinput('specific line emission from {} : '.format(mol_name))
-            if (_LINE_ == '') or (not _LINE_): # default to H1
-                _LINE_ = LINES['H1']
-            break
-        except ValueError:
-            logger.warn('Error with input, try again.')
-            continue
-        if _LINE_ not in [x for x in LINES]:
-            logger.warn('Please enter name exactly.')
-            continue
-        elif _LINE_ in [x for x in LINES]:
-            break
     _SPECTRA_ = LINES[_LINE_]
 
     # Read in the files
@@ -326,7 +287,7 @@ if __name__ == "__main__":
     # finished
     logger.header2("#################################")
     logger.success("Finished with all.")
-    logger.debug("These are the sources processed: {}".format(' | '.join(all_first)))
+    logger.debug("These are the sources processed: {}".format('|'.join(all_first)))
     
     logger.header1("Made files:  {} and logfile: {}".format(outname3,logfile)) 
 
