@@ -43,7 +43,7 @@ LINES = {'H1':1420.406} # linename: MHz
 mol_name = ','.join([x for x in LINES])
 
 # constants
-c = constants.c/10**4
+c = constants.c/10**5
 
 # parses the data
 def spectrum_parse(input_file, _SPEC, output_file):

@@ -26,6 +26,7 @@ import matplotlib.ticker as ticker
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
 from scipy.optimize import curve_fit
+from scipy.integrate import trapz
 ticks_font = mpl.font_manager.FontProperties(size=16, weight='normal', stretch='normal')
 
 # import custom modules
@@ -161,8 +162,8 @@ if __name__ == "__main__":
     # Argument Parser Setup
     # -----------------------
     description = 'Reads in masterfile output from all_hispec.py and reduces. ' \
-                  'Will flatten baselines, remove RFI, and find the integrated intensity. ' \
-                  'Version: ' + __version__
+                  'Will flatten baselines, remove RFI, and find the integrated intensity.\n' \
+                  '{} Version: {} {}'.format(colours.WARNING,__version__,colours._RST_)
 
     in_help   = 'name of the file to parse'
     spec_help = colours.OKGREEN + 'Current things to work on:\
@@ -223,8 +224,10 @@ if __name__ == "__main__":
     # handle files
     #############################################################################
     files = [f for f in glob(ooutfilename+'*') if isfile(f)]
-    logger.failure("Will remove these files: {}".format(' | '.join(files)))
-    logger.message("\n")
+    if files == []:
+        files = ['None',]
+    logger.failure("Will remove these files: {}\n".format(' | '.join(files)))
+    logger.warn('Move these to a directory if you don\'t want these deleted')
 
     _TEMP_ = str(time.time())
     datafile = 'TEMPORARY_FILE_SPECREDUC_{}_0.txt'.format(_TEMP_)
@@ -299,8 +302,8 @@ if __name__ == "__main__":
         
         # plot raw data
         #########################################################################
-        x1label = ''
-        x2label = r'V$_{lsr}$ ($10^2$m/s)'
+        x2label = ''
+        x1label = r'V$_{lsr}$ (km/s)'
         ylabel = 'Antenna Temperature (K)'
 
         rawfig = plotter('Raw Data Lasso',logger)
@@ -670,7 +673,7 @@ if __name__ == "__main__":
             plt.show()
 
             # intensity
-            intensity=np.sum(spectra_blcorr[intensity_mask])
+            intensity=trapz(spectra_blcorr,intensity_mask)
             chanwidth=abs(max(data[col1])-min(data[col1]))/len(data[col1])
             if ((answer_ok.lower() == 'y') or (answer_ok == '')):
                 intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
