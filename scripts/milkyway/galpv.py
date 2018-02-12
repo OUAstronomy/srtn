@@ -46,7 +46,7 @@ parser.add_argument('-i', '--integration',type=int, default=120,dest='i')
 parser.add_argument('--debug',action='store_true')
 args = parser.parse_args()
 
-if args.d == '+'
+if args.d == '+':
     outname = "galpv_{}_p_{}".format(args.sd,args.ed)
 else:
     outname = "galpv_{}_m_{}".format(args.sd,args.ed)

@@ -263,9 +263,9 @@ if __name__ == "__main__":
     counting = 0
     while True:
         try:
-            newstart = logger.pyinput('(y or [SPACE]/[RET] or n) Do you wish to start at a source: ')
+            newstart = logger.pyinput('(y or [SPACE]/[RET] or n) Do you wish to start at a source')
             if(newstart == ' ' ) or (newstart.lower() == 'y'):
-                acstart = logger.pyinput('Input source exactly: ')
+                acstart = logger.pyinput('Input source exactly')
             else:
                 break
             if acstart in first_line:
@@ -548,7 +548,7 @@ if __name__ == "__main__":
         final = plotter('Final corrected plot',logger)
         final.open((1,1),x1label,ylabel)
         final.limits(xlim=(minvel,maxvel),ylim=(mint-1,maxt * 1.1))
-        final.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps')
+        final.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps',label='data')
         final.draw()
         logger.waiting(auto)
         outfilename_iter +=1
@@ -653,13 +653,11 @@ if __name__ == "__main__":
                     continue
 
             # showing Intensity Mask
-            minint=min(data[col1][intensity_mask])
-            maxint=max(data[col1][intensity_mask])
 
             intensitymask = plotter('Intensity Mask',logger)
             intensitymask.open((1,1),x1label,ylabel)
             intensitymask.limits(xlim=(minvel,maxvel),ylim=(mint,maxt * 1.1))
-            intensitymask.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps')
+            intensitymask.plot(data[col1],spectra_blcorr,'data',color='black',linestyle='steps',label='Data')
             intensitymask.plot(data[col1][intensity_mask],np.zeros(len(data[col1][intensity_mask])),'bottom',color='blue',linestyle='dotted')
             intensitymask.plot([minint,minint],[0,maxt],'lower',color='blue',linestyle='dotted')
             intensitymask.plot([maxint,maxint],[0,maxt],'upper',color='blue',linestyle='dotted')
@@ -673,16 +671,16 @@ if __name__ == "__main__":
             plt.show()
 
             # intensity
-            intensity=trapz(spectra_blcorr,intensity_mask)
+            intensity=trapz(spectra_blcorr[intensity_mask],intensity_mask)
             chanwidth=abs(max(data[col1])-min(data[col1]))/len(data[col1])
             if ((answer_ok.lower() == 'y') or (answer_ok == '')):
                 intensity_rms=rms*chanwidth*(float(len(intensity_mask[0])))**0.5
             else:
                 intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
             logger.message("Intensity: ")
-            logger.message("{} +- {} (K km/s)".format((intensity)*chanwidth,intensity_rms))
+            logger.message("{} +- {} (K km/s)".format(round(intensity,2),round(intensity_rms,2)))
             with open(_TEMP2_,'a') as _T_:
-                _T_.write('Intensity: {} +- {} (K km/s)'.format((intensity)*chanwidth,intensity_rms))
+                _T_.write('Intensity: {} +- {} (K km/s)'.format(round(intensity,2),round(intensity_rms,2)))
         else:
             with open(_TEMP2_,'a') as _T_:
                 _T_.write('No intensity guess\n')
