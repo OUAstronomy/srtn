@@ -288,10 +288,13 @@ if __name__ == "__main__":
             col1 = "vel"
             col2 = "Tant"
             col0 = "vel_vlsr"
+            col3 = 'freq'
         else:
             col1 = "vel_{}".format(total_num)
             col2 = "Tant_{}".format(total_num)
             col0 = "vel_vlsr_{}".format(total_num)
+            col3 = "freq_{}".format(total_num)
+
         outfilename = ooutfilename + "_" + first_line[total_num]
         logger.warn('Working on: {}'.format(outfilename))
         with open(_TEMP2_,'w') as _T_:
@@ -443,7 +446,7 @@ if __name__ == "__main__":
         # remove rfi
         logger.message("Will try fitting with simple polynomial, gaussian, bimodal, or fail")
         rfi_fit_fn_ans=''
-        while (newask.lower() == 'n')or (newask == ' '):
+        while ((newask.lower() == 'n')or (newask == ' ')) and (len(rfi_mask) > 0):
             _TEMPSPEC_ = spectra_blcorr
             FITX    = np.delete(data[col1],rfi_mask)
             FITSPEC = np.delete(_TEMPSPEC_,rfi_mask)
@@ -529,7 +532,10 @@ if __name__ == "__main__":
                 _TRY_ +=1
 
         # draw and reset
-        spectra_blcorr = _TEMPSPEC_
+        try:
+            spectra_blcorr = _TEMPSPEC_
+        except:
+            pass
 
         corr = plotter("Corrected Baseline and RFI removed",logger)
         corr.open((1,1),x1label,ylabel)
@@ -664,7 +670,7 @@ if __name__ == "__main__":
             intensitymask.draw()
             logger.waiting(auto)
             outfilename_iter +=1
-            _TEMPNAME = "{}_{}.pdf".format(outfilename,outfilename_iter)
+            _TEMPNAME = "Final.{}_{}.pdf".format(outfilename,outfilename_iter)
             #_TEMP3_.append(_TEMPNAME)
             intensitymask.save(_TEMPNAME)
             intensitymask.draw()
@@ -678,17 +684,17 @@ if __name__ == "__main__":
             else:
                 intensity_rms=rms*chanwidth*(float(len(intensity_mask)))**0.5
             logger.message("Intensity: ")
-            logger.message("{} +- {} (K km/s)".format(round(intensity,2),round(intensity_rms,2)))
+            logger.message("{} +- {} (K km/s)".format(intensity,intensity_rms))
             with open(_TEMP2_,'a') as _T_:
-                _T_.write('Intensity: {} +- {} (K km/s)'.format(round(intensity,2),round(intensity_rms,2)))
+                _T_.write('Intensity: {} +- {} (K km/s)'.format(intensity,intensity_rms))
         else:
             with open(_TEMP2_,'a') as _T_:
                 _T_.write('No intensity guess\n')
         # write to file
         try:
-            spec_final = Table([data[col0],data[col1],data[col2],spectra_blcorr], names=('vel_sub', 'vel', 'Tant_raw', 'Tant_corr'))
+            spec_final = Table([data[col3],data[col0],data[col1],data[col2],spectra_blcorr], names=('freq','vel_sub', 'vel', 'Tant_raw', 'Tant_corr'))
         except KeyError:
-            spec_final = Table([data[col1],data[col2],spectra_blcorr], names=('vel', 'Tant_raw', 'Tant_corr'))           
+            spec_final = Table([data[col3],data[col1],data[col2],spectra_blcorr], names=('freq', 'vel', 'Tant_raw', 'Tant_corr'))           
         ascii.write(spec_final,_TEMP1_,overwrite=True)
         with open(_TEMP1_, 'r') as original: ndata = original.read()
         with open(_TEMP1_, 'w') as modified: modified.write(ndata)  #first + first_line[total_num] + '\n'+str((intensity)*chanwidth) + '+/-' + str(intensity_rms) + 'K km/s' + '\n' +
