@@ -1,9 +1,0 @@
-Working on: delf_G20.0
-Median of baseline: 139.12549019607843 and 2sigma baseline 141.90800000000002The polynomial is: 
-            2
-3.252e-05 x - 0.005553 x + 140.5
-RMS Noise: 0.44930446361932475K
-The function is: 
-gauss(x,mu1,sigma1,A1)+gauss(x,mu2,sigma2,A2)2.8534664713769353,13.445456164439475,37.69424364395878,9.09363598012894,47.87819217161338,8.620693256180497
-Sigma value for Gaussian: 3.0
-Intensity: 1153.6995884044297 +- 8.760033319746572 (K km/s)
